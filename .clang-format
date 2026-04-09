@@ -1,0 +1,3 @@
+AllowShortFunctionsOnASingleLine: Empty
+IndentWidth: 4
+InsertBraces: true
