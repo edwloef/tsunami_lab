@@ -1,2 +1,3 @@
 build
 .sconsign.dblite
+compile_commands.json
