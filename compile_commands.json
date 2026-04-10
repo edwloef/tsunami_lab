@@ -48,6 +48,12 @@
         "output": "build/src/solvers/Roe.test.o"
     },
     {
+        "command": "g++ -o build/src/solvers/FWave.test.o -c -std=c++17 -Wall -Wextra -Wpedantic -O3 -Werror -isystem submodules/Catch2/single_include build/src/solvers/FWave.test.cpp",
+        "directory": "/home/edwin/git/tsunami_lab",
+        "file": "src/solvers/FWave.test.cpp",
+        "output": "build/src/solvers/FWave.test.o"
+    },
+    {
         "command": "g++ -o build/src/patches/WavePropagation1d.test.o -c -std=c++17 -Wall -Wextra -Wpedantic -O3 -Werror -isystem submodules/Catch2/single_include build/src/patches/WavePropagation1d.test.cpp",
         "directory": "/home/edwin/git/tsunami_lab",
         "file": "src/patches/WavePropagation1d.test.cpp",

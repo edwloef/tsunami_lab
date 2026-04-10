@@ -9,11 +9,10 @@
 #include "FWave.h"
 #include <cmath>
 
-constexpr void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL, t_real i_hR,
-                                                       t_real i_huL,
-                                                       t_real i_huR,
-                                                       t_real o_netUpdateL[2],
-                                                       t_real o_netUpdateR[2]) {
+void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL, t_real i_hR,
+                                             t_real i_huL, t_real i_huR,
+                                             t_real o_netUpdateL[2],
+                                             t_real o_netUpdateR[2]) {
     t_real uL = i_huL / i_hL;
     t_real uR = i_huR / i_hR;
 
@@ -30,8 +29,8 @@ constexpr void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL, t_real i_hR,
     t_real delta2 = u_roe + sqrt_g_h_roe;
 
     // compute fluxes
-    t_real fL[2] = {i_huL, i_huL * uL + t_real(0.5) * g * i_hL * i_hL};
-    t_real fR[2] = {i_huR, i_huR * uR + t_real(0.5) * g * i_hR * i_hR};
+    t_real fL[2] = {i_huL, i_huL * uL + g_half * i_hL * i_hL};
+    t_real fR[2] = {i_huR, i_huR * uR + g_half * i_hR * i_hR};
 
     // flux difference deltaF
     t_real deltaF[2] = {fR[0] - fL[0], fR[1] - fL[1]};
@@ -54,7 +53,7 @@ constexpr void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL, t_real i_hR,
     if (delta1 < t_real(0.0)) {
         o_netUpdateL[0] += Z1[0];
         o_netUpdateL[1] += Z1[1];
-    } else {
+    } else if (delta1 > t_real(0.0)) {
         o_netUpdateR[0] += Z1[0];
         o_netUpdateR[1] += Z1[1];
     }
@@ -62,7 +61,7 @@ constexpr void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL, t_real i_hR,
     if (delta2 < t_real(0.0)) {
         o_netUpdateL[0] += Z2[0];
         o_netUpdateL[1] += Z2[1];
-    } else {
+    } else if (delta2 > t_real(0.0)) {
         o_netUpdateR[0] += Z2[0];
         o_netUpdateR[1] += Z2[1];
     }

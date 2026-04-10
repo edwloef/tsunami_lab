@@ -19,7 +19,9 @@ class FWave;
 class tsunami_lab::solvers::FWave {
   private:
     //! gravity
-    static constexpr t_real g = t_real(9.80665);
+    static t_real constexpr g = t_real(9.80665);
+    //! half gravity
+    static t_real constexpr g_half = t_real(0.5) * g;
 
   public:
     /**
@@ -34,9 +36,8 @@ class tsunami_lab::solvers::FWave {
      * @param o_netUpdateR will be set to the net-updates for the right side;
      * 0: height, 1: momentum.
      **/
-    static constexpr void netUpdates(t_real i_hL, t_real i_hR, t_real i_huL,
-                                     t_real i_huR, t_real o_netUpdateL[2],
-                                     t_real o_netUpdateR[2]);
+    static void netUpdates(t_real i_hL, t_real i_hR, t_real i_huL, t_real i_huR,
+                           t_real o_netUpdateL[2], t_real o_netUpdateR[2]);
 };
 
 #endif
