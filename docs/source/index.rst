@@ -6,9 +6,18 @@
 Tsunami documentation
 =====================
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+Documentation
+-------------
+
+Compile this project by typing scons in the terminal.
+
+To run the tests, run build/tests.
+
+Project Report 10.4.2026:
+-------------------------
+
+* Edwin wrote the code for the FWave solver. 
+* Lara wrote the tests for the FWave solver and the documentation.
 
 
 .. toctree::
