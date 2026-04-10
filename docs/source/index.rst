@@ -9,6 +9,9 @@ Tsunami documentation
 Documentation
 -------------
 
+Link to our code: 
+`https://github.com/edwloef/tsunami_lab´
+
 Compile this project by typing scons in the terminal.
 
 To run the tests, run build/tests.
