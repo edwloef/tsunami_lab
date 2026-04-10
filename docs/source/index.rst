@@ -10,7 +10,7 @@ Documentation
 -------------
 
 Link to our code: 
-`https://github.com/edwloef/tsunami_lab´
+https://github.com/edwloef/tsunami_lab
 
 Compile this project by typing scons in the terminal.
 
