@@ -35,7 +35,9 @@ if vars.UnknownVariables():
     exit(1)
 
 # create environment
-env = Environment(variables=vars)
+env = Environment(variables=vars, COMPILATIONDB_USE_ABSPATH=True)
+env.Tool("compilation_db")
+env.CompilationDatabase()
 
 # generate help message
 Help(vars.GenerateHelpText(env))
