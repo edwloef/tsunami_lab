@@ -41,13 +41,13 @@ env = Environment(variables=vars)
 Help(vars.GenerateHelpText(env))
 
 # add default flags
-env.Append(CXXFLAGS=["-std=c++11", "-Wall", "-Wextra", "-Wpedantic"])
+env.Append(CXXFLAGS=["-std=c++17", "-Wall", "-Wextra", "-Wpedantic"])
 
 # set optimization mode
 if "debug" in env["mode"]:
     env.Append(CXXFLAGS=["-g", "-O0"])
 else:
-    env.Append(CXXFLAGS=["-O2"])
+    env.Append(CXXFLAGS=["-O3"])
 
 # add sanitizers
 if "san" in env["mode"]:
