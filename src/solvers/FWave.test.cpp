@@ -43,6 +43,33 @@ TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]") {
     REQUIRE(netUpdateR[0] == Approx(23.4409982985738561366777));
     REQUIRE(netUpdateR[1] == Approx(224.403141905910928927533));
 
+
+
+    /*
+        Test case (supersonic, eigenvalues > 0)
+    */
+    tsunami_lab::solvers::FWave::netUpdates(4, 3, 40, 30, netUpdateL,
+                                            netUpdateR);
+
+    REQUIRE(netUpdateL[0] == Approx(0));
+    REQUIRE(netUpdateL[1] == Approx(0));
+
+    REQUIRE(netUpdateR[0] != Approx(0));
+    REQUIRE(netUpdateR[1] != Approx(0));
+
+
+    /*
+        Test case (supersonic, eigenvalues < 0)
+    */
+    tsunami_lab::solvers::FWave::netUpdates(4, 3, -40, -30, netUpdateL,
+                                            netUpdateR);
+
+    REQUIRE(netUpdateL[0] != Approx(0));
+    REQUIRE(netUpdateL[1] != Approx(0));
+
+    REQUIRE(netUpdateR[0] == Approx(0));
+    REQUIRE(netUpdateR[1] == Approx(0));
+
     /*
      * Test case (dam break):
      *
