@@ -4,8 +4,8 @@
  * @section DESCRIPTION
  * Unit tests for the one-dimensional wave propagation patch.
  **/
-#include "../solvers/FWave.h"
 #include "WavePropagation1d.h"
+#include "../solvers/FWave.h"
 #include <catch2/catch.hpp>
 
 TEST_CASE("Test the 1d wave propagation solver.", "[WaveProp1d]") {
