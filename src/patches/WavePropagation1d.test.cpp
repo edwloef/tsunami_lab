@@ -4,8 +4,9 @@
  * @section DESCRIPTION
  * Unit tests for the one-dimensional wave propagation patch.
  **/
-#include "WavePropagation1d.h"
 #include "../solvers/FWave.h"
+#include "../solvers/Roe.h"
+#include "WavePropagation1d.h"
 #include <catch2/catch.hpp>
 
 TEST_CASE("Test the 1d wave propagation solver.", "[WaveProp1d]") {
@@ -62,5 +63,23 @@ TEST_CASE("Test the 1d wave propagation solver.", "[WaveProp1d]") {
     for (std::size_t l_ce = 51; l_ce < 100; l_ce++) {
         REQUIRE(m_waveProp.getHeight()[l_ce] == Approx(8));
         REQUIRE(m_waveProp.getMomentumX()[l_ce] == Approx(0));
+    }
+
+    // init with first test case in csv
+    for (std::size_t l_ce = 0; l_ce < 50; l_ce++) {
+        m_waveProp.setHeight(l_ce, 0, 8899.326826472694);
+        m_waveProp.setMomentumX(l_ce, 0, 122.0337839252433);
+    }
+    for (std::size_t l_ce = 50; l_ce < 100; l_ce++) {
+        m_waveProp.setHeight(l_ce, 0, 8899.326826472694);
+        m_waveProp.setMomentumX(l_ce, 0, -122.0337839252433);
+    }
+
+    // perform a time step
+    m_waveProp.timeStep(0, &solver);
+
+    // middle state
+    for (std::size_t l_ce = 0; l_ce < 100; l_ce++) {
+        REQUIRE(m_waveProp.getHeight()[l_ce] == Approx(8899.739847378269));
     }
 }
