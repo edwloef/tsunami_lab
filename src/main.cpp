@@ -98,7 +98,7 @@ int main(int i_argc, char *i_argv[]) {
 
     std::cout << "entering time loop" << std::endl;
 
-    tsunami_lab::solvers::Solver *solver = new tsunami_lab::solvers::FWave();
+    auto solver = tsunami_lab::solvers::FWave();
 
     // iterate over time
     while (l_simTime < l_endTime) {
@@ -120,13 +120,11 @@ int main(int i_argc, char *i_argv[]) {
         }
 
         l_waveProp->setGhostOutflow();
-        l_waveProp->timeStep(l_scaling, solver);
+        l_waveProp->timeStep(l_scaling, &solver);
 
         l_timeStep++;
         l_simTime += l_dt;
     }
-
-    delete solver;
 
     std::cout << "finished time loop" << std::endl;
 
