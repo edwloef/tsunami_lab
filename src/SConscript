@@ -13,6 +13,7 @@ l_sources = [
     "patches/WavePropagation1d.cpp",
     "setups/DamBreak1d.cpp",
     "setups/ShockShock1d.cpp",
+    "setups/RareRare1d.cpp",
     "io/Csv.cpp",
 ]
 
@@ -30,6 +31,7 @@ l_tests = [
     "io/Csv.test.cpp",
     "setups/DamBreak1d.test.cpp",
     "setups/ShockShock1d.test.cpp",
+    "setups/RareRare1d.test.cpp",
 ]
 
 for l_te in l_tests:
