@@ -12,6 +12,7 @@ l_sources = [
     "solvers/FWave.cpp",
     "patches/WavePropagation1d.cpp",
     "setups/DamBreak1d.cpp",
+    "setups/ShockShock1d.cpp",
     "io/Csv.cpp",
 ]
 
@@ -28,6 +29,7 @@ l_tests = [
     "patches/WavePropagation1d.test.cpp",
     "io/Csv.test.cpp",
     "setups/DamBreak1d.test.cpp",
+    "setups/ShockShock1d.test.cpp",
 ]
 
 for l_te in l_tests:
