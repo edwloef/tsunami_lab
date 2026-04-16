@@ -77,7 +77,7 @@ TEST_CASE("Test the derivation of the Roe wave speeds.", "[RoeStrengths]") {
 }
 
 TEST_CASE("Test the derivation of the Roe net-updates.", "[RoeUpdates]") {
-    tsunami_lab::solvers::Solver *solver = new tsunami_lab::solvers::Roe();
+    auto solver = tsunami_lab::solvers::Roe();
 
     /*
      * Test case:
@@ -103,7 +103,7 @@ TEST_CASE("Test the derivation of the Roe net-updates.", "[RoeUpdates]") {
     float l_netUpdatesL[2] = {-5, 3};
     float l_netUpdatesR[2] = {4, 7};
 
-    solver->netUpdates(10, 9, -30, 27, l_netUpdatesL, l_netUpdatesR);
+    solver.netUpdates(10, 9, -30, 27, l_netUpdatesL, l_netUpdatesR);
 
     REQUIRE(l_netUpdatesL[0] == Approx(33.5590017014261447899292));
     REQUIRE(l_netUpdatesL[1] == Approx(-326.56631690591093200508));
@@ -149,7 +149,7 @@ TEST_CASE("Test the derivation of the Roe net-updates.", "[RoeUpdates]") {
      * update #2: s2 * a2 * |    | = |               |
      *                      | s2 |   | -88.25985     |
      */
-    solver->netUpdates(10, 8, 0, 0, l_netUpdatesL, l_netUpdatesR);
+    solver.netUpdates(10, 8, 0, 0, l_netUpdatesL, l_netUpdatesR);
 
     REQUIRE(l_netUpdatesL[0] == Approx(9.394671362));
     REQUIRE(l_netUpdatesL[1] == -Approx(88.25985));
@@ -164,13 +164,11 @@ TEST_CASE("Test the derivation of the Roe net-updates.", "[RoeUpdates]") {
      *   h:  10 | 10
      *  hu:   0 |  0
      */
-    solver->netUpdates(10, 10, 0, 0, l_netUpdatesL, l_netUpdatesR);
+    solver.netUpdates(10, 10, 0, 0, l_netUpdatesL, l_netUpdatesR);
 
     REQUIRE(l_netUpdatesL[0] == Approx(0));
     REQUIRE(l_netUpdatesL[1] == Approx(0));
 
     REQUIRE(l_netUpdatesR[0] == Approx(0));
     REQUIRE(l_netUpdatesR[1] == Approx(0));
-
-    delete solver;
 }
