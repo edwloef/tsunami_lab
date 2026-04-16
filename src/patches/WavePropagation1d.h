@@ -7,6 +7,7 @@
 #ifndef TSUNAMI_LAB_PATCHES_WAVE_PROPAGATION_1D
 #define TSUNAMI_LAB_PATCHES_WAVE_PROPAGATION_1D
 
+#include "../solvers/Solver.h"
 #include "WavePropagation.h"
 
 namespace tsunami_lab {
@@ -47,7 +48,7 @@ class tsunami_lab::patches::WavePropagation1d : public WavePropagation {
      *
      * @param i_scaling scaling of the time step (dt / dx).
      **/
-    void timeStep(t_real i_scaling);
+    void timeStep(t_real i_scaling, solvers::Solver *solver);
 
     /**
      * Sets the values of the ghost cells according to outflow boundary

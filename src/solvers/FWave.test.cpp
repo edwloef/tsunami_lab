@@ -10,6 +10,8 @@
 #include <catch2/catch.hpp>
 
 TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]") {
+    tsunami_lab::solvers::Solver *solver = new tsunami_lab::solvers::FWave();
+
     float netUpdateL[2];
     float netUpdateR[2];
 
@@ -34,8 +36,7 @@ TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]") {
      * update #2: s2 * a2 * |    | = |                           |
      *                      | s2 |   | 224.403141905910928927533 |
      */
-    tsunami_lab::solvers::FWave::netUpdates(10, 9, -30, 27, netUpdateL,
-                                            netUpdateR);
+    solver->netUpdates(10, 9, -30, 27, netUpdateL, netUpdateR);
 
     REQUIRE(netUpdateL[0] == Approx(33.5590017014261447899292));
     REQUIRE(netUpdateL[1] == Approx(-326.56631690591093200508));
@@ -43,13 +44,10 @@ TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]") {
     REQUIRE(netUpdateR[0] == Approx(23.4409982985738561366777));
     REQUIRE(netUpdateR[1] == Approx(224.403141905910928927533));
 
-
-
     /*
         Test case (supersonic, eigenvalues > 0)
     */
-    tsunami_lab::solvers::FWave::netUpdates(4, 3, 40, 30, netUpdateL,
-                                            netUpdateR);
+    solver->netUpdates(4, 3, 40, 30, netUpdateL, netUpdateR);
 
     REQUIRE(netUpdateL[0] == Approx(0));
     REQUIRE(netUpdateL[1] == Approx(0));
@@ -57,12 +55,10 @@ TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]") {
     REQUIRE(netUpdateR[0] != Approx(0));
     REQUIRE(netUpdateR[1] != Approx(0));
 
-
     /*
         Test case (supersonic, eigenvalues < 0)
     */
-    tsunami_lab::solvers::FWave::netUpdates(4, 3, -40, -30, netUpdateL,
-                                            netUpdateR);
+    solver->netUpdates(4, 3, -40, -30, netUpdateL, netUpdateR);
 
     REQUIRE(netUpdateL[0] != Approx(0));
     REQUIRE(netUpdateL[1] != Approx(0));
@@ -108,8 +104,7 @@ TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]") {
      * update #2: s2 * a2 * |    | = |               |
      *                      | s2 |   | -88.25985     |
      */
-    tsunami_lab::solvers::FWave::netUpdates(10, 8, 0, 0, netUpdateL,
-                                            netUpdateR);
+    solver->netUpdates(10, 8, 0, 0, netUpdateL, netUpdateR);
 
     REQUIRE(netUpdateL[0] == Approx(9.394671362));
     REQUIRE(netUpdateL[1] == -Approx(88.25985));
@@ -124,12 +119,13 @@ TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]") {
      *   h:  10 | 10
      *  hu:   0 |  0
      */
-    tsunami_lab::solvers::FWave::netUpdates(10, 10, 0, 0, netUpdateL,
-                                            netUpdateR);
+    solver->netUpdates(10, 10, 0, 0, netUpdateL, netUpdateR);
 
     REQUIRE(netUpdateL[0] == Approx(0));
     REQUIRE(netUpdateL[1] == Approx(0));
 
     REQUIRE(netUpdateR[0] == Approx(0));
     REQUIRE(netUpdateR[1] == Approx(0));
+
+    delete solver;
 }

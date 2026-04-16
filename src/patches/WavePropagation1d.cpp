@@ -4,8 +4,8 @@
  * @section DESCRIPTION
  * One-dimensional wave propagation patch.
  **/
-#include "WavePropagation1d.h"
 #include "../solvers/Roe.h"
+#include "WavePropagation1d.h"
 
 tsunami_lab::patches::WavePropagation1d::WavePropagation1d(t_idx i_nCells) {
     m_nCells = i_nCells;
@@ -32,7 +32,8 @@ tsunami_lab::patches::WavePropagation1d::~WavePropagation1d() {
     }
 }
 
-void tsunami_lab::patches::WavePropagation1d::timeStep(t_real i_scaling) {
+void tsunami_lab::patches::WavePropagation1d::timeStep(
+    t_real i_scaling, solvers::Solver *solver) {
     // pointers to old and new data
     t_real *l_hOld = m_h[m_step];
     t_real *l_huOld = m_hu[m_step];
@@ -56,9 +57,8 @@ void tsunami_lab::patches::WavePropagation1d::timeStep(t_real i_scaling) {
         // compute net-updates
         t_real l_netUpdates[2][2];
 
-        solvers::Roe::netUpdates(l_hOld[l_ceL], l_hOld[l_ceR], l_huOld[l_ceL],
-                                 l_huOld[l_ceR], l_netUpdates[0],
-                                 l_netUpdates[1]);
+        solver->netUpdates(l_hOld[l_ceL], l_hOld[l_ceR], l_huOld[l_ceL],
+                           l_huOld[l_ceR], l_netUpdates[0], l_netUpdates[1]);
 
         // update the cells' quantities
         l_hNew[l_ceL] -= i_scaling * l_netUpdates[0][0];
