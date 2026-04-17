@@ -14,6 +14,7 @@ l_sources = [
     "setups/DamBreak1d.cpp",
     "setups/ShockShock1d.cpp",
     "setups/RareRare1d.cpp",
+    "setups/Reservoir.cpp",
     "io/Csv.cpp",
 ]
 
