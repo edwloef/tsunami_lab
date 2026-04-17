@@ -16,6 +16,7 @@ l_sources = [
     "setups/RareRare1d.cpp",
     "setups/Reservoir.cpp",
     "io/Csv.cpp",
+    "io/Csv.reader.cpp"
 ]
 
 for l_so in l_sources:
