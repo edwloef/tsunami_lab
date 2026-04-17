@@ -1,54 +1,31 @@
-##
-# @author Alexander Breuer (alex.breuer AT uni-jena.de)
-# @section DESCRIPTION
-# Continuous integration using GitHub Actions.
-##
 name: Tsunami Lab
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  schedule:
-    - cron: 0 0 * * *
-
+on: [push, pull_request]
 jobs:
   CI:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - name: Dependencies
+      - name: dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install scons
-          sudo apt-get install valgrind
-          sudo apt-get install cppcheck
-          git submodule init
-          git submodule update
+          sudo apt-get install scons valgrind cppcheck
+          git submodule update --init --recursive
 
-      - name: Static Code Analysis
+      - name: cppcheck
         run: cppcheck src/ --template=gcc --force --error-exitcode=1
 
-      - name: Sanitize
+      - name: sanitize
         run: |
           scons mode=debug+san
           ./build/tests
-          ./build/tsunami_lab 25
+          ./build/tsunami_lab 5000
           scons mode=release+san
           ./build/tests
-          ./build/tsunami_lab 500
+          ./build/tsunami_lab 50000
 
-      - name: Valgrind
+      - name: valgrind
         run: |
           scons mode=debug
           valgrind ./build/tests
-          valgrind ./build/tsunami_lab 25
-
-      - name: Release
-        run: |
-          scons
-          ./build/tests
-          ./build/tsunami_lab 500
+          valgrind ./build/tsunami_lab 5000
