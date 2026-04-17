@@ -64,6 +64,15 @@ TEST_CASE("Test the 1d wave propagation solver.", "[WaveProp1d]") {
         REQUIRE(m_waveProp.getHeight()[l_ce] == Approx(8));
         REQUIRE(m_waveProp.getMomentumX()[l_ce] == Approx(0));
     }
+}
+
+TEST_CASE("Test the 1d wave propagation solver with middle-state cases.",
+          "[WaveProp1dMiddleStates]") {
+    // construct solver
+    tsunami_lab::patches::WavePropagation1d m_waveProp(100);
+
+    // set outflow boundary condition
+    m_waveProp.setGhostOutflow();
 
     // init with first test case in csv
     for (std::size_t l_ce = 0; l_ce < 50; l_ce++) {
@@ -76,10 +85,12 @@ TEST_CASE("Test the 1d wave propagation solver.", "[WaveProp1d]") {
     }
 
     // perform a time step
-    m_waveProp.timeStep(0, &solver);
+    auto solver = tsunami_lab::solvers::FWave();
+    m_waveProp.timeStep(1e-4, &solver);
 
-    // middle state
-    for (std::size_t l_ce = 0; l_ce < 100; l_ce++) {
-        REQUIRE(m_waveProp.getHeight()[l_ce] == Approx(8899.739847378269));
-    }
+    // check middle-state
+    REQUIRE(m_waveProp.getHeight()[49] ==
+            Approx(8899.739847378269).epsilon(1e-4));
+    REQUIRE(m_waveProp.getHeight()[50] ==
+            Approx(8899.739847378269).epsilon(1e-4));
 }
