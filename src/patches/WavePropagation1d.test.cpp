@@ -6,10 +6,10 @@
  **/
 #include "WavePropagation1d.h"
 #include "../solvers/FWave.h"
-#include "../solvers/Roe.h"
 #include <catch2/catch.hpp>
 
-#include "../io/Csv.reader.h"
+#include "../io/Csv.h"
+#include <fstream>
 #include <iostream>
 
 TEST_CASE("Test the 1d wave propagation solver.", "[WaveProp1d]") {
@@ -79,9 +79,13 @@ TEST_CASE("Test the 1d wave propagation solver with middle-state cases.",
 
     auto fails = 0;
 
-    const std::string filename = "middle_states.csv";
     try {
-        auto rows = readCsvFiveColumns(filename);
+        const std::string filename = "middle_states.csv";
+
+        std::ifstream file;
+        file.open(filename);
+
+        auto rows = tsunami_lab::io::Csv::readFive(file);
         for (size_t i = 0; i < rows.size(); ++i) {
             auto [hLeft, hRight, huLeft, huRight, hStar] = rows[i];
 

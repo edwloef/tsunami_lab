@@ -8,8 +8,8 @@
 #define TSUNAMI_LAB_IO_CSV
 
 #include "../constants.h"
-#include <cstring>
 #include <iostream>
+#include <vector>
 
 namespace tsunami_lab {
 namespace io {
@@ -38,6 +38,15 @@ class tsunami_lab::io::Csv {
     static void write(t_real i_dxy, t_idx i_nx, t_idx i_ny, t_idx i_stride,
                       t_real const *i_h, t_real const *i_hu, t_real const *i_hv,
                       std::ostream &io_stream);
+
+    /**
+     * Reads five-column CSV data from the given stream.
+     *
+     * @param io_stream stream containing CSV-data
+     * @return any successfully parsed CSV rows
+     **/
+    static std::vector<std::tuple<double, double, double, double, double>>
+    readFive(std::istream &io_stream);
 };
 
 #endif
