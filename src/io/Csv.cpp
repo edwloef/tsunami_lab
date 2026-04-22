@@ -67,7 +67,6 @@ std::vector<std::tuple<double, double, double, double, double>>
 tsunami_lab::io::Csv::readFive(std::istream &io_stream) {
     std::vector<std::tuple<double, double, double, double, double>> rows;
     std::string line;
-    std::istringstream ss(line);
 
     std::string field;
     std::vector<std::string> fields;
@@ -78,6 +77,7 @@ tsunami_lab::io::Csv::readFive(std::istream &io_stream) {
             continue;
         }
 
+        std::istringstream ss(line);
         fields.clear();
         while (std::getline(ss, field, ',')) {
             fields.push_back(trim(field));

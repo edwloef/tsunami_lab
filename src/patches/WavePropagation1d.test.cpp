@@ -86,6 +86,9 @@ TEST_CASE("Test the 1d wave propagation solver with middle-state cases.",
         file.open(filename);
 
         auto rows = tsunami_lab::io::Csv::readFive(file);
+
+        REQUIRE(rows.size() == 1'000'000);
+
         for (size_t i = 0; i < rows.size(); ++i) {
             auto [hLeft, hRight, huLeft, huRight, hStar] = rows[i];
 
