@@ -38,6 +38,11 @@ Project Report 22.4.2026:
 * a higher particle velocity in the river leads to a wider and faster wave
 * Our answer to the last question of evacuating the village: We would have 2248 seconds to do so, or 37 minutes.
 
+Visualization:
+--------------
+.. image:: reservoir1.png
+
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
