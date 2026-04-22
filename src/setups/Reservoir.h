@@ -24,10 +24,9 @@ class tsunami_lab::setups::Reservoir : public Setup {
     /**
      * Gets the water height at a given point.
      *
-     * @param i_x x-coordinate of the queried point.
      * @return height at the given point.
      **/
-    t_real getHeight(t_real i_x, t_real) const;
+    t_real getHeight(t_real, t_real) const;
 
     /**
      * Gets the momentum in x-direction.
