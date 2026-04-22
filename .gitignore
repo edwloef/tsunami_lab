@@ -1,4 +1,5 @@
 build
+html
 .sconsign.dblite
 compile_commands.json
 solution_*.csv
