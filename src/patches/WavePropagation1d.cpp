@@ -35,6 +35,8 @@ tsunami_lab::patches::WavePropagation1d::~WavePropagation1d() {
         delete[] m_h[l_st];
         delete[] m_hu[l_st];
     }
+
+    delete[] m_b;
 }
 
 void tsunami_lab::patches::WavePropagation1d::timeStep(
