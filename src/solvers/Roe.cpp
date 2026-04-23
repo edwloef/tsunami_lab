@@ -32,7 +32,7 @@ void tsunami_lab::solvers::Roe::waveStrengths(
     // compute inverse of right eigenvector-matrix
     t_real l_detInv = 1 / (i_waveSpeedR - i_waveSpeedL);
 
-    t_real l_rInv[2][2] = {0};
+    t_real l_rInv[2][2] = {{0}};
     l_rInv[0][0] = l_detInv * i_waveSpeedR;
     l_rInv[0][1] = -l_detInv;
     l_rInv[1][0] = -l_detInv * i_waveSpeedL;
@@ -51,8 +51,8 @@ void tsunami_lab::solvers::Roe::waveStrengths(
 }
 
 void tsunami_lab::solvers::Roe::netUpdates(t_real i_hL, t_real i_hR,
-                                           t_real i_huL, t_real i_huR,
-                                           t_real o_netUpdateL[2],
+                                           t_real i_huL, t_real i_huR, t_real,
+                                           t_real, t_real o_netUpdateL[2],
                                            t_real o_netUpdateR[2]) {
     // compute particle velocities
     t_real l_uL = i_huL / i_hL;
