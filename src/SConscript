@@ -8,14 +8,16 @@ Import("env")
 
 # gather sources
 l_sources = [
-    "solvers/Roe.cpp",
-    "solvers/FWave.cpp",
+    "io/Csv.cpp",
     "patches/WavePropagation1d.cpp",
     "setups/DamBreak1d.cpp",
-    "setups/ShockShock1d.cpp",
     "setups/RareRare1d.cpp",
-    "setups/Reservoir.cpp",
-    "io/Csv.cpp",
+    "setups/Reservoir1d.cpp",
+    "setups/ShockShock1d.cpp",
+    "setups/SubCritical1d.cpp",
+    "setups/SuperCritical1d.cpp",
+    "solvers/FWave.cpp",
+    "solvers/Roe.cpp",
 ]
 
 for l_so in l_sources:

@@ -33,11 +33,13 @@ class tsunami_lab::io::Csv {
      * if not required.
      * @param i_hv momentum in y-direction of the cells; optional: use nullptr
      * if not required.
+     * @param i_b bathymetry of the cells; optional: use nullptr if not
+     * required.
      * @param io_stream stream to which the CSV-data is written.
      **/
     static void write(t_real i_dxy, t_idx i_nx, t_idx i_ny, t_idx i_stride,
                       t_real const *i_h, t_real const *i_hu, t_real const *i_hv,
-                      std::ostream &io_stream);
+                      t_real const *i_b, std::ostream &io_stream);
 
     /**
      * Reads five-column CSV data from the given stream.

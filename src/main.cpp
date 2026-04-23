@@ -6,7 +6,8 @@
  **/
 #include "io/Csv.h"
 #include "patches/WavePropagation1d.h"
-#include "setups/Reservoir.h"
+#include "setups/SubCritical1d.h"
+#include "setups/SuperCritical1d.h"
 #include "solvers/FWave.h"
 #include <cmath>
 #include <cstdlib>
@@ -40,7 +41,7 @@ int main(int i_argc, char *i_argv[]) {
             std::cerr << "invalid number of cells" << std::endl;
             return EXIT_FAILURE;
         }
-        l_dxy = 50000.0 / l_nx;
+        l_dxy = 25.0 / l_nx;
     }
     std::cout << "runtime configuration" << std::endl;
     std::cout << "  number of cells in x-direction: " << l_nx << std::endl;
@@ -49,7 +50,7 @@ int main(int i_argc, char *i_argv[]) {
 
     // construct setup
     tsunami_lab::setups::Setup *l_setup;
-    l_setup = new tsunami_lab::setups::Reservoir();
+    l_setup = new tsunami_lab::setups::SuperCritical1d();
     // construct solver
     tsunami_lab::patches::WavePropagation *l_waveProp;
     l_waveProp = new tsunami_lab::patches::WavePropagation1d(l_nx);
@@ -67,19 +68,21 @@ int main(int i_argc, char *i_argv[]) {
 
             // get initial values of the setup
             tsunami_lab::t_real l_h = l_setup->getHeight(l_x, l_y);
-            l_hMax = std::max(l_h, l_hMax);
-
             tsunami_lab::t_real l_hu = l_setup->getMomentumX(l_x, l_y);
             tsunami_lab::t_real l_hv = l_setup->getMomentumY(l_x, l_y);
+            tsunami_lab::t_real l_b = l_setup->getBathymetry(l_x, l_y);
 
             // set initial values in wave propagation solver
             l_waveProp->setHeight(l_cx, l_cy, l_h);
-
             l_waveProp->setMomentumX(l_cx, l_cy, l_hu);
-
             l_waveProp->setMomentumY(l_cx, l_cy, l_hv);
+            l_waveProp->setBathymetry(l_cx, l_cy, l_b);
+
+            l_hMax = std::max(l_h, l_hMax);
         }
     }
+
+    l_waveProp->setGhostOutflow();
 
     // derive maximum wave speed in setup; the momentum is ignored
     tsunami_lab::t_real l_speedMax = std::sqrt(9.80665 * l_hMax);
@@ -93,17 +96,15 @@ int main(int i_argc, char *i_argv[]) {
     // set up time and print control
     tsunami_lab::t_idx l_timeStep = 0;
     tsunami_lab::t_idx l_nOut = 0;
+    tsunami_lab::t_real l_maxTime = 15.05;
     tsunami_lab::t_real l_simTime = 0;
 
     std::cout << "entering time loop" << std::endl;
 
     auto solver = tsunami_lab::solvers::FWave();
 
-    tsunami_lab::t_idx last_idx = (tsunami_lab::t_idx)l_nx - 1;
-    tsunami_lab::t_real initial = l_waveProp->getHeight()[last_idx];
-
     // iterate over time
-    while (l_waveProp->getHeight()[last_idx] == initial) {
+    while (l_simTime < l_maxTime) {
         if (l_timeStep % 25 == 0) {
             std::cout << "  simulation time / #time steps: " << l_simTime
                       << " / " << l_timeStep << std::endl;
@@ -114,9 +115,10 @@ int main(int i_argc, char *i_argv[]) {
             std::ofstream l_file;
             l_file.open(l_path);
 
-            tsunami_lab::io::Csv::write(
-                l_dxy, l_nx, 1, 1, l_waveProp->getHeight(),
-                l_waveProp->getMomentumX(), nullptr, l_file);
+            tsunami_lab::io::Csv::write(l_dxy, l_nx, 1, 1,
+                                        l_waveProp->getHeight(),
+                                        l_waveProp->getMomentumX(), nullptr,
+                                        l_waveProp->getBathymetry(), l_file);
             l_file.close();
             l_nOut++;
         }
