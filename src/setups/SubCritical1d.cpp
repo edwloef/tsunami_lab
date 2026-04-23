@@ -28,5 +28,5 @@ tsunami_lab::setups::SubCritical1d::getMomentumY(t_real, t_real) const {
 
 tsunami_lab::t_real
 tsunami_lab::setups::SubCritical1d::getBathymetry(t_real i_x, t_real) const {
-    return i_x > 8 && i_x < 12 ? -1.8 - 0.05 * std::powf(i_x - 10, 2) : -2;
+    return i_x > 8 && i_x < 12 ? -1.8 - 0.05 * std::pow(i_x - 10, 2) : -2;
 }
