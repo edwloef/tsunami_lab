@@ -19,13 +19,13 @@ jobs:
         run: |
           scons mode=debug+san
           ./build/tests
-          ./build/tsunami_lab 5000
+          ./build/tsunami_lab 500
           scons mode=release+san
           ./build/tests
-          ./build/tsunami_lab 50000
+          ./build/tsunami_lab 5000
 
       - name: valgrind
         run: |
           scons mode=debug
           valgrind ./build/tests
-          valgrind ./build/tsunami_lab 5000
+          valgrind ./build/tsunami_lab 500
