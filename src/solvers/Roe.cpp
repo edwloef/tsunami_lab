@@ -53,7 +53,7 @@ void tsunami_lab::solvers::Roe::waveStrengths(
 void tsunami_lab::solvers::Roe::netUpdates(t_real i_hL, t_real i_hR,
                                            t_real i_huL, t_real i_huR, t_real,
                                            t_real, t_real o_netUpdateL[2],
-                                           t_real o_netUpdateR[2]) {
+                                           t_real o_netUpdateR[2]) const {
     // compute particle velocities
     t_real l_uL = i_huL / i_hL;
     t_real l_uR = i_huR / i_hR;

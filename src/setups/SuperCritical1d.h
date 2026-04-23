@@ -3,42 +3,28 @@
  * @author Lara Schwarze (lara.schwarze AT uni-jena.de)
  *
  * @section DESCRIPTION
- * One-dimensional rare-rare problem.
+ * Subcritical flow problem.
  **/
-#ifndef TSUNAMI_LAB_SETUPS_RARE_RARE_1D_H
-#define TSUNAMI_LAB_SETUPS_RARE_RARE_1D_H
+#ifndef TSUNAMI_LAB_SETUPS_SUPERCRITICAL_1D_H
+#define TSUNAMI_LAB_SETUPS_SUPERCRITICAL_1D_H
 
 #include "Setup.h"
 
 namespace tsunami_lab {
 namespace setups {
-class RareRare1d;
+class SuperCritical1d;
 }
 } // namespace tsunami_lab
 
 /**
- * 1d rare-rare setup.
+ * 1d dam break setup.
  **/
-class tsunami_lab::setups::RareRare1d : public Setup {
-  private:
-    //! height
-    t_real m_height = 0;
-
-    //! momentum
-    t_real m_momentum = 0;
-
-    //! location where the water streams part
-    t_real m_location = 0;
-
+class tsunami_lab::setups::SuperCritical1d : public Setup {
   public:
     /**
      * Constructor.
-     *
-     * @param i_height water height
-     * @param i_momentum water momentum
-     * @param i_location location where the water streams part
      **/
-    RareRare1d(t_real i_height, t_real i_momentum, t_real i_location);
+    SuperCritical1d();
 
     /**
      * Gets the water height at a given point.

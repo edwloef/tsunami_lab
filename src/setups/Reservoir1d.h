@@ -12,14 +12,14 @@
 
 namespace tsunami_lab {
 namespace setups {
-class Reservoir;
+class Reservoir1d;
 }
 } // namespace tsunami_lab
 
 /**
  * reservoir setup.
  **/
-class tsunami_lab::setups::Reservoir : public Setup {
+class tsunami_lab::setups::Reservoir1d : public Setup {
   public:
     /**
      * Gets the water height at a given point.
@@ -41,6 +41,13 @@ class tsunami_lab::setups::Reservoir : public Setup {
      * @return momentum in y-direction.
      **/
     t_real getMomentumY(t_real, t_real) const;
+
+    /**
+     * Gets the bathymetry.
+     *
+     * @return bathymetry.
+     **/
+    t_real getBathymetry(t_real, t_real) const;
 };
 
 #endif

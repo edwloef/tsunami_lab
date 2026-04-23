@@ -60,6 +60,13 @@ class tsunami_lab::setups::DamBreak1d : public Setup {
      * @return momentum in y-direction.
      **/
     t_real getMomentumY(t_real, t_real) const;
+
+    /**
+     * Gets the bathymetry.
+     *
+     * @return bathymetry.
+     **/
+    t_real getBathymetry(t_real, t_real) const;
 };
 
 #endif

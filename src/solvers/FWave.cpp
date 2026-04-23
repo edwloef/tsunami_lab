@@ -13,7 +13,7 @@ void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL, t_real i_hR,
                                              t_real i_huL, t_real i_huR,
                                              t_real i_bL, t_real i_bR,
                                              t_real o_netUpdateL[2],
-                                             t_real o_netUpdateR[2]) {
+                                             t_real o_netUpdateR[2]) const {
     t_real uL = i_huL / i_hL;
     t_real uR = i_huR / i_hR;
 
@@ -37,13 +37,13 @@ void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL, t_real i_hR,
     t_real deltaF[2] = {fR[0] - fL[0], fR[1] - fL[1]};
 
     // bathymetry difference
-    t_real deltaXPsi[2] = {0, -g_half * (i_bR - i_bL) * (i_hL + i_hR)};
+    t_real deltaXPsi[2] = {0, g_half * (i_bL - i_bR) * (i_hL + i_hR)};
 
     // combined effect
     t_real combined[2] = {deltaF[0] - deltaXPsi[0], deltaF[1] - deltaXPsi[1]};
 
     // solve linear system for alphas:
-    // deltaF = alpha1 * delta1 + alpha2 * delta2
+    // combined = alpha1 * delta1 + alpha2 * delta2
     t_real diff = delta2 - delta1;
     t_real alpha1 = (delta2 * deltaF[0] - combined[1]) / diff;
     t_real alpha2 = (combined[1] - delta1 * combined[0]) / diff;
