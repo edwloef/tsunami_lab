@@ -96,7 +96,7 @@ int main(int i_argc, char *i_argv[]) {
     // set up time and print control
     tsunami_lab::t_idx l_timeStep = 0;
     tsunami_lab::t_idx l_nOut = 0;
-    tsunami_lab::t_real l_maxTime = 15.05;
+    tsunami_lab::t_real l_maxTime = 50;
     tsunami_lab::t_real l_simTime = 0;
 
     std::cout << "entering time loop" << std::endl;
@@ -123,7 +123,7 @@ int main(int i_argc, char *i_argv[]) {
             l_nOut++;
         }
 
-        l_waveProp->setGhostOutflow();
+        l_waveProp->setGhostReflecting();
         l_waveProp->timeStep(l_scaling, &solver);
 
         l_timeStep++;
