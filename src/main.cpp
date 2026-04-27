@@ -6,14 +6,14 @@
  **/
 #include "io/Csv.h"
 #include "patches/WavePropagation1d.h"
-#include "setups/SubCritical1d.h"
-#include "setups/SuperCritical1d.h"
+#include "setups/TsunamiEvent1d.h"
 #include "solvers/FWave.h"
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <ostream>
 
 int main(int i_argc, char *i_argv[]) {
     // number of cells in x- and y-direction
@@ -41,8 +41,9 @@ int main(int i_argc, char *i_argv[]) {
             std::cerr << "invalid number of cells" << std::endl;
             return EXIT_FAILURE;
         }
-        l_dxy = 25.0 / l_nx;
+        l_dxy = 440000.0 / l_nx;
     }
+
     std::cout << "runtime configuration" << std::endl;
     std::cout << "  number of cells in x-direction: " << l_nx << std::endl;
     std::cout << "  number of cells in y-direction: " << l_ny << std::endl;
@@ -50,7 +51,7 @@ int main(int i_argc, char *i_argv[]) {
 
     // construct setup
     tsunami_lab::setups::Setup *l_setup;
-    l_setup = new tsunami_lab::setups::SuperCritical1d();
+    l_setup = new tsunami_lab::setups::TsunamiEvent1d();
     // construct solver
     tsunami_lab::patches::WavePropagation *l_waveProp;
     l_waveProp = new tsunami_lab::patches::WavePropagation1d(l_nx);
@@ -82,8 +83,6 @@ int main(int i_argc, char *i_argv[]) {
         }
     }
 
-    l_waveProp->setGhostOutflow();
-
     // derive maximum wave speed in setup; the momentum is ignored
     tsunami_lab::t_real l_speedMax = std::sqrt(9.80665 * l_hMax);
 
@@ -96,7 +95,7 @@ int main(int i_argc, char *i_argv[]) {
     // set up time and print control
     tsunami_lab::t_idx l_timeStep = 0;
     tsunami_lab::t_idx l_nOut = 0;
-    tsunami_lab::t_real l_maxTime = 50;
+    tsunami_lab::t_real l_maxTime = 10000;
     tsunami_lab::t_real l_simTime = 0;
 
     std::cout << "entering time loop" << std::endl;
