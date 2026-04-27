@@ -5,9 +5,9 @@
  * IO-routines for writing a snapshot as Comma Separated Values (CSV).
  **/
 #include "Csv.h"
+#include <array>
 #include <sstream>
 #include <string>
-#include <tuple>
 #include <vector>
 
 void tsunami_lab::io::Csv::write(t_real i_dxy, t_idx i_nx, t_idx i_ny,
@@ -42,7 +42,8 @@ void tsunami_lab::io::Csv::write(t_real i_dxy, t_idx i_nx, t_idx i_ny,
             // write data
             io_stream << l_posX << "," << l_posY;
             if (i_h != nullptr) {
-                io_stream << "," << i_h[l_id] + (i_b != nullptr ? i_b[l_id] : 0.0);
+                io_stream << ","
+                          << i_h[l_id] + (i_b != nullptr ? i_b[l_id] : 0.0);
             }
             if (i_hu != nullptr) {
                 io_stream << "," << i_hu[l_id];
@@ -69,9 +70,10 @@ static std::string trim(const std::string &s) {
     return s.substr(l, r - l + 1);
 }
 
-std::vector<std::tuple<double, double, double, double, double>>
-tsunami_lab::io::Csv::readFive(std::istream &io_stream) {
-    std::vector<std::tuple<double, double, double, double, double>> rows;
+template <std::size_t N>
+std::vector<std::array<double, N>>
+tsunami_lab::io::Csv::read(std::istream &io_stream) {
+    std::vector<std::array<double, N>> rows;
     std::string line;
 
     std::string field;
@@ -89,17 +91,16 @@ tsunami_lab::io::Csv::readFive(std::istream &io_stream) {
             fields.push_back(trim(field));
         }
 
-        if (fields.size() != 5) {
+        if (fields.size() != N) {
             continue;
         }
 
         try {
-            double a = std::stod(fields[0]);
-            double b = std::stod(fields[1]);
-            double c = std::stod(fields[2]);
-            double d = std::stod(fields[3]);
-            double e = std::stod(fields[4]);
-            rows.emplace_back(a, b, c, d, e);
+            std::array<double, N> row;
+            for (std::size_t i = 0; i < N; ++i) {
+                row[i] = std::stod(fields[i]);
+            }
+            rows.push_back(row);
         } catch (...) {
             continue;
         }
@@ -107,3 +108,9 @@ tsunami_lab::io::Csv::readFive(std::istream &io_stream) {
 
     return rows;
 }
+
+template std::vector<std::array<double, 4>>
+tsunami_lab::io::Csv::read<4>(std::istream &io_stream);
+
+template std::vector<std::array<double, 5>>
+tsunami_lab::io::Csv::read<5>(std::istream &io_stream);

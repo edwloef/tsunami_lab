@@ -42,13 +42,13 @@ class tsunami_lab::io::Csv {
                       t_real const *i_b, std::ostream &io_stream);
 
     /**
-     * Reads five-column CSV data from the given stream.
+     * Reads N-column CSV data from the given stream.
      *
      * @param io_stream stream containing CSV-data
      * @return any successfully parsed CSV rows
      **/
-    static std::vector<std::tuple<double, double, double, double, double>>
-    readFive(std::istream &io_stream);
+    template <std::size_t N>
+    static std::vector<std::array<double, N>> read(std::istream &io_stream);
 };
 
 #endif

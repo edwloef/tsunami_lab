@@ -85,7 +85,7 @@ TEST_CASE("Test the 1d wave propagation solver with middle-state cases.",
         std::ifstream file;
         file.open(filename);
 
-        auto rows = tsunami_lab::io::Csv::readFive(file);
+        auto rows = tsunami_lab::io::Csv::read<5>(file);
 
         REQUIRE(rows.size() == 1'000'000);
 
