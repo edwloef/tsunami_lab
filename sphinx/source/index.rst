@@ -7,6 +7,8 @@
    :maxdepth: 2
    :caption: Contents:
 
+   test
+
 
 Tsunami documentation
 =====================
@@ -47,7 +49,7 @@ You can then view the result with paraview.
 Project Report 29.4.2026:
 -------------------------
 
-This week our task was athe implementation of bathymetry and boundary conitions.
+This week our task was the implementation of bathymetry and boundary conitions.
 
 **1. FWave-solver with bathymetry**
 

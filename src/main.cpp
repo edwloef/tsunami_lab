@@ -122,7 +122,7 @@ int main(int i_argc, char *i_argv[]) {
             l_nOut++;
         }
 
-        l_waveProp->setGhostReflecting();
+        l_waveProp->setGhostOutflow();
         l_waveProp->timeStep(l_scaling, &solver);
 
         l_timeStep++;
