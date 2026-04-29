@@ -3,8 +3,14 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+
 Tsunami documentation
 =====================
+
 
 Documentation
 -------------
@@ -13,15 +19,81 @@ Link to our code:
 https://github.com/edwloef/tsunami_lab
 
 Compile this project by typing scons in the terminal.
-To run the tests, run build/tests.
-In order to display what our program 
+To run the tests, enter 
 
-Project Report 10.4.2026:
+``./build/tests.exe``
+
+In order to work with the GEBCO files and data, download the zip file 
+and unzip it: 
+
+``curl -Lo GEBCO_2026_sub_ice.zip https://dap.ceda.ac.uk/bodc/gebco/global/gebco_2026/sub_ice_topography_bathymetry/netcdf/GEBCO_2026_sub_ice.zip
+unzip GEBCO_2026_sub_ice.zip``
+
+To create the csv-file with the bathymetry data, run the prompt below in the terminal:
+
+``gmt project -C141.024949/37.316569 -E146.0/37.316569 -G250e -Q | gmt grdtrack -GGEBCO_2026_sub_ice.nc | awk 'BEGIN {print "lon,lat,distance_m,elevation_m"} {print $1","$2","$3","$4}' > GEBCO_2026_sub_ice_bathy.csv``
+
+To create the final csv-files where the actual simulation is shown,
+type 
+
+``./build/tsunami_lab <number_of_cells>``
+
+in the terminal and let it run. 
+
+You can then view the result with paraview.
+
+
+
+Project Report 29.4.2026:
 -------------------------
 
-* Edwin wrote the code for the FWave solver. 
-* Lara wrote the tests for the FWave solver and the documentation.
+This week our task was athe implementation of bathymetry and boundary conitions.
 
+**1. FWave-solver with bathymetry**
+
+First, we extended our FWave-solver to be able to work with bathymetry. 
+
+(inlcude equations?)
+
+Here is an example with the subcritical flow as demonstration:
+
+.. video:: graphics/subcritical.mp4
+   :width: 100%
+
+**2. Reflecting Boundary Conditions**
+
+Next was the reflecting boundary conditions. For this, we needed to adjust the height and the 
+bathymetry of our current cell to that of the previous cell, and the particle velocity is the previous velocity as a negative.
+
+(equation again?)
+
+Here we can see that we obtain the one-sided solution of the shock-shock setup where we set q(left)
+everywhere initially and use reflecting boundary conditions at the right boundary, and outflow boundary 
+conditions at the left boundary.
+
+.. video:: graphics/supercritical_reflect.mp4
+   :autoplay:
+   :width: 100%
+
+**3. Hydraulic jumps**
+
+THe following task concerned the implementation of a sub- and supercritical flow.
+First we can see that the subcritical case works:
+
+.. video:: graphics/subcritical.mp4
+   :autoplay:
+   :width: 100%
+
+as well as the supercritical case:
+
+.. video:: graphics/supercritical.mp4
+   :autoplay:
+   :width: 100%
+
+First, we had to compute the location and value of the maximum Froude number for the subcritical setting
+and the supercritical setting at the initial time t=0:
+
+We can 
 
 
 
@@ -40,10 +112,16 @@ Project Report 22.4.2026:
 
 Visualization:
 --------------
-.. image:: reservoir1.png
+.. image:: graphics/reservoir1.png
+   :width: 400px
 
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+
+Project Report 10.4.2026:
+-------------------------
+
+* Edwin wrote the code for the FWave solver. 
+* Lara wrote the tests for the FWave solver and the documentation.
+
+
 
