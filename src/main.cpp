@@ -7,6 +7,7 @@
 #include "io/Csv.h"
 #include "patches/WavePropagation1d.h"
 #include "setups/TsunamiEvent1d.h"
+#include "setups/SuperCritical1d.h"
 #include "solvers/FWave.h"
 #include <cmath>
 #include <cstdlib>
@@ -41,7 +42,7 @@ int main(int i_argc, char *i_argv[]) {
             std::cerr << "invalid number of cells" << std::endl;
             return EXIT_FAILURE;
         }
-        l_dxy = 440000.0 / l_nx;
+        l_dxy = 25.0 / l_nx;
     }
 
     std::cout << "runtime configuration" << std::endl;
@@ -51,7 +52,7 @@ int main(int i_argc, char *i_argv[]) {
 
     // construct setup
     tsunami_lab::setups::Setup *l_setup;
-    l_setup = new tsunami_lab::setups::TsunamiEvent1d();
+    l_setup = new tsunami_lab::setups::SuperCritical1d();
     // construct solver
     tsunami_lab::patches::WavePropagation *l_waveProp;
     l_waveProp = new tsunami_lab::patches::WavePropagation1d(l_nx);
@@ -95,7 +96,7 @@ int main(int i_argc, char *i_argv[]) {
     // set up time and print control
     tsunami_lab::t_idx l_timeStep = 0;
     tsunami_lab::t_idx l_nOut = 0;
-    tsunami_lab::t_real l_maxTime = 10000;
+    tsunami_lab::t_real l_maxTime = 10;
     tsunami_lab::t_real l_simTime = 0;
 
     std::cout << "entering time loop" << std::endl;
