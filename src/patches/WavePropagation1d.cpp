@@ -61,11 +61,28 @@ void tsunami_lab::patches::WavePropagation1d::timeStep(
         t_idx l_ceL = l_ed;
         t_idx l_ceR = l_ed + 1;
 
+        t_real l_hL = l_hOld[l_ceL];
+        t_real l_hR = l_hOld[l_ceR];
+        t_real l_huL = l_huOld[l_ceL];
+        t_real l_huR = l_huOld[l_ceR];
+        t_real l_bL = m_b[l_ceL];
+        t_real l_bR = m_b[l_ceR];
+
+        // if wet <-> dry boundary, set up reflection
+        if (l_bL >= 0 && l_bR < 0) {
+            l_hL = l_hR;
+            l_huL = -l_huR;
+            l_bL = l_bR;
+        } else if (l_bR >= 0 && l_bL < 0) {
+            l_hR = l_hL;
+            l_huR = -l_huL;
+            l_bR = l_bL;
+        }
+
         // compute net-updates
         t_real l_netUpdates[2][2];
 
-        solver->netUpdates(l_hOld[l_ceL], l_hOld[l_ceR], l_huOld[l_ceL],
-                           l_huOld[l_ceR], m_b[l_ceL], m_b[l_ceR],
+        solver->netUpdates(l_hL, l_hR, l_huL, l_huR, l_bL, l_bR,
                            l_netUpdates[0], l_netUpdates[1]);
 
         // update the cells' quantities

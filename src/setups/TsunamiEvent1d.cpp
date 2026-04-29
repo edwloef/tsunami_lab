@@ -5,6 +5,8 @@
  * @section DESCRIPTION
  * Tsunami Event problem.
  **/
+#define _USE_MATH_DEFINES
+
 #include "TsunamiEvent1d.h"
 #include "../io/Csv.h"
 
