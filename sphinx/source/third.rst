@@ -41,7 +41,38 @@ as well as the supercritical case:
    :width: 100%
 
 We also had to compute the location and value of the maximum Froude number for the subcritical setting
-and the supercritical setting at the initial time t=0:
+and the supercritical setting at the initial time t=0.
+
+In our video our maximal bathymetry height is at :math:`x = 4000`.
+We don't want to use 4000 in our calculations:
+
+.. math::
+
+    \frac{4000}{10000} = \frac{2}{5} = \frac{10}{25}
+
+Now we transform our formula for the Froude number:
+
+.. math::
+
+    F = \frac{u}{\sqrt{gh}} = \frac{\frac{hu}{h}}{\sqrt{gh}}
+
+First the subcritical calculation:
+We only need to insert the correct numbers:
+
+.. math::
+
+    \frac{\frac{4.42}{1.8}}{\sqrt{9.81 \cdot 1.8}} \approx 0.584
+
+Given that for a subcritical region, F needs to be lesser than one, this result is correct.
+Now for the supercritical calculations:
+
+.. math::
+
+    \frac{\frac{hu}{h}}{\sqrt{gh}} = \frac{\frac{0.18}{0.13}}{\sqrt{9.81 \cdot 0.13}} \approx 1.226
+
+Given that for a supercritical region, F needs to be bigger than one, this result is correct as well.
+
+
 
 
 We can also see that our f-wave solver fails to converge to our expected constant momentum 
