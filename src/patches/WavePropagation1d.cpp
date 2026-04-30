@@ -115,7 +115,7 @@ void tsunami_lab::patches::WavePropagation1d::setGhostReflecting() {
 
     // set left boundary
     l_h[0] = l_h[1];
-    l_hu[0] = l_hu[1];
+    l_hu[0] = -l_hu[1];
     m_b[0] = m_b[1];
 
     // set right boundary

@@ -5,8 +5,7 @@
  * Entry-point for simulations.
  **/
 #include "io/Csv.h"
-#include "patches/WavePropagation1d.h"
-#include "setups/TsunamiEvent1d.h"
+#include "patches/WavePropagation2d.h"
 #include "setups/SuperCritical1d.h"
 #include "solvers/FWave.h"
 #include <cmath>
@@ -19,7 +18,7 @@
 int main(int i_argc, char *i_argv[]) {
     // number of cells in x- and y-direction
     tsunami_lab::t_idx l_nx = 0;
-    tsunami_lab::t_idx l_ny = 1;
+    tsunami_lab::t_idx l_ny = 100;
 
     // set cell size
     tsunami_lab::t_real l_dxy = 1;
@@ -55,7 +54,7 @@ int main(int i_argc, char *i_argv[]) {
     l_setup = new tsunami_lab::setups::SuperCritical1d();
     // construct solver
     tsunami_lab::patches::WavePropagation *l_waveProp;
-    l_waveProp = new tsunami_lab::patches::WavePropagation1d(l_nx);
+    l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny);
 
     // maximum observed height in the setup
     tsunami_lab::t_real l_hMax =
@@ -96,7 +95,7 @@ int main(int i_argc, char *i_argv[]) {
     // set up time and print control
     tsunami_lab::t_idx l_timeStep = 0;
     tsunami_lab::t_idx l_nOut = 0;
-    tsunami_lab::t_real l_maxTime = 10;
+    tsunami_lab::t_real l_maxTime = 25;
     tsunami_lab::t_real l_simTime = 0;
 
     std::cout << "entering time loop" << std::endl;
@@ -115,10 +114,11 @@ int main(int i_argc, char *i_argv[]) {
             std::ofstream l_file;
             l_file.open(l_path);
 
-            tsunami_lab::io::Csv::write(l_dxy, l_nx, 1, 1,
-                                        l_waveProp->getHeight(),
-                                        l_waveProp->getMomentumX(), nullptr,
-                                        l_waveProp->getBathymetry(), l_file);
+            tsunami_lab::io::Csv::write(
+                l_dxy, l_nx, l_ny, l_waveProp->getStride(),
+                l_waveProp->getHeight(), l_waveProp->getMomentumX(),
+                l_waveProp->getMomentumY(), l_waveProp->getBathymetry(),
+                l_file);
             l_file.close();
             l_nOut++;
         }
