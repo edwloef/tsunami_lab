@@ -10,6 +10,7 @@ Import("env")
 l_sources = [
     "io/Csv.cpp",
     "patches/WavePropagation1d.cpp",
+    "patches/WavePropagation2d.cpp",
     "setups/DamBreak1d.cpp",
     "setups/RareRare1d.cpp",
     "setups/Reservoir1d.cpp",
