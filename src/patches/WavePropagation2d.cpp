@@ -125,10 +125,10 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(
 
             // update the cells' quantities
             l_hNew[l_i] -= i_scaling * l_netUpdates[0][0];
-            l_huNew[l_i] -= i_scaling * l_netUpdates[0][1];
+            l_hvNew[l_i] -= i_scaling * l_netUpdates[0][1];
 
             l_hNew[l_v] -= i_scaling * l_netUpdates[1][0];
-            l_huNew[l_v] -= i_scaling * l_netUpdates[1][1];
+            l_hvNew[l_v] -= i_scaling * l_netUpdates[1][1];
         }
     }
 }

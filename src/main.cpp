@@ -6,7 +6,7 @@
  **/
 #include "io/Csv.h"
 #include "patches/WavePropagation2d.h"
-#include "setups/SuperCritical1d.h"
+#include "setups/DamBreak2d.h"
 #include "solvers/FWave.h"
 #include <cmath>
 #include <cstdlib>
@@ -18,7 +18,7 @@
 int main(int i_argc, char *i_argv[]) {
     // number of cells in x- and y-direction
     tsunami_lab::t_idx l_nx = 0;
-    tsunami_lab::t_idx l_ny = 100;
+    tsunami_lab::t_idx l_ny = 0;
 
     // set cell size
     tsunami_lab::t_real l_dxy = 1;
@@ -29,19 +29,26 @@ int main(int i_argc, char *i_argv[]) {
     std::cout << "### https://scalable.uni-jena.de ###" << std::endl;
     std::cout << "####################################" << std::endl;
 
-    if (i_argc != 2) {
+    if (i_argc != 3) {
         std::cerr << "invalid number of arguments, usage:" << std::endl;
-        std::cerr << "  ./build/tsunami_lab N_CELLS_X" << std::endl;
-        std::cerr << "where N_CELLS_X is the number of cells in x-direction."
+        std::cerr << "  ./build/tsunami_lab N_CELLS_X N_CELLS_Y" << std::endl;
+        std::cerr << "where N_CELLS_X is the number of cells in x-direction"
+                  << std::endl;
+        std::cerr << "and N_CELLS_Y is the number of cells in y-direction"
                   << std::endl;
         return EXIT_FAILURE;
     } else {
         l_nx = atoi(i_argv[1]);
         if (l_nx < 1) {
-            std::cerr << "invalid number of cells" << std::endl;
+            std::cerr << "invalid number of cells in x direction" << std::endl;
             return EXIT_FAILURE;
         }
-        l_dxy = 25.0 / l_nx;
+        l_ny = atoi(i_argv[2]);
+        if (l_ny < 1) {
+            std::cerr << "invalid number of cells in y direction" << std::endl;
+            return EXIT_FAILURE;
+        }
+        l_dxy = 100.0 / l_nx;
     }
 
     std::cout << "runtime configuration" << std::endl;
@@ -51,7 +58,7 @@ int main(int i_argc, char *i_argv[]) {
 
     // construct setup
     tsunami_lab::setups::Setup *l_setup;
-    l_setup = new tsunami_lab::setups::SuperCritical1d();
+    l_setup = new tsunami_lab::setups::DamBreak2d();
     // construct solver
     tsunami_lab::patches::WavePropagation *l_waveProp;
     l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny);
