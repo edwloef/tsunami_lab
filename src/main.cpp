@@ -5,9 +5,11 @@
  * Entry-point for simulations.
  **/
 #include "io/Csv.h"
+#include "io/Stations.h"
 #include "patches/WavePropagation2d.h"
 #include "setups/DamBreak2d.h"
 #include "solvers/FWave.h"
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
@@ -62,6 +64,8 @@ int main(int i_argc, char *i_argv[]) {
     // construct solver
     tsunami_lab::patches::WavePropagation *l_waveProp;
     l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny);
+    // construct stations
+    tsunami_lab::io::Stations stations{std::ifstream("stations.json")};
 
     // maximum observed height in the setup
     tsunami_lab::t_real l_hMax =
@@ -132,6 +136,8 @@ int main(int i_argc, char *i_argv[]) {
 
         l_waveProp->setGhostOutflow();
         l_waveProp->timeStep(l_scaling, &solver);
+
+        stations.output(l_dxy, l_simTime, l_waveProp);
 
         l_timeStep++;
         l_simTime += l_dt;

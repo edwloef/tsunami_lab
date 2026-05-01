@@ -21,6 +21,7 @@ l_sources = [
     "setups/TsunamiEvent1d.cpp",
     "solvers/FWave.cpp",
     "solvers/Roe.cpp",
+    "io/Stations.cpp"
 ]
 
 for l_so in l_sources:
