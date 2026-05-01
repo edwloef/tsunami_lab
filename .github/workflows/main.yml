@@ -11,9 +11,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install scons valgrind cppcheck unzip gmt
           git submodule update --init --recursive
-          curl -Lo GEBCO_2026_sub_ice.zip https://dap.ceda.ac.uk/bodc/gebco/global/gebco_2026/sub_ice_topography_bathymetry/netcdf/GEBCO_2026_sub_ice.zip
-          unzip GEBCO_2026_sub_ice.zip
-          gmt project -C141.024949/37.316569 -E146.0/37.316569 -G250e -Q | gmt grdtrack -GGEBCO_2026_sub_ice.nc | awk 'BEGIN {print "lon,lat,distance_m,elevation_m"} {print $1","$2","$3","$4}' > GEBCO_2026_sub_ice_bathy.csv
+#         curl -Lo GEBCO_2026_sub_ice.zip https://dap.ceda.ac.uk/bodc/gebco/global/gebco_2026/sub_ice_topography_bathymetry/netcdf/GEBCO_2026_sub_ice.zip
+#         unzip GEBCO_2026_sub_ice.zip
+#         gmt project -C141.024949/37.316569 -E146.0/37.316569 -G250e -Q | gmt grdtrack -GGEBCO_2026_sub_ice.nc | awk 'BEGIN {print "lon,lat,distance_m,elevation_m"} {print $1","$2","$3","$4}' > GEBCO_2026_sub_ice_bathy.csv
 
       - name: cppcheck
         run: cppcheck src/ --template=gcc --force --error-exitcode=1
@@ -22,13 +22,13 @@ jobs:
         run: |
           scons mode=debug+san
           ./build/tests
-          ./build/tsunami_lab 500
+          ./build/tsunami_lab 100 100
           scons mode=release+san
           ./build/tests
-          ./build/tsunami_lab 5000
+          ./build/tsunami_lab 200 200
 
       - name: valgrind
         run: |
           scons mode=debug
           valgrind ./build/tests
-          valgrind ./build/tsunami_lab 500
+          valgrind ./build/tsunami_lab 100 100
