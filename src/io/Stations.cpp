@@ -16,7 +16,7 @@
 tsunami_lab::io::Stations::Stations(std::ifstream i_file) {
     nlohmann::json data = nlohmann::json::parse(i_file);
 
-    m_OutputFreq = data["outputFreq"];
+    m_outputFreq = data["outputFreq"];
 
     for (auto &[_, value] : data["stations"].items()) {
         std::string name = value["name"];
@@ -30,7 +30,7 @@ tsunami_lab::io::Stations::Stations(std::ifstream i_file) {
 
 void tsunami_lab::io::Stations::output(t_real i_dxy, t_real i_simTime,
                                        patches::WavePropagation *i_waveProp) {
-    if (i_simTime - m_lastOutput < m_OutputFreq) {
+    if (i_simTime - m_lastOutput < m_outputFreq) {
         return;
     }
 
