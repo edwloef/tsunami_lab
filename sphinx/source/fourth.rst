@@ -228,6 +228,7 @@ With the one-dimensional solver, we can only see an uptick in the numbers but ne
 Station at the very start:
 
 .. code-block::
+    
     height
     7.40429
     7.23524
