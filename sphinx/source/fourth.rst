@@ -284,3 +284,9 @@ Station in the middle:
     7.23466
     7.23466
 
+
+
+**Our contributions**
+
+* Edwin implemented the two-dimensional solver and the circular dam break setup
+* Lara implemented the stations class, the json file, and the documentation
