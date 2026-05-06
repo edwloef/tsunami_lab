@@ -147,3 +147,140 @@ The output for each station is also written in a separate ASCII-CSV file:
             m_stations.push_back(std::move(s));
         }
     }
+
+In order to provide the names and locations of each stations to our solver, we used a json file:
+
+.. image:: graphics/json.png
+   :width: 300px
+
+We used the json library made by nlohmann to work with json files throughout our project. 
+
+The output frequenzy is the same for each station.
+
+Now to compare our two-dimensional solver to our one-dimensional one. 
+When we generate the two-dimensional dam break problem and take a look at the stations, 
+we see the wave first going down under 5 but rising slowly.
+
+Station in the very center:
+
+.. code-block:: 
+    
+    height
+    5.66201
+    1.92437
+    4.02517
+    4.62102
+    4.75814
+    4.83629
+    4.88204
+    4.90919
+    4.92722
+    4.93959
+    4.94287
+    4.92917
+    4.91091
+    4.90572
+    4.91386
+    4.93037
+    4.95911
+    4.99335
+    5.00267
+    4.99031
+    4.97456
+    4.9653
+    4.9665
+    4.97381
+
+Station where x=70 and y=70:
+
+.. code-block:: 
+
+    height
+    5
+    5.20688
+    5.92717
+    5.30621
+    4.67007
+    4.38358
+    4.61126
+    4.86686
+    4.91836
+    4.91978
+    4.90944
+    4.91398
+    4.93312
+    4.95822
+    4.96782
+    4.96227
+    4.95811
+    4.96682
+    4.97787
+    4.98102
+    4.9816
+    4.98467
+    4.98739
+    4.9883
+
+
+
+With the one-dimensional solver, we can only see an uptick in the numbers but never a real wave.
+
+Station at the very start:
+
+.. code-block::
+    height
+    7.40429
+    7.23524
+    7.23848
+    7.2407
+    7.24194
+    7.24273
+    7.24327
+    7.24366
+    7.24395
+    7.24417
+    7.24434
+    7.24447
+    7.24458
+    7.24466
+    7.24473
+    7.24479
+    7.24484
+    7.24488
+    7.24491
+    7.24493
+    7.24495
+    7.24497
+    7.24499
+    7.24494
+
+Station in the middle:
+
+.. code-block::
+
+    height
+    5
+    5
+    5
+    5.00177
+    6.96838
+    7.24497
+    7.24479
+    7.24484
+    7.24488
+    7.24491
+    7.24494
+    7.24496
+    7.24498
+    7.245
+    7.24501
+    7.245
+    7.24455
+    7.24232
+    7.2386
+    7.2359
+    7.2349
+    7.23468
+    7.23466
+    7.23466
+
