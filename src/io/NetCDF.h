@@ -33,6 +33,11 @@ class tsunami_lab::io::NetCDF {
            t_real const *i_b);
 
     /**
+     * Destructor.
+     */
+    ~NetCDF();
+
+    /**
      * Writes the data as NetCDF.
      *
      * @param i_h water height of the cells; optional

@@ -4,7 +4,7 @@
  * @section DESCRIPTION
  * Entry-point for simulations.
  **/
-#include "io/Csv.h"
+#include "io/NetCDF.h"
 #include "io/Stations.h"
 #include "patches/WavePropagation2d.h"
 #include "setups/DamBreak2d.h"
@@ -65,7 +65,11 @@ int main(int i_argc, char *i_argv[]) {
     tsunami_lab::patches::WavePropagation *l_waveProp;
     l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny);
     // construct stations
-    tsunami_lab::io::Stations stations{std::ifstream("stations.json")};
+    tsunami_lab::io::Stations stations(std::ifstream("stations.json"));
+    // construct netcdf writer
+    tsunami_lab::io::NetCDF netcdf("solution.nc", l_nx, l_ny,
+                                   l_waveProp->getStride(),
+                                   l_waveProp->getBathymetry());
 
     // maximum observed height in the setup
     tsunami_lab::t_real l_hMax =
@@ -94,6 +98,8 @@ int main(int i_argc, char *i_argv[]) {
         }
     }
 
+    delete l_setup;
+
     // derive maximum wave speed in setup; the momentum is ignored
     tsunami_lab::t_real l_speedMax = std::sqrt(9.80665 * l_hMax);
 
@@ -105,33 +111,21 @@ int main(int i_argc, char *i_argv[]) {
 
     // set up time and print control
     tsunami_lab::t_idx l_timeStep = 0;
-    tsunami_lab::t_idx l_nOut = 0;
     tsunami_lab::t_real l_maxTime = 25;
     tsunami_lab::t_real l_simTime = 0;
 
     std::cout << "entering time loop" << std::endl;
 
-    auto solver = tsunami_lab::solvers::FWave();
+    tsunami_lab::solvers::FWave solver;
 
     // iterate over time
     while (l_simTime < l_maxTime) {
         if (l_timeStep % 25 == 0) {
-            std::cout << "  simulation time / #time steps: " << l_simTime
-                      << " / " << l_timeStep << std::endl;
+            std::cout << "  " << l_timeStep << " time steps, " << l_simTime
+                      << " seconds" << std::endl;
 
-            std::string l_path = "solution_" + std::to_string(l_nOut) + ".csv";
-            std::cout << "  writing wave field to " << l_path << std::endl;
-
-            std::ofstream l_file;
-            l_file.open(l_path);
-
-            tsunami_lab::io::Csv::write(
-                l_dxy, l_nx, l_ny, l_waveProp->getStride(),
-                l_waveProp->getHeight(), l_waveProp->getMomentumX(),
-                l_waveProp->getMomentumY(), l_waveProp->getBathymetry(),
-                l_file);
-            l_file.close();
-            l_nOut++;
+            netcdf.write(l_waveProp->getHeight(), l_waveProp->getMomentumX(),
+                         l_waveProp->getMomentumY());
         }
 
         l_waveProp->setGhostOutflow();
@@ -145,11 +139,5 @@ int main(int i_argc, char *i_argv[]) {
 
     std::cout << "finished time loop" << std::endl;
 
-    // free memory
-    std::cout << "freeing memory" << std::endl;
-    delete l_setup;
     delete l_waveProp;
-
-    std::cout << "finished, exiting" << std::endl;
-    return EXIT_SUCCESS;
 }
