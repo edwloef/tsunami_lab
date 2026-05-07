@@ -9,8 +9,9 @@ jobs:
       - name: dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install scons valgrind cppcheck unzip gmt
+          sudo apt-get install scons valgrind cppcheck libnetcdf-dev
           git submodule update --init --recursive
+#         sudo apt-get install unzip gmt
 #         curl -Lo GEBCO_2026_sub_ice.zip https://dap.ceda.ac.uk/bodc/gebco/global/gebco_2026/sub_ice_topography_bathymetry/netcdf/GEBCO_2026_sub_ice.zip
 #         unzip GEBCO_2026_sub_ice.zip
 #         gmt project -C141.024949/37.316569 -E146.0/37.316569 -G250e -Q | gmt grdtrack -GGEBCO_2026_sub_ice.nc | awk 'BEGIN {print "lon,lat,distance_m,elevation_m"} {print $1","$2","$3","$4}' > GEBCO_2026_sub_ice_bathy.csv
