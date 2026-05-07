@@ -6,6 +6,7 @@
  * IO-routines for writing a snapshot as NetCDF.
  **/
 
+#include <cstring>
 #include <iostream>
 #include <netcdf.h>
 #include <stdlib.h>
@@ -40,8 +41,9 @@ tsunami_lab::io::NetCDF::NetCDF(char const *i_path, t_idx i_nx, t_idx i_ny,
     nc_try(nc_def_var(ncid, "h", NC_FLOAT, 3, dimids, &h_varid));
     nc_try(nc_def_var(ncid, "hu", NC_FLOAT, 3, dimids, &hu_varid));
     nc_try(nc_def_var(ncid, "hv", NC_FLOAT, 3, dimids, &hv_varid));
-
     nc_try(nc_def_var(ncid, "b", NC_FLOAT, 2, &dimids[1], &b_varid));
+
+    nc_try(nc_put_att_text(ncid, h_varid, "units", strlen("meters"), "meters"));
 
     nc_try(nc_enddef(ncid));
 
