@@ -47,18 +47,18 @@ tsunami_lab::io::NetCDF::NetCDF(char const *i_path, t_idx i_nx, t_idx i_ny,
 
     nc_try(nc_def_var(ncid, "b", NC_FLOAT, 2, dimids2, &b_varid));
 
-    const t_idx l_start[2] = {0, 0};
-    const t_idx l_count[2] = {nx, ny};
-    const ptrdiff_t l_stride[2] = {(ptrdiff_t)stride, 1};
+    t_idx l_start[2] = {0, 0};
+    t_idx l_count[2] = {nx, ny};
+    ptrdiff_t l_stride[2] = {(ptrdiff_t)stride, 1};
 
     nc_try(nc_put_vars_float(ncid, b_varid, l_start, l_count, l_stride, i_b));
 }
 
-void tsunami_lab::io::NetCDF::write(const t_real *i_h, const t_real *i_hu,
-                                    const t_real *i_hv) {
-    const t_idx l_start[3] = {0, 0, step};
-    const t_idx l_count[3] = {nx, ny, 1};
-    const ptrdiff_t l_stride[3] = {(ptrdiff_t)stride, 1, 0};
+void tsunami_lab::io::NetCDF::write(t_real const *i_h, t_real const *i_hu,
+                                    t_real const *i_hv) {
+    t_idx l_start[3] = {0, 0, step};
+    t_idx l_count[3] = {nx, ny, 1};
+    ptrdiff_t l_stride[3] = {(ptrdiff_t)stride, 1, 0};
 
     nc_try(nc_put_vars_float(ncid, h_varid, l_start, l_count, l_stride, i_h));
 
