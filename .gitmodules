@@ -4,3 +4,6 @@
 [submodule "submodules/json"]
 	path = submodules/json
 	url = https://github.com/nlohmann/json
+[submodule "submodules/netcdf-c"]
+	path = submodules/netcdf-c
+	url = https://github.com/Unidata/netcdf-c

@@ -73,6 +73,10 @@ env.Append(CXXFLAGS=["-isystem", "submodules/Catch2/single_include"])
 # add JSON
 env.Append(CXXFLAGS=["-isystem", "submodules/json/single_include"])
 
+# add NetCDF
+env.Append(CXXFLAGS=["-isystem", "submodules/netcdf-c/include"])
+env.Append(LINKFLAGS=["-lnetcdf"])
+
 # get source files
 VariantDir(variant_dir="build/src", src_dir="src")
 

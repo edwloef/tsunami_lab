@@ -9,6 +9,8 @@ Import("env")
 # gather sources
 l_sources = [
     "io/Csv.cpp",
+    "io/NetCDF.cpp",
+    "io/Stations.cpp",
     "patches/WavePropagation1d.cpp",
     "patches/WavePropagation2d.cpp",
     "setups/DamBreak1d.cpp",
@@ -21,7 +23,6 @@ l_sources = [
     "setups/TsunamiEvent1d.cpp",
     "solvers/FWave.cpp",
     "solvers/Roe.cpp",
-    "io/Stations.cpp"
 ]
 
 for l_so in l_sources:
@@ -31,14 +32,14 @@ env.standalone = env.Object("main.cpp")
 
 # gather unit tests
 l_tests = [
-    "tests.cpp",
-    "solvers/Roe.test.cpp",
-    "solvers/FWave.test.cpp",
-    "patches/WavePropagation1d.test.cpp",
     "io/Csv.test.cpp",
+    "patches/WavePropagation1d.test.cpp",
     "setups/DamBreak1d.test.cpp",
-    "setups/ShockShock1d.test.cpp",
     "setups/RareRare1d.test.cpp",
+    "setups/ShockShock1d.test.cpp",
+    "solvers/FWave.test.cpp",
+    "solvers/Roe.test.cpp",
+    "tests.cpp",
 ]
 
 for l_te in l_tests:
