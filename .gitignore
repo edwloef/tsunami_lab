@@ -3,5 +3,6 @@ build
 html
 .sconsign.dblite
 compile_commands.json
+middle_states.csv
 solution_*.csv
 GEBCO_*
