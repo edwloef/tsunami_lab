@@ -43,13 +43,13 @@ env.CompilationDatabase()
 Help(vars.GenerateHelpText(env))
 
 # add default flags
-env.Append(CXXFLAGS=["-std=c++17", "-Wall", "-Wextra", "-Wpedantic"])
+env.Append(CXXFLAGS=["-std=c++17", "-fwrapv", "-Wall", "-Wextra", "-Wpedantic"])
 
 # set optimization mode
 if "debug" in env["mode"]:
     env.Append(CXXFLAGS=["-g", "-O0"])
 else:
-    env.Append(CXXFLAGS=["-O3"])
+    env.Append(CXXFLAGS=["-O3", "-flto=auto"])
 
 # add sanitizers
 if "san" in env["mode"]:
@@ -63,7 +63,6 @@ if "san" in env["mode"]:
             "-fno-omit-frame-pointer",
         ]
     )
-    env.Append(LINKFLAGS=["-g", "-fsanitize=address", "-fsanitize=undefined"])
 else:
     env.Append(CXXFLAGS=["-Werror"])
 
@@ -74,8 +73,10 @@ env.Append(CXXFLAGS=["-isystem", "submodules/Catch2/single_include"])
 env.Append(CXXFLAGS=["-isystem", "submodules/json/single_include"])
 
 # add NetCDF
-env.Append(CXXFLAGS=["-isystem", "submodules/netcdf-c/include"])
-env.Append(LINKFLAGS=["-lnetcdf"])
+env.Append(CXXFLAGS=["-isystem", "submodules/netcdf-c/include", "-lnetcdf"])
+
+# set linker flags to match compiler flags
+env.Append(LINKFLAGS=env["CXXFLAGS"])
 
 # get source files
 VariantDir(variant_dir="build/src", src_dir="src")
