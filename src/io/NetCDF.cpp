@@ -6,6 +6,7 @@
  * IO-routines for writing a snapshot as NetCDF.
  **/
 
+#include <assert.h>
 #include <cstring>
 #include <iostream>
 #include <netcdf.h>
@@ -23,14 +24,19 @@
         }                                                                      \
     }
 
-tsunami_lab::io::NetCDF::NetCDF(char const *i_path, t_idx i_nx, t_idx i_ny,
-                                t_idx i_stride, t_real const *i_b) {
+tsunami_lab::io::NetCDF::NetCDF(char const *i_path) {
+    nc_try(nc_create(i_path, NC_CLOBBER, &ncid));
+}
+
+tsunami_lab::io::NetCDF::~NetCDF() {
+    nc_try(nc_close(ncid));
+}
+
+void tsunami_lab::io::NetCDF::writeDefs(t_idx i_nx, t_idx i_ny,
+                                        t_idx i_stride) {
     nx = i_nx;
     ny = i_ny;
     stride = i_stride;
-    step = 0;
-
-    nc_try(nc_create(i_path, NC_CLOBBER, &ncid));
 
     nc_try(nc_def_dim(ncid, "t", NC_UNLIMITED, &t_dimid));
     nc_try(nc_def_dim(ncid, "y", ny, &y_dimid));
@@ -46,7 +52,9 @@ tsunami_lab::io::NetCDF::NetCDF(char const *i_path, t_idx i_nx, t_idx i_ny,
     nc_try(nc_put_att_text(ncid, h_varid, "units", strlen("meters"), "meters"));
 
     nc_try(nc_enddef(ncid));
+}
 
+void tsunami_lab::io::NetCDF::writeBathymetry(t_real const *i_b) {
     t_idx l_count[2] = {1, nx};
 
     for (t_idx l_iy = 0; l_iy < ny; l_iy++) {
@@ -57,12 +65,9 @@ tsunami_lab::io::NetCDF::NetCDF(char const *i_path, t_idx i_nx, t_idx i_ny,
     }
 }
 
-tsunami_lab::io::NetCDF::~NetCDF() {
-    nc_try(nc_close(ncid));
-}
-
-void tsunami_lab::io::NetCDF::write(t_real const *i_h, t_real const *i_hu,
-                                    t_real const *i_hv) {
+void tsunami_lab::io::NetCDF::writeTimeStep(t_real const *i_h,
+                                            t_real const *i_hu,
+                                            t_real const *i_hv) {
     t_idx l_count[3] = {1, 1, nx};
 
     for (t_idx l_iy = 0; l_iy < ny; l_iy++) {
@@ -77,4 +82,61 @@ void tsunami_lab::io::NetCDF::write(t_real const *i_h, t_real const *i_hu,
     }
 
     step++;
+}
+
+void tsunami_lab::io::NetCDF::readDefs() {
+    nc_try(nc_inq_dimid(ncid, "x", &x_dimid));
+    nc_try(nc_inq_dimid(ncid, "y", &y_dimid));
+
+    nc_try(nc_inq_dimlen(ncid, x_dimid, &nx));
+    nc_try(nc_inq_dimlen(ncid, y_dimid, &ny));
+
+    nc_try(nc_inq_varid(ncid, "x", &x_varid));
+    nc_try(nc_inq_varid(ncid, "y", &y_varid));
+    nc_try(nc_inq_varid(ncid, "z", &z_varid));
+
+    t_real *x = new t_real[nx];
+
+    nc_try(nc_get_var_float(ncid, x_varid, x));
+
+    for (t_idx i = 0; i < nx; i++) {
+        y_coords[x[i]] = i;
+    }
+
+    delete[] x;
+
+    t_real *y = new t_real[ny];
+
+    nc_try(nc_get_var_float(ncid, y_varid, y));
+
+    for (t_idx i = 0; i < nx; i++) {
+        y_coords[y[i]] = i;
+    }
+
+    delete[] y;
+}
+
+template <typename K, typename V> V nearest(std::map<K, V> &map, K num) {
+    assert(!map.empty());
+
+    auto it = map.upper_bound(num);
+
+    auto k_l = *(--it++);
+
+    if (it == std::end(map)) {
+        return k_l.second;
+    }
+
+    auto k_r = *it;
+
+    return k_l.first - num > num - k_r.first ? k_r.second : k_l.second;
+}
+
+tsunami_lab::t_real tsunami_lab::io::NetCDF::readAt(t_real i_x, t_real i_y) {
+    size_t index[2] = {(size_t)nearest(x_coords, i_x),
+                       (size_t)nearest(y_coords, i_y)};
+
+    t_real val;
+    nc_try(nc_get_var1_float(ncid, z_varid, index, &val));
+    return val;
 }

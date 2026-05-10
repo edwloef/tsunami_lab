@@ -67,9 +67,8 @@ int main(int i_argc, char *i_argv[]) {
     // construct stations
     tsunami_lab::io::Stations stations(std::ifstream("stations.json"));
     // construct netcdf writer
-    tsunami_lab::io::NetCDF netcdf("solution.nc", l_nx, l_ny,
-                                   l_waveProp->getStride(),
-                                   l_waveProp->getBathymetry());
+    tsunami_lab::io::NetCDF netcdf("solution.nc");
+    netcdf.writeDefs(l_nx, l_ny, l_waveProp->getStride());
 
     // maximum observed height in the setup
     tsunami_lab::t_real l_hMax =
@@ -100,6 +99,8 @@ int main(int i_argc, char *i_argv[]) {
 
     delete l_setup;
 
+    netcdf.writeBathymetry(l_waveProp->getBathymetry());
+
     // derive maximum wave speed in setup; the momentum is ignored
     tsunami_lab::t_real l_speedMax = std::sqrt(9.80665 * l_hMax);
 
@@ -124,8 +125,9 @@ int main(int i_argc, char *i_argv[]) {
             std::cout << "  " << l_timeStep << " time steps, " << l_simTime
                       << " seconds" << std::endl;
 
-            netcdf.write(l_waveProp->getHeight(), l_waveProp->getMomentumX(),
-                         l_waveProp->getMomentumY());
+            netcdf.writeTimeStep(l_waveProp->getHeight(),
+                                 l_waveProp->getMomentumX(),
+                                 l_waveProp->getMomentumY());
         }
 
         l_waveProp->setGhostOutflow();

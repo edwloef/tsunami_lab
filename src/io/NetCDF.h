@@ -9,6 +9,7 @@
 #define TSUNAMI_LAB_IO_NETCDF
 
 #include "../constants.h"
+#include <map>
 
 namespace tsunami_lab {
 namespace io {
@@ -19,18 +20,17 @@ class NetCDF;
 class tsunami_lab::io::NetCDF {
   private:
     t_idx nx, ny, stride, step;
-    int ncid, x_dimid, y_dimid, t_dimid, h_varid, hu_varid, hv_varid, b_varid;
+    int ncid, x_dimid, y_dimid, t_dimid, x_varid, y_varid, z_varid, h_varid,
+        hu_varid, hv_varid, b_varid;
+    std::map<t_real, t_idx> x_coords, y_coords;
 
   public:
     /**
      * Constructor.
      *
      * @param i_path path to be written to.
-     * @param i_nx number of cells in x-direction
-     * @param i_ny number of cells in y-direction
      */
-    NetCDF(char const *i_path, t_idx i_nx, t_idx i_ny, t_idx i_stride,
-           t_real const *i_b);
+    NetCDF(char const *i_path);
 
     /**
      * Destructor.
@@ -38,13 +38,44 @@ class tsunami_lab::io::NetCDF {
     ~NetCDF();
 
     /**
-     * Writes the data as NetCDF.
+     * Writes the dimension and variable definitions as NetCDF.
      *
-     * @param i_h water height of the cells; optional
+     * @param i_nx number of cells in x-direction
+     * @param i_ny number of cells in y-direction
+     * @param i_stride stride of the data arrays in y-direction
+     **/
+    void writeDefs(t_idx i_nx, t_idx i_ny, t_idx i_stride);
+
+    /**
+     * Writes the bathymetry as NetCDF.
+     *
+     * @param i_b bathymetry
+     **/
+    void writeBathymetry(t_real const *i_b);
+
+    /**
+     * Writes the time step as NetCDF.
+     *
+     * @param i_h water height of the cells
      * @param i_hu momentum in x-direction of the cells
      * @param i_hv momentum in y-direction of the cells
      **/
-    void write(t_real const *i_h, t_real const *i_hu, t_real const *i_hv);
+    void writeTimeStep(t_real const *i_h, t_real const *i_hu,
+                       t_real const *i_hv);
+
+    /**
+     * Reads the dimension and variable definitions as NetCDF.
+     **/
+    void readDefs();
+
+    /**
+     * Reads the value of the z variable at the given position.
+     *
+     * @param i_x x-coordinate of the queried point.
+     * @param i_y y-coordinate of the queried point.
+     * @return value of z.
+     **/
+    t_real readAt(t_real i_x, t_real i_y);
 };
 
 #endif
