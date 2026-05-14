@@ -9,7 +9,6 @@
 #define TSUNAMI_LAB_IO_NETCDF
 
 #include "../constants.h"
-#include <map>
 
 namespace tsunami_lab {
 namespace io {
@@ -22,15 +21,16 @@ class tsunami_lab::io::NetCDF {
     t_idx nx, ny, stride, step;
     int ncid, x_dimid, y_dimid, t_dimid, x_varid, y_varid, z_varid, h_varid,
         hu_varid, hv_varid, b_varid;
-    std::map<t_real, t_idx> x_coords, y_coords;
+    t_real xs, xe, ys, ye;
 
   public:
     /**
      * Constructor.
      *
      * @param i_path path to be written to.
+     * @param i_ro whether to open the file in read-only mode
      */
-    NetCDF(char const *i_path);
+    NetCDF(char const *i_path, bool i_ro = true);
 
     /**
      * Destructor.
@@ -75,7 +75,7 @@ class tsunami_lab::io::NetCDF {
      * @param i_y y-coordinate of the queried point.
      * @return value of z.
      **/
-    t_real readAt(t_real i_x, t_real i_y);
+    t_real readAt(t_real i_x, t_real i_y) const;
 };
 
 #endif

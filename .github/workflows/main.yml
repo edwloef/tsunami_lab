@@ -12,6 +12,8 @@ jobs:
           sudo apt-get install scons valgrind cppcheck libnetcdf-dev
           git submodule update --init --recursive
           curl -Lo middle_states.csv https://scalable.uni-jena.de/assets/tsunami_lab/middle_states.csv
+          curl -Lo artificialtsunami_bathymetry_1000.nc https://scalable.uni-jena.de/assets/tsunami_lab/artificialtsunami_bathymetry_1000.nc
+          curl -Lo artificialtsunami_displ_1000.nc https://scalable.uni-jena.de/assets/tsunami_lab/artificialtsunami_displ_1000.nc
 #         sudo apt-get install gmt
 #         curl -Lo GEBCO_2026_sub_ice.zip https://dap.ceda.ac.uk/bodc/gebco/global/gebco_2026/sub_ice_topography_bathymetry/netcdf/GEBCO_2026_sub_ice.zip
 #         unzip GEBCO_2026_sub_ice.zip
@@ -24,13 +26,16 @@ jobs:
         run: |
           scons mode=debug+san
           ./build/tests
-          ./build/tsunami_lab 100 100
+          ./build/tsunami_lab 5 -500 -500 500 500 artificialtsunami_displ_1000.nc artificialtsunami_bathymetry_1000.nc
           scons mode=release+san
           ./build/tests
-          ./build/tsunami_lab 200 200
+          ./build/tsunami_lab 2.5 -500 -500 500 500 artificialtsunami_displ_1000.nc artificialtsunami_bathymetry_1000.nc
 
       - name: valgrind
         run: |
           scons mode=debug
           valgrind ./build/tests
-          valgrind ./build/tsunami_lab 100 100
+          valgrind ./build/tsunami_lab 5 -500 -500 500 500 artificialtsunami_displ_1000.nc artificialtsunami_bathymetry_1000.nc
+          scons mode=release
+          valgrind ./build/tests
+          valgrind ./build/tsunami_lab 2.5 -500 -500 500 500 artificialtsunami_displ_1000.nc artificialtsunami_bathymetry_1000.nc

@@ -6,6 +6,7 @@
  * IO-routines for writing a snapshot as NetCDF.
  **/
 
+#include <algorithm>
 #include <assert.h>
 #include <cstring>
 #include <iostream>
@@ -24,8 +25,12 @@
         }                                                                      \
     }
 
-tsunami_lab::io::NetCDF::NetCDF(char const *i_path) {
-    nc_try(nc_create(i_path, NC_CLOBBER, &ncid));
+tsunami_lab::io::NetCDF::NetCDF(char const *i_path, bool i_ro) {
+    if (i_ro) {
+        nc_try(nc_open(i_path, NC_NOWRITE, &ncid));
+    } else {
+        nc_try(nc_create(i_path, NC_CLOBBER, &ncid));
+    }
 }
 
 tsunami_lab::io::NetCDF::~NetCDF() {
@@ -95,46 +100,68 @@ void tsunami_lab::io::NetCDF::readDefs() {
     nc_try(nc_inq_varid(ncid, "y", &y_varid));
     nc_try(nc_inq_varid(ncid, "z", &z_varid));
 
-    t_real *x = new t_real[nx];
+    size_t si = 0, ei;
 
-    nc_try(nc_get_var_float(ncid, x_varid, x));
+    ei = nx - 1;
+    nc_try(nc_get_var1_float(ncid, x_varid, &si, &xs));
+    nc_try(nc_get_var1_float(ncid, x_varid, &ei, &xe));
 
-    for (t_idx i = 0; i < nx; i++) {
-        y_coords[x[i]] = i;
-    }
-
-    delete[] x;
-
-    t_real *y = new t_real[ny];
-
-    nc_try(nc_get_var_float(ncid, y_varid, y));
-
-    for (t_idx i = 0; i < nx; i++) {
-        y_coords[y[i]] = i;
-    }
-
-    delete[] y;
+    ei = ny - 1;
+    nc_try(nc_get_var1_float(ncid, y_varid, &si, &ys));
+    nc_try(nc_get_var1_float(ncid, y_varid, &ei, &ye));
 }
 
-template <typename K, typename V> V nearest(std::map<K, V> &map, K num) {
-    assert(!map.empty());
+static size_t nc_find_index(int ncid, int varid, size_t size, float left_val,
+                            float right_val, float value) {
+    size_t left = 0;
+    size_t right = size - 1;
 
-    auto it = map.upper_bound(num);
+    bool increasing = right_val > left_val;
 
-    auto k_l = *(--it++);
-
-    if (it == std::end(map)) {
-        return k_l.second;
+    if (increasing) {
+        if (value <= left_val) {
+            return 0;
+        } else if (value >= right_val) {
+            return right;
+        }
+    } else {
+        if (value >= left_val) {
+            return 0;
+        } else if (value <= right_val) {
+            return right;
+        }
     }
 
-    auto k_r = *it;
+    while (right - left > 1) {
+        if (left_val == right_val) {
+            break;
+        }
 
-    return k_l.first - num > num - k_r.first ? k_r.second : k_l.second;
+        float ratio = (value - left_val) / (right_val - left_val);
+
+        size_t guess = left + (right - left) * ratio;
+        guess = std::clamp(guess, left + 1, right - 1);
+
+        float guess_val;
+        nc_try(nc_get_var1_float(ncid, varid, &guess, &guess_val));
+
+        if (increasing ? guess_val < value : guess_val > value) {
+            left = guess;
+            left_val = guess_val;
+        } else {
+            right = guess;
+            right_val = guess_val;
+        }
+    }
+
+    return std::abs(value - left_val) <= std::abs(right_val - value) ? left
+                                                                     : right;
 }
 
-tsunami_lab::t_real tsunami_lab::io::NetCDF::readAt(t_real i_x, t_real i_y) {
-    size_t index[2] = {(size_t)nearest(x_coords, i_x),
-                       (size_t)nearest(y_coords, i_y)};
+tsunami_lab::t_real tsunami_lab::io::NetCDF::readAt(t_real i_x,
+                                                    t_real i_y) const {
+    size_t index[2] = {nc_find_index(ncid, x_varid, nx, xs, xe, i_x),
+                       nc_find_index(ncid, y_varid, ny, ys, ye, i_y)};
 
     t_real val;
     nc_try(nc_get_var1_float(ncid, z_varid, index, &val));

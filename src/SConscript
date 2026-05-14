@@ -21,6 +21,7 @@ l_sources = [
     "setups/SubCritical1d.cpp",
     "setups/SuperCritical1d.cpp",
     "setups/TsunamiEvent1d.cpp",
+    "setups/TsunamiEvent2d.cpp",
     "solvers/FWave.cpp",
     "solvers/Roe.cpp",
 ]

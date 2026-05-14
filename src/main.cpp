@@ -7,7 +7,7 @@
 #include "io/NetCDF.h"
 #include "io/Stations.h"
 #include "patches/WavePropagation2d.h"
-#include "setups/DamBreak2d.h"
+#include "setups/TsunamiEvent2d.h"
 #include "solvers/FWave.h"
 #include <algorithm>
 #include <cmath>
@@ -18,12 +18,8 @@
 #include <ostream>
 
 int main(int i_argc, char *i_argv[]) {
-    // number of cells in x- and y-direction
-    tsunami_lab::t_idx l_nx = 0;
-    tsunami_lab::t_idx l_ny = 0;
-
-    // set cell size
-    tsunami_lab::t_real l_dxy = 1;
+    tsunami_lab::t_real l_dxy, l_sx, l_sy, l_ex, l_ey;
+    char const *l_displ, *l_bathy, *l_stations, *l_solution;
 
     std::cout << "####################################" << std::endl;
     std::cout << "### Tsunami Lab                  ###" << std::endl;
@@ -31,55 +27,68 @@ int main(int i_argc, char *i_argv[]) {
     std::cout << "### https://scalable.uni-jena.de ###" << std::endl;
     std::cout << "####################################" << std::endl;
 
-    if (i_argc != 3) {
-        std::cerr << "invalid number of arguments, usage:" << std::endl;
-        std::cerr << "  ./build/tsunami_lab N_CELLS_X N_CELLS_Y" << std::endl;
-        std::cerr << "where N_CELLS_X is the number of cells in x-direction"
-                  << std::endl;
-        std::cerr << "and N_CELLS_Y is the number of cells in y-direction"
+    if (i_argc < 6) {
+        std::cerr << "invalid number of arguments, usage:\n  "
+                     "./build/tsunami_lab CELL_SIZE DOMAIN_START_X "
+                     "DOMAIN_START_Y DOMAIN_END_X DOMAIN_END_Y [DISPL.nc "
+                     "[BATHY.nc [STATIONS.json [SOLUTION.nc]]]]"
                   << std::endl;
         return EXIT_FAILURE;
-    } else {
-        l_nx = atoi(i_argv[1]);
-        if (l_nx < 1) {
-            std::cerr << "invalid number of cells in x direction" << std::endl;
-            return EXIT_FAILURE;
-        }
-        l_ny = atoi(i_argv[2]);
-        if (l_ny < 1) {
-            std::cerr << "invalid number of cells in y direction" << std::endl;
-            return EXIT_FAILURE;
-        }
-        l_dxy = 100.0 / l_nx;
     }
 
-    std::cout << "runtime configuration" << std::endl;
-    std::cout << "  number of cells in x-direction: " << l_nx << std::endl;
-    std::cout << "  number of cells in y-direction: " << l_ny << std::endl;
-    std::cout << "  cell size:                      " << l_dxy << std::endl;
+    l_dxy = std::stod(i_argv[1]);
+    l_sx = std::stod(i_argv[2]);
+    l_sy = std::stod(i_argv[3]);
+    l_ex = std::stod(i_argv[4]);
+    l_ey = std::stod(i_argv[5]);
+
+    l_displ = i_argc < 7 ? "displ.nc" : i_argv[6];
+    l_bathy = i_argc < 8 ? "bathy.nc" : i_argv[7];
+    l_stations = i_argc < 9 ? "stations.json" : i_argv[8];
+    l_solution = i_argc < 10 ? "solution.nc" : i_argv[9];
+
+    if (l_dxy <= 0) {
+        std::cerr << "invalid cell size" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    if (l_ex - l_sx < l_dxy) {
+        std::cerr << "invalid number of cells in x direction" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    if (l_ey - l_sy < l_dxy) {
+        std::cerr << "invalid number of cells in y direction" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    tsunami_lab::t_idx l_nx = (l_ex - l_sx) / l_dxy;
+    tsunami_lab::t_idx l_ny = (l_ey - l_sy) / l_dxy;
 
     // construct setup
     tsunami_lab::setups::Setup *l_setup;
-    l_setup = new tsunami_lab::setups::DamBreak2d();
+    l_setup = new tsunami_lab::setups::TsunamiEvent2d(l_displ, l_bathy);
     // construct solver
     tsunami_lab::patches::WavePropagation *l_waveProp;
     l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny);
     // construct stations
-    tsunami_lab::io::Stations stations(std::ifstream("stations.json"));
+    tsunami_lab::io::Stations stations(std::ifstream{l_stations});
     // construct netcdf writer
-    tsunami_lab::io::NetCDF netcdf("solution.nc");
+    tsunami_lab::io::NetCDF netcdf(l_solution, false);
     netcdf.writeDefs(l_nx, l_ny, l_waveProp->getStride());
 
     // maximum observed height in the setup
     tsunami_lab::t_real l_hMax =
         std::numeric_limits<tsunami_lab::t_real>::lowest();
 
+    std::cout << "initializing..." << std::endl;
+
     // set up solver
     for (tsunami_lab::t_idx l_cy = 0; l_cy < l_ny; l_cy++) {
-        tsunami_lab::t_real l_y = l_cy * l_dxy;
+        tsunami_lab::t_real l_y = l_sy + l_cy * l_dxy;
 
         for (tsunami_lab::t_idx l_cx = 0; l_cx < l_nx; l_cx++) {
-            tsunami_lab::t_real l_x = l_cx * l_dxy;
+            tsunami_lab::t_real l_x = l_sx + l_cx * l_dxy;
 
             // get initial values of the setup
             tsunami_lab::t_real l_h = l_setup->getHeight(l_x, l_y);

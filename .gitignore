@@ -2,6 +2,7 @@
 build
 html
 .sconsign.dblite
+artificialtsunami*
 compile_commands.json
 middle_states.csv
 solution_*.csv
