@@ -47,7 +47,7 @@ env.Append(CXXFLAGS=["-std=c++17", "-fwrapv", "-Wall", "-Wextra", "-Wpedantic"])
 
 # set optimization mode
 if "debug" in env["mode"]:
-    env.Append(CXXFLAGS=["-g", "-O0"])
+    env.Append(CXXFLAGS=["-g"])
 else:
     env.Append(CXXFLAGS=["-O3", "-flto=auto"])
 
@@ -69,11 +69,8 @@ else:
 # add Catch2
 env.Append(CXXFLAGS=["-isystem", "submodules/Catch2/single_include"])
 
-# add JSON
-env.Append(CXXFLAGS=["-isystem", "submodules/json/single_include"])
-
 # add NetCDF
-env.Append(CXXFLAGS=["-isystem", "submodules/netcdf-c/include", "-lnetcdf"])
+env.MergeFlags(["!nc-config --cflags", "!nc-config --libs"])
 
 # set linker flags to match compiler flags
 env.Append(LINKFLAGS=env["CXXFLAGS"])

@@ -9,7 +9,7 @@ jobs:
       - name: dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install scons valgrind cppcheck libnetcdf-dev
+          sudo apt-get install scons valgrind cppcheck nlohmann-json3-dev libnetcdf-dev
           git submodule update --init --recursive
           curl -Lo middle_states.csv https://scalable.uni-jena.de/assets/tsunami_lab/middle_states.csv
           curl -Lo artificialtsunami_bathymetry_1000.nc https://scalable.uni-jena.de/assets/tsunami_lab/artificialtsunami_bathymetry_1000.nc
