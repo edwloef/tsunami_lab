@@ -9,6 +9,7 @@
 #define TSUNAMI_LAB_IO_NETCDF
 
 #include "../constants.h"
+#include <optional>
 
 namespace tsunami_lab {
 namespace io {
@@ -20,7 +21,7 @@ class tsunami_lab::io::NetCDF {
   private:
     t_idx nx, ny, stride, step;
     int ncid, x_dimid, y_dimid, t_dimid, x_varid, y_varid, z_varid, h_varid,
-        hu_varid, hv_varid, b_varid;
+        hu_varid, hv_varid, b_varid, t_varid;
     t_real xs, xe, ys, ye;
 
   public:
@@ -60,7 +61,7 @@ class tsunami_lab::io::NetCDF {
      * @param i_hu momentum in x-direction of the cells
      * @param i_hv momentum in y-direction of the cells
      **/
-    void writeTimeStep(t_real const *i_h, t_real const *i_hu,
+    void writeTimeStep(t_real i_simTime, t_real const *i_h, t_real const *i_hu,
                        t_real const *i_hv);
 
     /**
@@ -75,7 +76,7 @@ class tsunami_lab::io::NetCDF {
      * @param i_y y-coordinate of the queried point.
      * @return value of z.
      **/
-    t_real readAt(t_real i_x, t_real i_y) const;
+    std::optional<t_real> readAt(t_real i_x, t_real i_y) const;
 };
 
 #endif

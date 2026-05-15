@@ -7,6 +7,7 @@
 #include "io/NetCDF.h"
 #include "io/Stations.h"
 #include "patches/WavePropagation2d.h"
+#include "setups/ArtificialTsunami2d.h"
 #include "setups/TsunamiEvent2d.h"
 #include "solvers/FWave.h"
 #include <algorithm>
@@ -135,7 +136,7 @@ int main(int i_argc, char *i_argv[]) {
             std::cout << "  " << l_timeStep << " time steps, " << l_simTime
                       << " seconds" << std::endl;
 
-            netcdf.writeTimeStep(l_waveProp->getHeight(),
+            netcdf.writeTimeStep(l_simTime, l_waveProp->getHeight(),
                                  l_waveProp->getMomentumX(),
                                  l_waveProp->getMomentumY());
         }

@@ -53,8 +53,13 @@ void tsunami_lab::io::NetCDF::writeDefs(t_idx i_nx, t_idx i_ny,
     nc_try(nc_def_var(ncid, "hu", NC_FLOAT, 3, dimids, &hu_varid));
     nc_try(nc_def_var(ncid, "hv", NC_FLOAT, 3, dimids, &hv_varid));
     nc_try(nc_def_var(ncid, "b", NC_FLOAT, 2, &dimids[1], &b_varid));
+    nc_try(nc_def_var(ncid, "t", NC_FLOAT, 1, dimids, &t_varid));
 
     nc_try(nc_put_att_text(ncid, h_varid, "units", strlen("meters"), "meters"));
+    nc_try(nc_put_att_text(ncid, b_varid, "units", strlen("meters"), "meters"));
+    nc_try(nc_put_att_text(ncid, t_varid, "units",
+                           strlen("seconds since tsunami event"),
+                           "seconds since tsunami event"));
 
     nc_try(nc_enddef(ncid));
 }
@@ -70,7 +75,7 @@ void tsunami_lab::io::NetCDF::writeBathymetry(t_real const *i_b) {
     }
 }
 
-void tsunami_lab::io::NetCDF::writeTimeStep(t_real const *i_h,
+void tsunami_lab::io::NetCDF::writeTimeStep(t_real i_simTime, t_real const *i_h,
                                             t_real const *i_hu,
                                             t_real const *i_hv) {
     t_idx l_count[3] = {1, 1, nx};
@@ -85,6 +90,8 @@ void tsunami_lab::io::NetCDF::writeTimeStep(t_real const *i_h,
         nc_try(nc_put_vara_float(ncid, hv_varid, l_start, l_count,
                                  i_hv + l_iy * stride));
     }
+
+    nc_try(nc_put_var1_float(ncid, t_varid, &step, &i_simTime));
 
     step++;
 }
@@ -111,25 +118,17 @@ void tsunami_lab::io::NetCDF::readDefs() {
     nc_try(nc_get_var1_float(ncid, y_varid, &ei, &ye));
 }
 
-static size_t nc_find_index(int ncid, int varid, size_t size, float left_val,
-                            float right_val, float value) {
+static std::optional<size_t> nc_find_index(int ncid, int varid, size_t size,
+                                           float left_val, float right_val,
+                                           float value) {
     size_t left = 0;
     size_t right = size - 1;
 
     bool increasing = right_val > left_val;
 
-    if (increasing) {
-        if (value <= left_val) {
-            return 0;
-        } else if (value >= right_val) {
-            return right;
-        }
-    } else {
-        if (value >= left_val) {
-            return 0;
-        } else if (value <= right_val) {
-            return right;
-        }
+    if (increasing ? (value < left_val || value > right_val)
+                   : (value > left_val || value < right_val)) {
+        return std::nullopt;
     }
 
     while (right - left > 1) {
@@ -158,10 +157,19 @@ static size_t nc_find_index(int ncid, int varid, size_t size, float left_val,
                                                                      : right;
 }
 
-tsunami_lab::t_real tsunami_lab::io::NetCDF::readAt(t_real i_x,
-                                                    t_real i_y) const {
-    size_t index[2] = {nc_find_index(ncid, x_varid, nx, xs, xe, i_x),
-                       nc_find_index(ncid, y_varid, ny, ys, ye, i_y)};
+std::optional<tsunami_lab::t_real>
+tsunami_lab::io::NetCDF::readAt(t_real i_x, t_real i_y) const {
+    std::optional<size_t> y = nc_find_index(ncid, y_varid, ny, ys, ye, i_y);
+    if (!y.has_value()) {
+        return std::nullopt;
+    }
+
+    std::optional<size_t> x = nc_find_index(ncid, x_varid, nx, xs, xe, i_x);
+    if (!x.has_value()) {
+        return std::nullopt;
+    }
+
+    size_t index[2] = {x.value(), y.value()};
 
     t_real val;
     nc_try(nc_get_var1_float(ncid, z_varid, index, &val));

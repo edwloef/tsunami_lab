@@ -13,6 +13,7 @@ l_sources = [
     "io/Stations.cpp",
     "patches/WavePropagation1d.cpp",
     "patches/WavePropagation2d.cpp",
+    "setups/ArtificialTsunami2d.cpp",
     "setups/DamBreak1d.cpp",
     "setups/DamBreak2d.cpp",
     "setups/RareRare1d.cpp",

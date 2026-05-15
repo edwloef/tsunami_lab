@@ -18,7 +18,7 @@ tsunami_lab::setups::TsunamiEvent2d::TsunamiEvent2d(char const *i_d,
 
 tsunami_lab::t_real
 tsunami_lab::setups::TsunamiEvent2d::getHeight(t_real i_x, t_real i_y) const {
-    double b_in = b.readAt(i_x, i_y);
+    double b_in = b.readAt(i_x, i_y).value();
     return b_in < 0 ? std::max(-b_in, 20.) : 0;
 }
 
@@ -35,7 +35,7 @@ tsunami_lab::setups::TsunamiEvent2d::getMomentumY(t_real, t_real) const {
 tsunami_lab::t_real
 tsunami_lab::setups::TsunamiEvent2d::getBathymetry(t_real i_x,
                                                    t_real i_y) const {
-    double b_in = b.readAt(i_x, i_y);
-    double d_in = d.readAt(i_x, i_y);
-    return (b_in < 0 ? std::min(b_in, -20.) : std::max(b_in, 20.)) + d_in;
+    double b_in = b.readAt(i_x, i_y).value();
+    return (b_in < 0 ? std::min(b_in, -20.) : std::max(b_in, 20.)) +
+           d.readAt(i_x, i_y).value_or(0.0);
 }
