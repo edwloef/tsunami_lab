@@ -7,8 +7,8 @@
  **/
 #define _USE_MATH_DEFINES
 
-#include "../io/Csv.h"
 #include "TsunamiEvent1d.h"
+#include "../io/Csv.h"
 
 #include <cmath>
 #include <fstream>

@@ -18,7 +18,7 @@
 #include <ostream>
 
 int main(int i_argc, char *i_argv[]) {
-    tsunami_lab::t_real l_dxy, l_sx, l_sy, l_ex, l_ey;
+    tsunami_lab::t_real l_maxTime, l_dxy, l_sx, l_sy, l_ex, l_ey;
     char const *l_displ, *l_bathy, *l_stations, *l_solution;
 
     std::cout << "####################################" << std::endl;
@@ -27,38 +27,36 @@ int main(int i_argc, char *i_argv[]) {
     std::cout << "### https://scalable.uni-jena.de ###" << std::endl;
     std::cout << "####################################" << std::endl;
 
-    if (i_argc < 6) {
-        std::cerr << "invalid number of arguments, usage:\n  "
-                     "./build/tsunami_lab CELL_SIZE DOMAIN_START_X "
+    if (i_argc < 7) {
+        std::cerr << "invalid number of arguments, usage:\n  " << *i_argv
+                  << " SIM_TIME CELL_SIZE DOMAIN_START_X "
                      "DOMAIN_START_Y DOMAIN_END_X DOMAIN_END_Y [DISPL.nc "
                      "[BATHY.nc [STATIONS.json [SOLUTION.nc]]]]"
                   << std::endl;
         return EXIT_FAILURE;
     }
 
-    l_dxy = std::stod(i_argv[1]);
-    l_sx = std::stod(i_argv[2]);
-    l_sy = std::stod(i_argv[3]);
-    l_ex = std::stod(i_argv[4]);
-    l_ey = std::stod(i_argv[5]);
+    i_argv++;
 
-    l_displ = i_argc < 7 ? "displ.nc" : i_argv[6];
-    l_bathy = i_argc < 8 ? "bathy.nc" : i_argv[7];
-    l_stations = i_argc < 9 ? "stations.json" : i_argv[8];
-    l_solution = i_argc < 10 ? "solution.nc" : i_argv[9];
+    l_maxTime = std::stod(*i_argv++);
+    l_dxy = std::stod(*i_argv++);
+    l_sx = std::stod(*i_argv++);
+    l_sy = std::stod(*i_argv++);
+    l_ex = std::stod(*i_argv++);
+    l_ey = std::stod(*i_argv++);
+
+    l_displ = *i_argv ? *i_argv++ : "displ.nc";
+    l_bathy = *i_argv ? *i_argv++ : "bathy.nc";
+    l_stations = *i_argv ? *i_argv++ : "stations.json";
+    l_solution = *i_argv ? *i_argv++ : "solution.nc";
 
     if (l_dxy <= 0) {
         std::cerr << "invalid cell size" << std::endl;
         return EXIT_FAILURE;
     }
 
-    if (l_ex - l_sx < l_dxy) {
-        std::cerr << "invalid number of cells in x direction" << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    if (l_ey - l_sy < l_dxy) {
-        std::cerr << "invalid number of cells in y direction" << std::endl;
+    if (l_ex - l_sx < l_dxy || l_ey - l_sy < l_dxy) {
+        std::cerr << "invalid computational domain" << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -108,8 +106,6 @@ int main(int i_argc, char *i_argv[]) {
 
     delete l_setup;
 
-    netcdf.writeBathymetry(l_waveProp->getBathymetry());
-
     // derive maximum wave speed in setup; the momentum is ignored
     tsunami_lab::t_real l_speedMax = std::sqrt(9.80665 * l_hMax);
 
@@ -121,10 +117,15 @@ int main(int i_argc, char *i_argv[]) {
 
     // set up time and print control
     tsunami_lab::t_idx l_timeStep = 0;
-    tsunami_lab::t_real l_maxTime = 25;
     tsunami_lab::t_real l_simTime = 0;
 
-    std::cout << "entering time loop" << std::endl;
+    std::cout << "runtime configuration:\n  number of cells in x-direction: "
+              << l_nx << "\n  number of cells in y-direction: " << l_ny
+              << "\n  time step length: " << l_dt << " seconds" << std::endl;
+
+    netcdf.writeBathymetry(l_waveProp->getBathymetry());
+
+    std::cout << "entering time loop..." << std::endl;
 
     tsunami_lab::solvers::FWave solver;
 
