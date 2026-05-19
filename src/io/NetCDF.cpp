@@ -43,6 +43,8 @@ void tsunami_lab::io::NetCDF::writeDefs(t_idx i_nx, t_idx i_ny,
     ny = i_ny;
     stride = i_stride;
 
+    nc_try(nc_set_fill(ncid, NC_NOFILL, NULL));
+
     nc_try(nc_def_dim(ncid, "t", NC_UNLIMITED, &t_dimid));
     nc_try(nc_def_dim(ncid, "y", ny, &y_dimid));
     nc_try(nc_def_dim(ncid, "x", nx, &x_dimid));
