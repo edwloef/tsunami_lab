@@ -115,9 +115,15 @@ void tsunami_lab::io::NetCDF::readDefs() {
     nc_try(nc_get_var1_float(ncid, x_varid, &si, &xs));
     nc_try(nc_get_var1_float(ncid, x_varid, &ei, &xe));
 
+    lxi = si;
+    lx = xs;
+
     ei = ny - 1;
     nc_try(nc_get_var1_float(ncid, y_varid, &si, &ys));
     nc_try(nc_get_var1_float(ncid, y_varid, &ei, &ye));
+
+    lyi = si;
+    ly = ys;
 }
 
 static std::optional<size_t> nc_find_index(int ncid, int varid, size_t size,
@@ -161,15 +167,23 @@ static std::optional<size_t> nc_find_index(int ncid, int varid, size_t size,
 
 std::optional<tsunami_lab::t_real>
 tsunami_lab::io::NetCDF::readAt(t_real i_x, t_real i_y) const {
-    std::optional<size_t> y = nc_find_index(ncid, y_varid, ny, ys, ye, i_y);
+    std::optional<size_t> y =
+        i_y == ly ? lyi : nc_find_index(ncid, y_varid, ny, ys, ye, i_y);
     if (!y.has_value()) {
         return std::nullopt;
     }
 
-    std::optional<size_t> x = nc_find_index(ncid, x_varid, nx, xs, xe, i_x);
+    ly = i_y;
+    lyi = y.value();
+
+    std::optional<size_t> x =
+        i_x == lx ? lxi : nc_find_index(ncid, x_varid, nx, xs, xe, i_x);
     if (!x.has_value()) {
         return std::nullopt;
     }
+
+    lx = i_x;
+    lxi = x.value();
 
     size_t index[2] = {y.value(), x.value()};
 

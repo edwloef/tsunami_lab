@@ -23,6 +23,8 @@ class tsunami_lab::io::NetCDF {
     int ncid, x_dimid, y_dimid, t_dimid, x_varid, y_varid, z_varid, h_varid,
         hu_varid, hv_varid, b_varid, t_varid;
     t_real xs, xe, ys, ye;
+    mutable t_idx lxi, lyi;
+    mutable t_real lx, ly, lv;
 
   public:
     /**
