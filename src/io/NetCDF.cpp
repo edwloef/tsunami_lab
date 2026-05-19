@@ -169,7 +169,7 @@ tsunami_lab::io::NetCDF::readAt(t_real i_x, t_real i_y) const {
         return std::nullopt;
     }
 
-    size_t index[2] = {x.value(), y.value()};
+    size_t index[2] = {y.value(), x.value()};
 
     t_real val;
     nc_try(nc_get_var1_float(ncid, z_varid, index, &val));
