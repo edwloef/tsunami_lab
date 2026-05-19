@@ -27,9 +27,9 @@
 
 tsunami_lab::io::NetCDF::NetCDF(char const *i_path, bool i_ro) {
     if (i_ro) {
-        nc_try(nc_open(i_path, NC_NOWRITE, &ncid));
+        nc_try(nc_open(i_path, NC_NOWRITE | NC_64BIT_OFFSET, &ncid));
     } else {
-        nc_try(nc_create(i_path, NC_CLOBBER, &ncid));
+        nc_try(nc_create(i_path, NC_CLOBBER | NC_64BIT_OFFSET, &ncid));
     }
 }
 
