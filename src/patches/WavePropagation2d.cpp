@@ -66,11 +66,8 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(
 
     for (t_idx l_y = 0; l_y < m_nCellsY + 1; l_y++) {
         for (t_idx l_x = 0; l_x < m_nCellsX + 1; l_x++) {
-            t_real l_netUpdates[2][2];
-
             t_idx l_i = l_y * getStride() + l_x;
             t_idx l_h = l_y * getStride() + l_x + 1;
-            t_idx l_v = (l_y + 1) * getStride() + l_x;
 
             t_real l_hI = l_hOld[l_i];
             t_real l_hH = l_hOld[l_h];
@@ -80,15 +77,21 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(
             t_real l_bH = m_b[l_h];
 
             // if wet <-> dry boundary, set up reflection
-            if (l_bI >= 0 && l_bH < 0) {
-                l_hI = l_hH;
-                l_huI = -l_huH;
-                l_bI = l_bH;
-            } else if (l_bH >= 0 && l_bI < 0) {
+            if (l_bI >= 0) {
+                if (l_bH >= 0) {
+                    continue;
+                } else {
+                    l_hI = l_hH;
+                    l_huI = -l_huH;
+                    l_bI = l_bH;
+                }
+            } else if (l_bH >= 0) {
                 l_hH = l_hI;
                 l_huH = -l_huI;
                 l_bH = l_bI;
             }
+
+            t_real l_netUpdates[2][2];
 
             // compute net-updates
             solver->netUpdates(l_hI, l_hH, l_huI, l_huH, l_bI, l_bH,
@@ -100,24 +103,38 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(
 
             l_hNew[l_h] -= i_scaling * l_netUpdates[1][0];
             l_huNew[l_h] -= i_scaling * l_netUpdates[1][1];
+        }
+    }
 
-            l_hI = l_hOld[l_i];
+    for (t_idx l_y = 0; l_y < m_nCellsY + 1; l_y++) {
+        for (t_idx l_x = 0; l_x < m_nCellsX + 1; l_x++) {
+            t_idx l_i = l_y * getStride() + l_x;
+            t_idx l_v = (l_y + 1) * getStride() + l_x;
+
+            t_real l_hI = l_hOld[l_i];
             t_real l_hV = l_hOld[l_v];
             t_real l_hvI = l_hvOld[l_i];
             t_real l_hvV = l_hvOld[l_v];
-            l_bI = m_b[l_i];
+            t_real l_bI = m_b[l_i];
             t_real l_bV = m_b[l_v];
 
             // if wet <-> dry boundary, set up reflection
-            if (l_bI >= 0 && l_bV < 0) {
-                l_hI = l_hV;
-                l_hvI = -l_hvV;
-                l_bI = l_bV;
-            } else if (l_bV >= 0 && l_bI < 0) {
+            if (l_bI >= 0) {
+                if (l_bV >= 0) {
+                    continue;
+                } else {
+                    l_hI = l_hV;
+                    l_hvI = -l_hvV;
+                    l_bI = l_bV;
+                }
+                continue;
+            } else if (l_bV >= 0) {
                 l_hV = l_hI;
                 l_hvV = -l_hvI;
                 l_bV = l_bI;
             }
+
+            t_real l_netUpdates[2][2];
 
             // compute net-updates
             solver->netUpdates(l_hI, l_hV, l_hvI, l_hvV, l_bI, l_bV,
