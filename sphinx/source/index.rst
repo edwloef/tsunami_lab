@@ -11,6 +11,7 @@
    second
    third
    fourth
+   fifth
 
 
 Tsunami documentation
@@ -38,10 +39,15 @@ To create the csv-file with the bathymetry data, run the prompt below in the ter
 
 ``gmt project -C141.024949/37.316569 -E146.0/37.316569 -G250e -Q | gmt grdtrack -GGEBCO_2026_sub_ice.nc | awk 'BEGIN {print "lon,lat,distance_m,elevation_m"} {print $1","$2","$3","$4}' > GEBCO_2026_sub_ice_bathy.csv``
 
-To create the final csv-files where the actual simulation is shown,
-type 
+To create the nc files with our data, you have to enter the simulation time, the cell size,
+the start time, and the dimensions where the domain starts and ends.
+Typde something like this:
 
-``./build/tsunami_lab <number_of_cells>``
+.. code-block:: c++
+
+   ./build/tsunami_lab "SIM_TIME CELL_SIZE DOMAIN_START_X"
+                     "DOMAIN_START_Y DOMAIN_END_X DOMAIN_END_Y [DISPL.nc "
+                     "[BATHY.nc [STATIONS.json [SOLUTION.nc]]]]"
 
 in the terminal and let it run. 
 
