@@ -5,7 +5,7 @@
 
 
 
-This week our task was to extends our current solver with 
+This week our task was to extends our current solver with
 bathymetry and vertical displacements of the sea floor.
 
 **1. NetCDF Output**
@@ -67,7 +67,7 @@ by the multiple csv files because we will store all time steps in a single file.
 
     step++;
     }
-    
+
 
 
 **2. NetCDF Input**
@@ -104,22 +104,27 @@ Next we added support for reading netCDF files to our netCDF class:
     nc_try(nc_inq_varid(ncid, "x", &x_varid));
     nc_try(nc_inq_varid(ncid, "y", &y_varid));
     nc_try(nc_inq_varid(ncid, "z", &z_varid));
+    }
 
-    size_t si = 0, ei;
+.. code-block:: c++
 
-    ei = nx - 1;
-    nc_try(nc_get_var1_float(ncid, x_varid, &si, &xs));
-    nc_try(nc_get_var1_float(ncid, x_varid, &ei, &xe));
+    std::optional<tsunami_lab::t_real>
+    tsunami_lab::io::NetCDF::readAt(t_real i_x, t_real i_y) const {
+    std::optional<size_t> y = nc_find_index(ncid, y_varid, ny, ys, ye, i_y);
+    if (!y.has_value()) {
+        return std::nullopt;
+    }
 
-    lxi = si;
-    lx = xs;
+    std::optional<size_t> x = nc_find_index(ncid, x_varid, nx, xs, xe, i_x);
+    if (!x.has_value()) {
+        return std::nullopt;
+    }
 
-    ei = ny - 1;
-    nc_try(nc_get_var1_float(ncid, y_varid, &si, &ys));
-    nc_try(nc_get_var1_float(ncid, y_varid, &ei, &ye));
+    size_t index[2] = {y.value(), x.value()};
 
-    lyi = si;
-    ly = ys;
+    t_real val;
+    nc_try(nc_get_var1_float(ncid, z_varid, index, &val));
+    return val;
     }
 
 Then we implemented the TsunamiEvent2d setup which will be able to handle data input:
@@ -140,7 +145,7 @@ Then we implemented the TsunamiEvent2d setup which will be able to handle data i
            d.readAt(i_x, i_y).value_or(0.0);
     }
 
-Now we integrate the class into our code so that the user can set the 
+Now we integrate the class into our code so that the user can set the
 total simulation time and resolution:
 
 .. code-block:: c++

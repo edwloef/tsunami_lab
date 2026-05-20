@@ -11,8 +11,8 @@ This week our task was to extend our one-dimensional discretization to two spati
 **1. Unsplit Method**
 
 First we need to find a way to support two dimensional problems in our new class "WavePropagation2d".
-We can use the unsplit method which allows us to apply our 
-one-dimensional f-wave solver to the shallow water equations in 
+We can use the unsplit method which allows us to apply our
+one-dimensional f-wave solver to the shallow water equations in
 two spatial dimensions.
 We implemented the time step as such:
 
@@ -89,7 +89,7 @@ We implemented the time step as such:
         }
     }
     }
-    
+
 Next we implemented a circular dam break setup with the given equations:
 
 .. code-block:: c++
@@ -106,9 +106,9 @@ In our video we can see this working very well:
 
 **2. Stations**
 
-Next was the implementation of stations to 
+Next was the implementation of stations to
 compare our one dimensional solvers and our two dimensional solvers.
-First, we added the new class "Stations.cpp" that summarizes a 
+First, we added the new class "Stations.cpp" that summarizes a
 collection of user-defined stations:
 
 .. code-block:: c++
@@ -153,18 +153,18 @@ In order to provide the names and locations of each stations to our solver, we u
 .. image:: graphics/json.png
    :width: 300px
 
-We used the json library made by nlohmann to work with json files throughout our project. 
+We used the json library made by nlohmann to work with json files throughout our project.
 
 The output frequenzy is the same for each station.
 
-Now to compare our two-dimensional solver to our one-dimensional one. 
-When we generate the two-dimensional dam break problem and take a look at the stations, 
+Now to compare our two-dimensional solver to our one-dimensional one.
+When we generate the two-dimensional dam break problem and take a look at the stations,
 we see the wave first going down under 5 but rising slowly.
 
 Station in the very center:
 
-.. code-block:: 
-    
+.. code-block::
+
     height
     5.66201
     1.92437
@@ -193,7 +193,7 @@ Station in the very center:
 
 Station where x=70 and y=70:
 
-.. code-block:: 
+.. code-block::
 
     height
     5
@@ -228,7 +228,7 @@ With the one-dimensional solver, we can only see an uptick in the numbers but ne
 Station at the very start:
 
 .. code-block::
-    
+
     height
     7.40429
     7.23524

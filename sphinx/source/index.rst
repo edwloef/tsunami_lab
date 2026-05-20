@@ -41,7 +41,7 @@ To create the csv-file with the bathymetry data, run the prompt below in the ter
 
 To create the nc files with our data, you have to enter the simulation time, the cell size,
 the start time, and the dimensions where the domain starts and ends.
-Typde something like this:
+Type something like this:
 
 .. code-block:: c++
 

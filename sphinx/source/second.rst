@@ -18,5 +18,3 @@ Visualization:
 
 .. image:: graphics/reservoir1.png
    :width: 400px
-
-

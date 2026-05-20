@@ -9,7 +9,7 @@ This week our task was the implementation of bathymetry and boundary conitions.
 
 **1. FWave-solver with bathymetry**
 
-First, we extended our FWave-solver to be able to work with bathymetry. 
+First, we extended our FWave-solver to be able to work with bathymetry.
 Here is an example with the subcritical flow as demonstration:
 
 .. video:: graphics/subcritical.mp4
@@ -17,11 +17,11 @@ Here is an example with the subcritical flow as demonstration:
 
 **2. Reflecting Boundary Conditions**
 
-Next was the reflecting boundary conditions. For this, we needed to adjust the height and the 
+Next was the reflecting boundary conditions. For this, we needed to adjust the height and the
 bathymetry of our current cell to that of the previous cell, and the particle velocity is the previous velocity as a negative.
 
 Here we can see that we obtain the one-sided solution of the shock-shock setup where we
-use reflecting boundary conditions at the right boundary, and outflow boundary 
+use reflecting boundary conditions at the right boundary, and outflow boundary
 conditions at the left boundary.
 
 .. video:: graphics/supercritical_reflect.mp4
@@ -75,7 +75,7 @@ Given that for a supercritical region, F needs to be bigger than one, this resul
 
 
 
-We can also see that our f-wave solver fails to converge to our expected constant momentum 
+We can also see that our f-wave solver fails to converge to our expected constant momentum
 over the entire domain:
 
 .. image:: graphics/failed.png
@@ -88,7 +88,7 @@ over the entire domain:
 First we extracted the bathymetry data for the 1D domain using a 250m sampling between the points p1=(141.024949,37.316569)
 and p2=(146.0,37.316569).
 
-Next we added the ability to read the extracted bathymetry data to our csv reader. 
+Next we added the ability to read the extracted bathymetry data to our csv reader.
 Then we implemented the TsunamiEvent1d setup with our csv reader as well as the given data for our wave.
 
 .. video:: graphics/tsunami.mp4

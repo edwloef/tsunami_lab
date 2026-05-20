@@ -5,7 +5,5 @@
 
 **Project Report 10.4.2026:**
 
-* Edwin wrote the code for the FWave solver. 
+* Edwin wrote the code for the FWave solver.
 * Lara wrote the tests for the FWave solver and the documentation.
-
-
