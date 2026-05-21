@@ -58,18 +58,18 @@ void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL, t_real i_hR,
     o_netUpdateR[0] = t_real(0.0);
     o_netUpdateR[1] = t_real(0.0);
 
-    if (delta1 < t_real(0.0)) {
+    if (std::signbit(delta1)) {
         o_netUpdateL[0] += z1[0];
         o_netUpdateL[1] += z1[1];
-    } else if (delta1 > t_real(0.0)) {
+    } else {
         o_netUpdateR[0] += z1[0];
         o_netUpdateR[1] += z1[1];
     }
 
-    if (delta2 < t_real(0.0)) {
+    if (std::signbit(delta2)) {
         o_netUpdateL[0] += z2[0];
         o_netUpdateL[1] += z2[1];
-    } else if (delta2 > t_real(0.0)) {
+    } else {
         o_netUpdateR[0] += z2[0];
         o_netUpdateR[1] += z2[1];
     }
