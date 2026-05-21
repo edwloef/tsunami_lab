@@ -6,6 +6,7 @@
  * Two-dimensional wave propagation patch.
  **/
 #include "WavePropagation2d.h"
+#include <cstring>
 
 tsunami_lab::patches::WavePropagation2d::WavePropagation2d(t_idx i_x,
                                                            t_idx i_y) {
@@ -15,24 +16,12 @@ tsunami_lab::patches::WavePropagation2d::WavePropagation2d(t_idx i_x,
     m_nCells = (i_x + 2) * (i_y + 2);
 
     for (unsigned short l_st = 0; l_st < 2; l_st++) {
-        m_h[l_st] = new t_real[m_nCells];
-        m_hu[l_st] = new t_real[m_nCells];
-        m_hv[l_st] = new t_real[m_nCells];
+        m_h[l_st] = new t_real[m_nCells]{0};
+        m_hu[l_st] = new t_real[m_nCells]{0};
+        m_hv[l_st] = new t_real[m_nCells]{0};
     }
 
-    for (unsigned short l_st = 0; l_st < 2; l_st++) {
-        for (t_idx l_ce = 0; l_ce < m_nCells; l_ce++) {
-            m_h[l_st][l_ce] = 0;
-            m_hu[l_st][l_ce] = 0;
-            m_hv[l_st][l_ce] = 0;
-        }
-    }
-
-    m_b = new t_real[m_nCells];
-
-    for (t_idx l_ce = 0; l_ce < m_nCells; l_ce++) {
-        m_b[l_ce] = 0;
-    }
+    m_b = new t_real[m_nCells]{0};
 }
 
 tsunami_lab::patches::WavePropagation2d::~WavePropagation2d() {
@@ -58,93 +47,93 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(
     t_real *l_hvNew = m_hv[m_step];
 
     // init new cell quantities
-    for (t_idx l_ce = 0; l_ce < m_nCells; l_ce++) {
-        l_hNew[l_ce] = l_hOld[l_ce];
-        l_huNew[l_ce] = l_huOld[l_ce];
-        l_hvNew[l_ce] = l_hvOld[l_ce];
-    }
+    std::memcpy(l_hNew, l_hOld, m_nCells * sizeof(t_real));
+    std::memcpy(l_huNew, l_huOld, m_nCells * sizeof(t_real));
+    std::memcpy(l_hvNew, l_hvOld, m_nCells * sizeof(t_real));
 
     for (t_idx l_y = 0; l_y < m_nCellsY + 1; l_y++) {
         for (t_idx l_x = 0; l_x < m_nCellsX + 1; l_x++) {
-            t_idx l_i = l_y * getStride() + l_x;
-            t_idx l_h = l_y * getStride() + l_x + 1;
+            // determine left and right cell-id
+            t_idx l_ceL = l_y * getStride() + l_x;
+            t_idx l_ceR = l_y * getStride() + l_x + 1;
 
-            t_real l_hI = l_hOld[l_i];
-            t_real l_hH = l_hOld[l_h];
-            t_real l_huI = l_huOld[l_i];
-            t_real l_huH = l_huOld[l_h];
-            t_real l_bI = m_b[l_i];
-            t_real l_bH = m_b[l_h];
+            t_real l_hL = l_hOld[l_ceL];
+            t_real l_hR = l_hOld[l_ceR];
+            t_real l_huL = l_huOld[l_ceL];
+            t_real l_huR = l_huOld[l_ceR];
+            t_real l_bL = m_b[l_ceL];
+            t_real l_bR = m_b[l_ceR];
 
             // if wet <-> dry boundary, set up reflection
-            if (l_bI >= 0) {
-                if (l_bH >= 0) {
+            if (l_bL > 0) {
+                if (l_bR > 0) {
                     continue;
                 } else {
-                    l_hI = l_hH;
-                    l_huI = -l_huH;
-                    l_bI = l_bH;
+                    l_hL = l_hR;
+                    l_huL = -l_huR;
+                    l_bL = l_bR;
                 }
-            } else if (l_bH >= 0) {
-                l_hH = l_hI;
-                l_huH = -l_huI;
-                l_bH = l_bI;
+            } else if (l_bR > 0) {
+                l_hR = l_hL;
+                l_huR = -l_huL;
+                l_bR = l_bL;
             }
 
             t_real l_netUpdates[2][2];
 
             // compute net-updates
-            solver->netUpdates(l_hI, l_hH, l_huI, l_huH, l_bI, l_bH,
+            solver->netUpdates(l_hL, l_hR, l_huL, l_huR, l_bL, l_bR,
                                l_netUpdates[0], l_netUpdates[1]);
 
             // update the cells' quantities
-            l_hNew[l_i] -= i_scaling * l_netUpdates[0][0];
-            l_huNew[l_i] -= i_scaling * l_netUpdates[0][1];
+            l_hNew[l_ceL] -= i_scaling * l_netUpdates[0][0];
+            l_huNew[l_ceL] -= i_scaling * l_netUpdates[0][1];
 
-            l_hNew[l_h] -= i_scaling * l_netUpdates[1][0];
-            l_huNew[l_h] -= i_scaling * l_netUpdates[1][1];
+            l_hNew[l_ceR] -= i_scaling * l_netUpdates[1][0];
+            l_huNew[l_ceR] -= i_scaling * l_netUpdates[1][1];
         }
     }
 
     for (t_idx l_x = 0; l_x < m_nCellsX + 1; l_x++) {
         for (t_idx l_y = 0; l_y < m_nCellsY + 1; l_y++) {
-            t_idx l_i = l_y * getStride() + l_x;
-            t_idx l_v = (l_y + 1) * getStride() + l_x;
+            // determine left and right cell-id
+            t_idx l_ceL = l_y * getStride() + l_x;
+            t_idx l_ceR = (l_y + 1) * getStride() + l_x;
 
-            t_real l_hI = l_hOld[l_i];
-            t_real l_hV = l_hOld[l_v];
-            t_real l_hvI = l_hvOld[l_i];
-            t_real l_hvV = l_hvOld[l_v];
-            t_real l_bI = m_b[l_i];
-            t_real l_bV = m_b[l_v];
+            t_real l_hL = l_hOld[l_ceL];
+            t_real l_hR = l_hOld[l_ceR];
+            t_real l_hvL = l_hvOld[l_ceL];
+            t_real l_hvR = l_hvOld[l_ceR];
+            t_real l_bL = m_b[l_ceL];
+            t_real l_bR = m_b[l_ceR];
 
             // if wet <-> dry boundary, set up reflection
-            if (l_bI >= 0) {
-                if (l_bV >= 0) {
+            if (l_bL > 0) {
+                if (l_bR > 0) {
                     continue;
                 } else {
-                    l_hI = l_hV;
-                    l_hvI = -l_hvV;
-                    l_bI = l_bV;
+                    l_hL = l_hR;
+                    l_hvL = -l_hvR;
+                    l_bL = l_bR;
                 }
-            } else if (l_bV >= 0) {
-                l_hV = l_hI;
-                l_hvV = -l_hvI;
-                l_bV = l_bI;
+            } else if (l_bR > 0) {
+                l_hR = l_hL;
+                l_hvR = -l_hvL;
+                l_bR = l_bL;
             }
 
             t_real l_netUpdates[2][2];
 
             // compute net-updates
-            solver->netUpdates(l_hI, l_hV, l_hvI, l_hvV, l_bI, l_bV,
+            solver->netUpdates(l_hL, l_hR, l_hvL, l_hvR, l_bL, l_bR,
                                l_netUpdates[0], l_netUpdates[1]);
 
             // update the cells' quantities
-            l_hNew[l_i] -= i_scaling * l_netUpdates[0][0];
-            l_hvNew[l_i] -= i_scaling * l_netUpdates[0][1];
+            l_hNew[l_ceL] -= i_scaling * l_netUpdates[0][0];
+            l_hvNew[l_ceL] -= i_scaling * l_netUpdates[0][1];
 
-            l_hNew[l_v] -= i_scaling * l_netUpdates[1][0];
-            l_hvNew[l_v] -= i_scaling * l_netUpdates[1][1];
+            l_hNew[l_ceR] -= i_scaling * l_netUpdates[1][0];
+            l_hvNew[l_ceR] -= i_scaling * l_netUpdates[1][1];
         }
     }
 }

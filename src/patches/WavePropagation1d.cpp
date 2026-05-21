@@ -5,29 +5,17 @@
  * One-dimensional wave propagation patch.
  **/
 #include "WavePropagation1d.h"
+#include <cstring>
 
 tsunami_lab::patches::WavePropagation1d::WavePropagation1d(t_idx i_nCells) {
     m_nCells = i_nCells;
 
-    // allocate memory including a single ghost cell on each side
     for (unsigned short l_st = 0; l_st < 2; l_st++) {
-        m_h[l_st] = new t_real[m_nCells + 2];
-        m_hu[l_st] = new t_real[m_nCells + 2];
+        m_h[l_st] = new t_real[m_nCells + 2]{0};
+        m_hu[l_st] = new t_real[m_nCells + 2]{0};
     }
 
-    // init to zero
-    for (unsigned short l_st = 0; l_st < 2; l_st++) {
-        for (t_idx l_ce = 0; l_ce < m_nCells + 2; l_ce++) {
-            m_h[l_st][l_ce] = 0;
-            m_hu[l_st][l_ce] = 0;
-        }
-    }
-
-    m_b = new t_real[m_nCells + 2];
-
-    for (t_idx l_ce = 0; l_ce < m_nCells + 2; l_ce++) {
-        m_b[l_ce] = 0;
-    }
+    m_b = new t_real[m_nCells + 2]{0};
 }
 
 tsunami_lab::patches::WavePropagation1d::~WavePropagation1d() {
@@ -50,10 +38,8 @@ void tsunami_lab::patches::WavePropagation1d::timeStep(
     t_real *l_huNew = m_hu[m_step];
 
     // init new cell quantities
-    for (t_idx l_ce = 1; l_ce < m_nCells + 1; l_ce++) {
-        l_hNew[l_ce] = l_hOld[l_ce];
-        l_huNew[l_ce] = l_huOld[l_ce];
-    }
+    std::memcpy(l_hNew + 1, l_hOld + 1, m_nCells * sizeof(t_real));
+    std::memcpy(l_huNew + 1, l_huOld + 1, m_nCells * sizeof(t_real));
 
     // iterate over edges and update with Riemann solutions
     for (t_idx l_ed = 0; l_ed < m_nCells + 1; l_ed++) {
@@ -69,11 +55,15 @@ void tsunami_lab::patches::WavePropagation1d::timeStep(
         t_real l_bR = m_b[l_ceR];
 
         // if wet <-> dry boundary, set up reflection
-        if (l_bL >= 0 && l_bR < 0) {
-            l_hL = l_hR;
-            l_huL = -l_huR;
-            l_bL = l_bR;
-        } else if (l_bR >= 0 && l_bL < 0) {
+        if (l_bL > 0) {
+            if (l_bR > 0) {
+                continue;
+            } else {
+                l_hL = l_hR;
+                l_huL = -l_huR;
+                l_bL = l_bR;
+            }
+        } else if (l_bR > 0) {
             l_hR = l_hL;
             l_huR = -l_huL;
             l_bR = l_bL;
