@@ -44,9 +44,9 @@ void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL, t_real i_hR,
 
     // solve linear system for alphas:
     // combined = alpha1 * delta1 + alpha2 * delta2
-    t_real diff = delta2 - delta1;
-    t_real alpha1 = (delta2 * deltaF[0] - combined[1]) / diff;
-    t_real alpha2 = (combined[1] - delta1 * combined[0]) / diff;
+    t_real diff = t_real(1.0) / (delta2 - delta1);
+    t_real alpha1 = (delta2 * deltaF[0] - combined[1]) * diff;
+    t_real alpha2 = (combined[1] - delta1 * combined[0]) * diff;
 
     // f-waves
     t_real z1[2] = {alpha1, alpha1 * delta1};

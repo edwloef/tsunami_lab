@@ -49,7 +49,7 @@ env.Append(CXXFLAGS=["-std=c++17", "-fwrapv", "-Wall", "-Wextra", "-Wpedantic"])
 if "debug" in env["mode"]:
     env.Append(CXXFLAGS=["-g"])
 else:
-    env.Append(CXXFLAGS=["-O3", "-flto=auto"])
+    env.Append(CXXFLAGS=["-O3", "-flto=auto", "-fno-math-errno"])
 
 # add sanitizers
 if "san" in env["mode"]:
