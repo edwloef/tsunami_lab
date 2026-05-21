@@ -106,8 +106,8 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(
         }
     }
 
-    for (t_idx l_y = 0; l_y < m_nCellsY + 1; l_y++) {
-        for (t_idx l_x = 0; l_x < m_nCellsX + 1; l_x++) {
+    for (t_idx l_x = 0; l_x < m_nCellsX + 1; l_x++) {
+        for (t_idx l_y = 0; l_y < m_nCellsY + 1; l_y++) {
             t_idx l_i = l_y * getStride() + l_x;
             t_idx l_v = (l_y + 1) * getStride() + l_x;
 
@@ -127,7 +127,6 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(
                     l_hvI = -l_hvV;
                     l_bI = l_bV;
                 }
-                continue;
             } else if (l_bV >= 0) {
                 l_hV = l_hI;
                 l_hvV = -l_hvI;
@@ -201,51 +200,13 @@ void tsunami_lab::patches::WavePropagation2d::setGhostOutflow() {
 }
 
 void tsunami_lab::patches::WavePropagation2d::setGhostReflecting() {
-    t_real *l_h = m_h[m_step];
-    t_real *l_hu = m_hu[m_step];
-    t_real *l_hv = m_hv[m_step];
-
     for (t_idx l_x = 1; l_x < m_nCellsX + 1; l_x++) {
-        t_idx l_y = 0;
-
-        t_idx l_i = l_y * getStride() + l_x;
-        t_idx l_j = (l_y + 1) * getStride() + l_x;
-
-        l_h[l_i] = l_h[l_j];
-        l_hu[l_i] = -l_hu[l_j];
-        l_hv[l_i] = -l_hv[l_j];
-        m_b[l_i] = m_b[l_j];
-
-        l_y = m_nCellsY + 1;
-
-        l_i = l_y * getStride() + l_x;
-        l_j = (l_y - 1) * getStride() + l_x;
-
-        l_h[l_i] = l_h[l_j];
-        l_hu[l_i] = -l_hu[l_j];
-        l_hv[l_i] = -l_hv[l_j];
-        m_b[l_i] = m_b[l_j];
+        m_b[l_x] = 20.;
+        m_b[(m_nCellsY + 1) * getStride() + l_x] = 20.;
     }
 
     for (t_idx l_y = 1; l_y < m_nCellsY + 1; l_y++) {
-        t_idx l_x = 0;
-
-        t_idx l_i = l_y * getStride() + l_x;
-        t_idx l_j = l_y * getStride() + l_x + 1;
-
-        l_h[l_i] = l_h[l_j];
-        l_hu[l_i] = -l_hu[l_j];
-        l_hv[l_i] = -l_hv[l_j];
-        m_b[l_i] = m_b[l_j];
-
-        l_x = m_nCellsX + 1;
-
-        l_i = l_y * getStride() + l_x;
-        l_j = l_y * getStride() + l_x - 1;
-
-        l_h[l_i] = l_h[l_j];
-        l_hu[l_i] = -l_hu[l_j];
-        l_hv[l_i] = -l_hv[l_j];
-        m_b[l_i] = m_b[l_j];
+        m_b[l_y * getStride()] = 20.;
+        m_b[l_y * getStride() + m_nCellsX + 1] = 20.;
     }
 }

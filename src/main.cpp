@@ -111,7 +111,7 @@ int main(int i_argc, char *i_argv[]) {
     tsunami_lab::t_real l_speedMax = std::sqrt(9.80665 * l_hMax);
 
     // derive constant time step; changes at simulation time are ignored
-    tsunami_lab::t_real l_dt = 0.4 * l_dxy / l_speedMax;
+    tsunami_lab::t_real l_dt = 0.5 * l_dxy / l_speedMax;
 
     // derive scaling for a time step
     tsunami_lab::t_real l_scaling = l_dt / l_dxy;
