@@ -94,8 +94,8 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(
         }
     }
 
-    for (t_idx l_x = 0; l_x < m_nCellsX + 1; l_x++) {
-        for (t_idx l_y = 0; l_y < m_nCellsY + 1; l_y++) {
+    for (t_idx l_y = 0; l_y < m_nCellsY + 1; l_y++) {
+        for (t_idx l_x = 0; l_x < m_nCellsX + 1; l_x++) {
             // determine left and right cell-id
             t_idx l_ceL = l_y * getStride() + l_x;
             t_idx l_ceR = (l_y + 1) * getStride() + l_x;
