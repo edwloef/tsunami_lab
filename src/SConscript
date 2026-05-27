@@ -42,6 +42,7 @@ l_tests = [
     "solvers/FWave.test.cpp",
     "solvers/Roe.test.cpp",
     "tests.cpp",
+    "NetCDF.test.cpp",
 ]
 
 for l_te in l_tests:
