@@ -35,6 +35,7 @@ env.standalone = env.Object("main.cpp")
 # gather unit tests
 l_tests = [
     "io/Csv.test.cpp",
+    "io/NetCDF.test.cpp",
     "patches/WavePropagation1d.test.cpp",
     "setups/DamBreak1d.test.cpp",
     "setups/RareRare1d.test.cpp",
@@ -42,7 +43,6 @@ l_tests = [
     "solvers/FWave.test.cpp",
     "solvers/Roe.test.cpp",
     "tests.cpp",
-    "NetCDF.test.cpp",
 ]
 
 for l_te in l_tests:
