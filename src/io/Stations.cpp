@@ -23,7 +23,7 @@ tsunami_lab::io::Stations::Stations(std::ifstream i_file) {
         t_real x = value["x"];
         t_real y = value["y"];
         Station s = Station{name, x, y, std::ofstream(name + ".csv")};
-        s.os << "height" << std::endl;
+        s.os << "t,h,hu,hv" << std::endl;
         m_stations.push_back(std::move(s));
     }
 }
@@ -37,8 +37,12 @@ void tsunami_lab::io::Stations::output(t_real i_dxy, t_real i_simTime,
     for (Station &station : m_stations) {
         t_idx x = station.x / i_dxy;
         t_idx y = station.y / i_dxy;
-        station.os << i_waveProp->getHeight()[(y * i_waveProp->getStride()) + x]
-                   << std::endl;
+        t_idx idx = (y * i_waveProp->getStride()) + x;
+        station.os << i_simTime << ","
+                   << i_waveProp->getHeight()[idx] +
+                          i_waveProp->getBathymetry()[idx]
+                   << "," << i_waveProp->getMomentumX()[idx] << ","
+                   << i_waveProp->getMomentumY()[idx] << std::endl;
     }
 
     m_lastOutput = i_simTime;
