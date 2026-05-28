@@ -11,6 +11,7 @@
 #include "setups/TsunamiEvent2d.h"
 #include "solvers/FWave.h"
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
@@ -130,27 +131,32 @@ int main(int i_argc, char *i_argv[]) {
 
     tsunami_lab::solvers::FWave solver;
 
+    auto dur = std::chrono::duration<double>(0);
+
     // iterate over time
     while (l_simTime < l_maxTime) {
-        if (l_timeStep % 25 == 0) {
+        if (l_simTime >= stations.nextOutputTime()) {
             std::cout << "  " << l_timeStep << " time steps, " << l_simTime
                       << " seconds" << std::endl;
 
             netcdf.writeTimeStep(l_simTime, l_waveProp->getHeight(),
                                  l_waveProp->getMomentumX(),
                                  l_waveProp->getMomentumY());
+
+            stations.output(l_dxy, l_simTime, l_waveProp);
         }
 
+        auto now = std::chrono::high_resolution_clock::now();
         l_waveProp->setGhostOutflow();
         l_waveProp->timeStep(l_scaling, &solver);
-
-        stations.output(l_dxy, l_simTime, l_waveProp);
+        dur += std::chrono::high_resolution_clock::now() - now;
 
         l_timeStep++;
         l_simTime += l_dt;
     }
 
-    std::cout << "finished time loop" << std::endl;
+    std::cout << "finished time loop\n  simulation time per time step: "
+              << dur.count() << " ms" << std::endl;
 
     delete l_waveProp;
 }
