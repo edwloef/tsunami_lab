@@ -5,5 +5,5 @@ pkgs.mkShell {
         scons
         netcdf
         nlohmann_json
-    ]
+    ];
 }
