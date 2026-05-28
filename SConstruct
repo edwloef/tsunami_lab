@@ -5,6 +5,7 @@
 # Entry-point for builds.
 ##
 import SCons
+import os
 
 print("####################################")
 print("### Tsunami Lab                  ###")
@@ -74,6 +75,9 @@ env.MergeFlags(["!nc-config --cflags", "!nc-config --libs"])
 
 # set linker flags to match compiler flags
 env.Append(LINKFLAGS=env["CXXFLAGS"])
+
+# add nix header paths
+env.Append(CPPPATH=os.environ.get("NIX_CFLAGS_COMPILE", "").split())
 
 # get source files
 VariantDir(variant_dir="build/src", src_dir="src")
