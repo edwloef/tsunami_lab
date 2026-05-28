@@ -65,6 +65,10 @@ int main(int i_argc, char *i_argv[]) {
     tsunami_lab::t_idx l_nx = (l_ex - l_sx) / l_dxy;
     tsunami_lab::t_idx l_ny = (l_ey - l_sy) / l_dxy;
 
+    std::cout << "runtime configuration:\n  number of cells in x-direction: "
+              << l_nx << "\n  number of cells in y-direction: " << l_ny
+              << std::endl;
+
     // construct setup
     tsunami_lab::setups::Setup *l_setup;
     l_setup = new tsunami_lab::setups::TsunamiEvent2d(l_displ, l_bathy);
@@ -80,8 +84,6 @@ int main(int i_argc, char *i_argv[]) {
     // maximum observed height in the setup
     tsunami_lab::t_real l_hMax =
         std::numeric_limits<tsunami_lab::t_real>::lowest();
-
-    std::cout << "initializing..." << std::endl;
 
     // set up solver
     for (tsunami_lab::t_idx l_cy = 0; l_cy < l_ny; l_cy++) {
@@ -121,9 +123,7 @@ int main(int i_argc, char *i_argv[]) {
     tsunami_lab::t_idx l_timeStep = 0;
     tsunami_lab::t_real l_simTime = 0;
 
-    std::cout << "runtime configuration:\n  number of cells in x-direction: "
-              << l_nx << "\n  number of cells in y-direction: " << l_ny
-              << "\n  time step length: " << l_dt << " seconds" << std::endl;
+    std::cout << "  time step length: " << l_dt << " seconds" << std::endl;
 
     netcdf.writeBathymetry(l_waveProp->getBathymetry());
 
