@@ -4,6 +4,7 @@
  * @section DESCRIPTION
  * Unit tests for the CSV-interface.
  **/
+
 #include "../constants.h"
 #include <catch2/catch.hpp>
 #include <sstream>
