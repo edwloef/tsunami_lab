@@ -53,8 +53,7 @@ TEST_CASE("Test the NetCDF writer", "[NetCDFWriter]") {
     const size_t STRIDE = 6;
 
     {
-        tsunami_lab::io::NetCDF writer(PATH, false);
-        writer.writeDefs(NX, NY, STRIDE);
+        tsunami_lab::io::NetCDF writer(PATH, NX, NY, STRIDE);
 
         // prepare bathymetry: row-major with stride
         std::vector<float> b(NY * STRIDE);
@@ -106,8 +105,7 @@ TEST_CASE("Test the NetCDF reader", "[NetCDFReader]") {
 
     create_read_test_input(PATH, NX, NY, x, y, z);
 
-    tsunami_lab::io::NetCDF reader(PATH, true);
-    reader.readDefs();
+    tsunami_lab::io::NetCDF reader(PATH);
 
     // exact grid point
     auto v = reader.readAt(4.0, -1.5);

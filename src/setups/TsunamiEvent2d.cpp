@@ -11,10 +11,7 @@
 
 tsunami_lab::setups::TsunamiEvent2d::TsunamiEvent2d(char const *i_d,
                                                     char const *i_b)
-    : d(io::NetCDF(i_d)), b(io::NetCDF(i_b)) {
-    d.readDefs();
-    b.readDefs();
-}
+    : d(io::NetCDF(i_d)), b(io::NetCDF(i_b)) {}
 
 tsunami_lab::t_real
 tsunami_lab::setups::TsunamiEvent2d::getHeight(t_real i_x, t_real i_y) const {

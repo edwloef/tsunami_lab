@@ -25,20 +25,40 @@
         }                                                                      \
     }
 
-tsunami_lab::io::NetCDF::NetCDF(char const *i_path, bool i_ro) {
-    if (i_ro) {
-        nc_try(nc_open(i_path, NC_NOWRITE | NC_64BIT_OFFSET, &ncid));
-    } else {
-        nc_try(nc_create(i_path, NC_CLOBBER | NC_64BIT_OFFSET, &ncid));
-    }
+tsunami_lab::io::NetCDF::NetCDF(char const *i_path) {
+    nc_try(nc_open(i_path, NC_NOWRITE | NC_64BIT_OFFSET, &ncid));
+
+    nc_try(nc_inq_dimid(ncid, "x", &x_dimid));
+    nc_try(nc_inq_dimid(ncid, "y", &y_dimid));
+
+    nc_try(nc_inq_dimlen(ncid, x_dimid, &nx));
+    nc_try(nc_inq_dimlen(ncid, y_dimid, &ny));
+
+    nc_try(nc_inq_varid(ncid, "x", &x_varid));
+    nc_try(nc_inq_varid(ncid, "y", &y_varid));
+    nc_try(nc_inq_varid(ncid, "z", &z_varid));
+
+    size_t si = 0, ei;
+
+    ei = nx - 1;
+    nc_try(nc_get_var1_float(ncid, x_varid, &si, &xs));
+    nc_try(nc_get_var1_float(ncid, x_varid, &ei, &xe));
+
+    lxi = si;
+    lx = xs;
+
+    ei = ny - 1;
+    nc_try(nc_get_var1_float(ncid, y_varid, &si, &ys));
+    nc_try(nc_get_var1_float(ncid, y_varid, &ei, &ye));
+
+    lyi = si;
+    ly = ys;
 }
 
-tsunami_lab::io::NetCDF::~NetCDF() {
-    nc_try(nc_close(ncid));
-}
+tsunami_lab::io::NetCDF::NetCDF(char const *i_path, t_idx i_nx, t_idx i_ny,
+                                t_idx i_stride) {
+    nc_try(nc_create(i_path, NC_CLOBBER | NC_64BIT_OFFSET, &ncid));
 
-void tsunami_lab::io::NetCDF::writeDefs(t_idx i_nx, t_idx i_ny,
-                                        t_idx i_stride) {
     nx = i_nx;
     ny = i_ny;
     stride = i_stride;
@@ -64,6 +84,10 @@ void tsunami_lab::io::NetCDF::writeDefs(t_idx i_nx, t_idx i_ny,
                            "seconds since tsunami event"));
 
     nc_try(nc_enddef(ncid));
+}
+
+tsunami_lab::io::NetCDF::~NetCDF() {
+    nc_try(nc_close(ncid));
 }
 
 void tsunami_lab::io::NetCDF::writeBathymetry(t_real const *i_b) {
@@ -96,34 +120,6 @@ void tsunami_lab::io::NetCDF::writeTimeStep(t_real i_simTime, t_real const *i_h,
     nc_try(nc_put_var1_float(ncid, t_varid, &step, &i_simTime));
 
     step++;
-}
-
-void tsunami_lab::io::NetCDF::readDefs() {
-    nc_try(nc_inq_dimid(ncid, "x", &x_dimid));
-    nc_try(nc_inq_dimid(ncid, "y", &y_dimid));
-
-    nc_try(nc_inq_dimlen(ncid, x_dimid, &nx));
-    nc_try(nc_inq_dimlen(ncid, y_dimid, &ny));
-
-    nc_try(nc_inq_varid(ncid, "x", &x_varid));
-    nc_try(nc_inq_varid(ncid, "y", &y_varid));
-    nc_try(nc_inq_varid(ncid, "z", &z_varid));
-
-    size_t si = 0, ei;
-
-    ei = nx - 1;
-    nc_try(nc_get_var1_float(ncid, x_varid, &si, &xs));
-    nc_try(nc_get_var1_float(ncid, x_varid, &ei, &xe));
-
-    lxi = si;
-    lx = xs;
-
-    ei = ny - 1;
-    nc_try(nc_get_var1_float(ncid, y_varid, &si, &ys));
-    nc_try(nc_get_var1_float(ncid, y_varid, &ei, &ye));
-
-    lyi = si;
-    ly = ys;
 }
 
 static std::optional<size_t> nc_find_index(int ncid, int varid, size_t size,

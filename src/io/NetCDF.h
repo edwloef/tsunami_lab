@@ -30,24 +30,24 @@ class tsunami_lab::io::NetCDF {
     /**
      * Constructor.
      *
-     * @param i_path path to be written to.
-     * @param i_ro whether to open the file in read-only mode
+     * @param i_path path to be read from.
      */
-    NetCDF(char const *i_path, bool i_ro = true);
+    NetCDF(char const *i_path);
+
+    /**
+     * Constructor.
+     *
+     * @param i_path path to be written to
+     * @param i_nx number of cells in x-direction
+     * @param i_ny number of cells in y-direction
+     * @param i_stride stride of the data arrays in y-direction
+     */
+    NetCDF(char const *i_path, t_idx i_nx, t_idx i_ny, t_idx i_stride);
 
     /**
      * Destructor.
      */
     ~NetCDF();
-
-    /**
-     * Writes the dimension and variable definitions as NetCDF.
-     *
-     * @param i_nx number of cells in x-direction
-     * @param i_ny number of cells in y-direction
-     * @param i_stride stride of the data arrays in y-direction
-     **/
-    void writeDefs(t_idx i_nx, t_idx i_ny, t_idx i_stride);
 
     /**
      * Writes the bathymetry as NetCDF.
@@ -65,11 +65,6 @@ class tsunami_lab::io::NetCDF {
      **/
     void writeTimeStep(t_real i_simTime, t_real const *i_h, t_real const *i_hu,
                        t_real const *i_hv);
-
-    /**
-     * Reads the dimension and variable definitions as NetCDF.
-     **/
-    void readDefs();
 
     /**
      * Reads the value of the z variable at the given position.
