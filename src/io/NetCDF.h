@@ -9,6 +9,7 @@
 #define TSUNAMI_LAB_IO_NETCDF
 
 #include "../constants.h"
+#include <cstring>
 #include <optional>
 
 namespace tsunami_lab {
@@ -19,12 +20,23 @@ class NetCDF;
 
 class tsunami_lab::io::NetCDF {
   private:
-    t_idx nx, ny, stride, k, step;
-    int ncid, x_dimid, y_dimid, t_dimid, x_varid, y_varid, z_varid, h_varid,
-        hu_varid, hv_varid, b_varid, t_varid;
-    t_real xs, xe, ys, ye;
-    mutable t_idx lxi, lyi;
-    mutable t_real lx, ly, lv;
+    t_idx nx, ny, stride, k, knx, kny, step;
+    int ncid, x_dimid, y_dimid, b_varid, t_dimid, x_varid, y_varid, z_varid,
+        h_varid, hu_varid, hv_varid, t_varid;
+    t_real *buf;
+
+    t_real const *downsample(t_real const *i_v) {
+        std::memset(buf, 0, knx * kny * sizeof(t_real));
+
+        for (t_idx l_iy = 0; l_iy < ny; l_iy++) {
+            for (t_idx l_ix = 0; l_ix < nx; l_ix++) {
+                buf[(l_iy * nx + l_ix) / (k * k)] +=
+                    i_v[l_iy * stride + l_ix] / (k * k);
+            }
+        }
+
+        return buf;
+    }
 
   public:
     /**
