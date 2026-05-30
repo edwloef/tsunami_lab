@@ -55,19 +55,25 @@ tsunami_lab::io::NetCDF::NetCDF(char const *i_path) {
     ly = ys;
 }
 
+template <typename T> T div_ceil(T &lhs, T &rhs) {
+    return (lhs + rhs - 1) / rhs;
+}
+
 tsunami_lab::io::NetCDF::NetCDF(char const *i_path, t_idx i_nx, t_idx i_ny,
-                                t_idx i_stride) {
+                                t_idx i_stride, t_idx i_k) {
     nc_try(nc_create(i_path, NC_NETCDF4, &ncid));
 
     nx = i_nx;
     ny = i_ny;
     stride = i_stride;
+    k = i_k;
+    step = 0;
 
     nc_try(nc_set_fill(ncid, NC_NOFILL, NULL));
 
     nc_try(nc_def_dim(ncid, "t", NC_UNLIMITED, &t_dimid));
-    nc_try(nc_def_dim(ncid, "y", ny, &y_dimid));
-    nc_try(nc_def_dim(ncid, "x", nx, &x_dimid));
+    nc_try(nc_def_dim(ncid, "y", div_ceil(ny, k), &y_dimid));
+    nc_try(nc_def_dim(ncid, "x", div_ceil(nx, k), &x_dimid));
 
     int dimids[3] = {t_dimid, y_dimid, x_dimid};
 
@@ -97,30 +103,76 @@ tsunami_lab::io::NetCDF::~NetCDF() {
 }
 
 void tsunami_lab::io::NetCDF::writeBathymetry(t_real const *i_b) {
-    t_idx l_count[2] = {1, nx};
+    for (t_idx l_iy = 0; l_iy < div_ceil(ny, k); l_iy++) {
+        for (t_idx l_ix = 0; l_ix < div_ceil(nx, k); l_ix++) {
+            t_idx l_index[2] = {l_iy, l_ix};
 
-    for (t_idx l_iy = 0; l_iy < ny; l_iy++) {
-        t_idx l_start[2] = {l_iy, 0};
+            t_real b = t_real(0.0);
+            for (t_idx l_jy = k * l_iy; l_jy < k * (l_iy + 1) && l_jy < ny;
+                 l_jy++) {
+                for (t_idx l_jx = k * l_ix; l_jx < k * (l_ix + 1) && l_jx < nx;
+                     l_jx++) {
+                    b += i_b[l_jy * stride + l_jx];
+                }
+            }
 
-        nc_try(nc_put_vara_float(ncid, b_varid, l_start, l_count,
-                                 i_b + l_iy * stride));
+            nc_try(nc_put_var1_float(ncid, b_varid, l_index, &b));
+        }
     }
 }
 
 void tsunami_lab::io::NetCDF::writeTimeStep(t_real i_simTime, t_real const *i_h,
                                             t_real const *i_hu,
                                             t_real const *i_hv) {
-    t_idx l_count[3] = {1, 1, nx};
+    for (t_idx l_iy = 0; l_iy < div_ceil(ny, k); l_iy++) {
+        for (t_idx l_ix = 0; l_ix < div_ceil(nx, k); l_ix++) {
+            t_idx l_index[3] = {step, l_iy, l_ix};
 
-    for (t_idx l_iy = 0; l_iy < ny; l_iy++) {
-        t_idx l_start[3] = {step, l_iy, 0};
+            t_real h = t_real(0.0);
+            for (t_idx l_jy = k * l_iy; l_jy < k * (l_iy + 1) && l_jy < ny;
+                 l_jy++) {
+                for (t_idx l_jx = k * l_ix; l_jx < k * (l_ix + 1) && l_jx < nx;
+                     l_jx++) {
+                    h += i_h[l_jy * stride + l_jx];
+                }
+            }
 
-        nc_try(nc_put_vara_float(ncid, h_varid, l_start, l_count,
-                                 i_h + l_iy * stride));
-        nc_try(nc_put_vara_float(ncid, hu_varid, l_start, l_count,
-                                 i_hu + l_iy * stride));
-        nc_try(nc_put_vara_float(ncid, hv_varid, l_start, l_count,
-                                 i_hv + l_iy * stride));
+            nc_try(nc_put_var1_float(ncid, h_varid, l_index, &h));
+        }
+    }
+
+    for (t_idx l_iy = 0; l_iy < div_ceil(ny, k); l_iy++) {
+        for (t_idx l_ix = 0; l_ix < div_ceil(nx, k); l_ix++) {
+            t_idx l_index[3] = {step, l_iy, l_ix};
+
+            t_real hu = t_real(0.0);
+            for (t_idx l_jy = k * l_iy; l_jy < k * (l_iy + 1) && l_jy < ny;
+                 l_jy++) {
+                for (t_idx l_jx = k * l_ix; l_jx < k * (l_ix + 1) && l_jx < nx;
+                     l_jx++) {
+                    hu += i_hu[l_jy * stride + l_jx];
+                }
+            }
+
+            nc_try(nc_put_var1_float(ncid, hu_varid, l_index, &hu));
+        }
+    }
+
+    for (t_idx l_iy = 0; l_iy < div_ceil(ny, k); l_iy++) {
+        for (t_idx l_ix = 0; l_ix < div_ceil(nx, k); l_ix++) {
+            t_idx l_index[3] = {step, l_iy, l_ix};
+
+            t_real hv = t_real(0.0);
+            for (t_idx l_jy = k * l_iy; l_jy < k * (l_iy + 1) && l_jy < ny;
+                 l_jy++) {
+                for (t_idx l_jx = k * l_ix; l_jx < k * (l_ix + 1) && l_jx < nx;
+                     l_jx++) {
+                    hv += i_hv[l_jy * stride + l_jx];
+                }
+            }
+
+            nc_try(nc_put_var1_float(ncid, hv_varid, l_index, &hv));
+        }
     }
 
     nc_try(nc_put_var1_float(ncid, t_varid, &step, &i_simTime));

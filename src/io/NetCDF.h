@@ -19,7 +19,7 @@ class NetCDF;
 
 class tsunami_lab::io::NetCDF {
   private:
-    t_idx nx, ny, stride, step;
+    t_idx nx, ny, stride, k, step;
     int ncid, x_dimid, y_dimid, t_dimid, x_varid, y_varid, z_varid, h_varid,
         hu_varid, hv_varid, b_varid, t_varid;
     t_real xs, xe, ys, ye;
@@ -41,8 +41,10 @@ class tsunami_lab::io::NetCDF {
      * @param i_nx number of cells in x-direction
      * @param i_ny number of cells in y-direction
      * @param i_stride stride of the data arrays in y-direction
+     * @param i_k coarse output size
      */
-    NetCDF(char const *i_path, t_idx i_nx, t_idx i_ny, t_idx i_stride);
+    NetCDF(char const *i_path, t_idx i_nx, t_idx i_ny, t_idx i_stride,
+           t_idx i_k = 1);
 
     /**
      * Destructor.
