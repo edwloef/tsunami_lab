@@ -30,7 +30,7 @@ class tsunami_lab::io::NetCDF {
 
         for (t_idx l_iy = 0; l_iy < ny; l_iy++) {
             for (t_idx l_ix = 0; l_ix < nx; l_ix++) {
-                buf[(l_iy * nx + l_ix) / (k * k)] +=
+                buf[(l_iy / k) * knx + (l_ix / k)] +=
                     i_v[l_iy * stride + l_ix] / (k * k);
             }
         }
