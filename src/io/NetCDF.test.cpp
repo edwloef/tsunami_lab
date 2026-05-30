@@ -48,12 +48,13 @@ static void create_read_test_input(const char *path, size_t nx, size_t ny,
 TEST_CASE("Test the NetCDF writer", "[NetCDFWriter]") {
     const char *PATH = "test_write.nc";
 
+    const float DXY = 0.5;
     const size_t NX = 6;
     const size_t NY = 4;
     const size_t STRIDE = 6;
 
     {
-        tsunami_lab::io::NetCDF writer(PATH, NX, NY, STRIDE);
+        tsunami_lab::io::NetCDF writer(PATH, DXY, NX, NY, STRIDE);
 
         // prepare bathymetry: row-major with stride
         std::vector<float> b(NY * STRIDE);

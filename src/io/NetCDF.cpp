@@ -59,9 +59,9 @@ template <typename T> T div_ceil(T &lhs, T &rhs) {
     return (lhs + rhs - 1) / rhs;
 }
 
-tsunami_lab::io::NetCDF::NetCDF(char const *i_path, t_idx i_nx, t_idx i_ny,
-                                t_idx i_stride, t_idx i_k) {
-    nc_try(nc_create(i_path, NC_NETCDF4, &ncid));
+tsunami_lab::io::NetCDF::NetCDF(char const *i_path, t_real i_dxy, t_idx i_nx,
+                                t_idx i_ny, t_idx i_stride, t_idx i_k) {
+    nc_try(nc_create(i_path, NC_NETCDF4 | NC_NOFILL, &ncid));
 
     nx = i_nx;
     ny = i_ny;
@@ -69,26 +69,30 @@ tsunami_lab::io::NetCDF::NetCDF(char const *i_path, t_idx i_nx, t_idx i_ny,
     k = i_k;
     step = 0;
 
-    nc_try(nc_set_fill(ncid, NC_NOFILL, NULL));
-
     nc_try(nc_def_dim(ncid, "t", NC_UNLIMITED, &t_dimid));
     nc_try(nc_def_dim(ncid, "y", div_ceil(ny, k), &y_dimid));
     nc_try(nc_def_dim(ncid, "x", div_ceil(nx, k), &x_dimid));
 
     int dimids[3] = {t_dimid, y_dimid, x_dimid};
 
+    nc_try(nc_def_var(ncid, "x", NC_FLOAT, 1, dimids + 2, &x_varid));
+    nc_try(nc_def_var(ncid, "y", NC_FLOAT, 1, dimids + 1, &y_varid));
     nc_try(nc_def_var(ncid, "h", NC_FLOAT, 3, dimids, &h_varid));
     nc_try(nc_def_var(ncid, "hu", NC_FLOAT, 3, dimids, &hu_varid));
     nc_try(nc_def_var(ncid, "hv", NC_FLOAT, 3, dimids, &hv_varid));
-    nc_try(nc_def_var(ncid, "b", NC_FLOAT, 2, &dimids[1], &b_varid));
+    nc_try(nc_def_var(ncid, "b", NC_FLOAT, 2, dimids + 1, &b_varid));
     nc_try(nc_def_var(ncid, "t", NC_FLOAT, 1, dimids, &t_varid));
 
-    nc_try(nc_def_var_deflate(ncid, h_varid, false, true, 1));
-    nc_try(nc_def_var_deflate(ncid, hu_varid, false, true, 1));
-    nc_try(nc_def_var_deflate(ncid, hv_varid, false, true, 1));
-    nc_try(nc_def_var_deflate(ncid, b_varid, false, true, 1));
-    nc_try(nc_def_var_deflate(ncid, t_varid, false, true, 1));
+    nc_try(nc_def_var_deflate(ncid, x_varid, true, true, 3));
+    nc_try(nc_def_var_deflate(ncid, y_varid, true, true, 3));
+    nc_try(nc_def_var_deflate(ncid, h_varid, true, true, 3));
+    nc_try(nc_def_var_deflate(ncid, hu_varid, true, true, 3));
+    nc_try(nc_def_var_deflate(ncid, hv_varid, true, true, 3));
+    nc_try(nc_def_var_deflate(ncid, b_varid, true, true, 3));
+    nc_try(nc_def_var_deflate(ncid, t_varid, true, true, 3));
 
+    nc_try(nc_put_att_text(ncid, x_varid, "units", strlen("meters"), "meters"));
+    nc_try(nc_put_att_text(ncid, y_varid, "units", strlen("meters"), "meters"));
     nc_try(nc_put_att_text(ncid, h_varid, "units", strlen("meters"), "meters"));
     nc_try(nc_put_att_text(ncid, b_varid, "units", strlen("meters"), "meters"));
     nc_try(nc_put_att_text(ncid, t_varid, "units",
@@ -96,6 +100,18 @@ tsunami_lab::io::NetCDF::NetCDF(char const *i_path, t_idx i_nx, t_idx i_ny,
                            "seconds since tsunami event"));
 
     nc_try(nc_enddef(ncid));
+
+    for (t_idx l_ix = 0; l_ix < div_ceil(nx, k); l_ix++) {
+        t_idx l_index[1] = {l_ix};
+        t_real x = (l_ix + 0.5) * k * i_dxy;
+        nc_try(nc_put_var1_float(ncid, x_varid, l_index, &x));
+    }
+
+    for (t_idx l_iy = 0; l_iy < div_ceil(ny, k); l_iy++) {
+        t_idx l_index[1] = {l_iy};
+        t_real y = (l_iy + 0.5) * k * i_dxy;
+        nc_try(nc_put_var1_float(ncid, y_varid, l_index, &y));
+    }
 }
 
 tsunami_lab::io::NetCDF::~NetCDF() {

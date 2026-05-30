@@ -38,13 +38,14 @@ class tsunami_lab::io::NetCDF {
      * Constructor.
      *
      * @param i_path path to be written to
+     * @param i_dxy cell width in x- and y-direction
      * @param i_nx number of cells in x-direction
      * @param i_ny number of cells in y-direction
      * @param i_stride stride of the data arrays in y-direction
      * @param i_k coarse output size
      */
-    NetCDF(char const *i_path, t_idx i_nx, t_idx i_ny, t_idx i_stride,
-           t_idx i_k = 1);
+    NetCDF(char const *i_path, t_real i_dxy, t_idx i_nx, t_idx i_ny,
+           t_idx i_stride, t_idx i_k = 1);
 
     /**
      * Destructor.

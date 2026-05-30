@@ -78,7 +78,7 @@ int main(int i_argc, char *i_argv[]) {
     // construct stations
     tsunami_lab::io::Stations stations(std::ifstream{l_stations});
     // construct netcdf writer
-    tsunami_lab::io::NetCDF netcdf(l_solution, l_nx, l_ny,
+    tsunami_lab::io::NetCDF netcdf(l_solution, l_dxy, l_nx, l_ny,
                                    l_waveProp->getStride());
 
     // maximum observed height in the setup
