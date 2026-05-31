@@ -20,11 +20,9 @@ void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL, t_real i_hR,
     // compute wave speeds (eigenvalues)
     t_real sqrt_hL = std::sqrt(i_hL);
     t_real sqrt_hR = std::sqrt(i_hR);
+
     t_real u_roe = (uL * sqrt_hL + uR * sqrt_hR) / (sqrt_hL + sqrt_hR);
-
-    t_real h_roe = t_real(0.5) * (i_hL + i_hR);
-
-    t_real sqrt_g_h_roe = std::sqrt(g * h_roe);
+    t_real sqrt_g_h_roe = std::sqrt(g_half * (i_hL + i_hR));
 
     t_real delta1 = u_roe - sqrt_g_h_roe;
     t_real delta2 = u_roe + sqrt_g_h_roe;
