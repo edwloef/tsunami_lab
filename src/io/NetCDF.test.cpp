@@ -57,7 +57,7 @@ TEST_CASE("Test the NetCDF writer", "[NetCDFWriter]") {
         tsunami_lab::io::NetCDF writer(PATH, DXY, NX, NY, STRIDE);
 
         // prepare bathymetry: row-major with stride
-        std::vector<float> b(NY * STRIDE);
+        std::vector<tsunami_lab::t_real> b(NY * STRIDE);
         for (size_t y = 0; y < NY; ++y) {
             for (size_t x = 0; x < NX; ++x) {
                 b[y * STRIDE + x] = y * 100 + x;
@@ -67,7 +67,8 @@ TEST_CASE("Test the NetCDF writer", "[NetCDFWriter]") {
         writer.writeBathymetry(b.data());
 
         // write two time steps
-        std::vector<float> h(NY * STRIDE), hu(NY * STRIDE), hv(NY * STRIDE);
+        std::vector<tsunami_lab::t_real> h(NY * STRIDE), hu(NY * STRIDE),
+            hv(NY * STRIDE);
         for (size_t t = 0; t < 2; ++t) {
             for (size_t y = 0; y < NY; ++y) {
                 for (size_t x = 0; x < NX; ++x) {

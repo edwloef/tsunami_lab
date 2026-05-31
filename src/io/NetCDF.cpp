@@ -38,7 +38,7 @@ tsunami_lab::io::NetCDF::NetCDF(char const *i_path) {
     nc_try(nc_inq_varid(ncid, "y", &y_varid));
     nc_try(nc_inq_varid(ncid, "z", &z_varid));
 
-    buf = new t_real[nx + ny];
+    buf = new float[nx + ny];
 
     nc_try(nc_get_var_float(ncid, x_varid, buf));
     nc_try(nc_get_var_float(ncid, y_varid, buf + nx));
@@ -59,7 +59,7 @@ tsunami_lab::io::NetCDF::NetCDF(char const *i_path, t_real i_dxy, t_idx i_nx,
     knx = div_ceil(nx, k);
     kny = div_ceil(ny, k);
     step = 0;
-    buf = new t_real[knx * kny];
+    buf = new float[knx * kny];
 
     nc_try(nc_def_dim(ncid, "t", NC_UNLIMITED, &t_dimid));
     nc_try(nc_def_dim(ncid, "y", kny, &y_dimid));
@@ -121,10 +121,12 @@ void tsunami_lab::io::NetCDF::writeTimeStep(t_real i_simTime, t_real const *i_h,
     t_idx start[3] = {step, 0, 0};
     t_idx count[3] = {1, kny, knx};
 
+    float simTime = i_simTime;
+
     nc_try(nc_put_vara_float(ncid, h_varid, start, count, downsample(i_h)));
     nc_try(nc_put_vara_float(ncid, hu_varid, start, count, downsample(i_hu)));
     nc_try(nc_put_vara_float(ncid, hv_varid, start, count, downsample(i_hv)));
-    nc_try(nc_put_var1_float(ncid, t_varid, &step, &i_simTime));
+    nc_try(nc_put_var1_float(ncid, t_varid, &step, &simTime));
 
     step++;
 }
@@ -181,7 +183,7 @@ tsunami_lab::io::NetCDF::readAt(t_real i_x, t_real i_y) const {
 
     size_t index[2] = {y.value(), x.value()};
 
-    t_real val;
+    float val;
     nc_try(nc_get_var1_float(ncid, z_varid, index, &val));
     return val;
 }

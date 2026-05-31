@@ -12,8 +12,8 @@
 TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]") {
     auto solver = tsunami_lab::solvers::FWave();
 
-    float netUpdateL[2];
-    float netUpdateR[2];
+    tsunami_lab::t_real netUpdateL[2];
+    tsunami_lab::t_real netUpdateR[2];
 
     /*
      * Test case:

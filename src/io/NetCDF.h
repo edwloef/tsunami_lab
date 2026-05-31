@@ -23,9 +23,9 @@ class tsunami_lab::io::NetCDF {
     t_idx nx, ny, stride, k, knx, kny, step;
     int ncid, x_dimid, y_dimid, b_varid, t_dimid, x_varid, y_varid, z_varid,
         h_varid, hu_varid, hv_varid, t_varid;
-    t_real *buf;
+    float *buf;
 
-    t_real const *downsample(t_real const *i_v) {
+    float const *downsample(t_real const *i_v) {
         std::memset(buf, 0, knx * kny * sizeof(t_real));
 
         for (t_idx l_iy = 0; l_iy < ny; l_iy++) {
