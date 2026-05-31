@@ -24,8 +24,8 @@ void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL, t_real i_hR,
     t_real u_roe = (uL * sqrt_hL + uR * sqrt_hR) / (sqrt_hL + sqrt_hR);
     t_real sqrt_g_h_roe = std::sqrt(g_half * (i_hL + i_hR));
 
-    t_real delta1 = u_roe - sqrt_g_h_roe;
-    t_real delta2 = u_roe + sqrt_g_h_roe;
+    // compute eigenvalues
+    t_real lambda_roe[2] = {u_roe - sqrt_g_h_roe, u_roe + sqrt_g_h_roe};
 
     // compute fluxes
     t_real fL[2] = {i_huL, i_huL * uL + g_half * i_hL * i_hL};
@@ -40,18 +40,17 @@ void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL, t_real i_hR,
     // combined effect
     t_real combined[2] = {deltaF[0] - deltaXPsi[0], deltaF[1] - deltaXPsi[1]};
 
-    // solve linear system for alphas:
-    // combined = alpha1 * delta1 + alpha2 * delta2
-    t_real diff = t_real(1.0) / (delta2 - delta1);
-    t_real alpha1 = (delta2 * deltaF[0] - combined[1]) * diff;
-    t_real alpha2 = (combined[1] - delta1 * combined[0]) * diff;
+    // solve linear system for alphas
+    t_real diff = t_real(0.5) / sqrt_g_h_roe; // 1 / (lambda2 - lambda1)
+    t_real alpha[2] = {(combined[0] * lambda_roe[1] - combined[1]) * diff,
+                       (combined[1] - lambda_roe[0] * combined[0]) * diff};
 
     // f-waves
-    t_real z1[2] = {alpha1, alpha1 * delta1};
-    t_real z2[2] = {alpha2, alpha2 * delta2};
+    t_real z1[2] = {alpha[0], alpha[0] * lambda_roe[0]};
+    t_real z2[2] = {alpha[1], alpha[1] * lambda_roe[1]};
 
     // distribute waves
-    if (std::signbit(delta1)) {
+    if (std::signbit(lambda_roe[0])) {
         o_netUpdateR[0] = t_real(0.0);
         o_netUpdateR[1] = t_real(0.0);
 
@@ -65,7 +64,7 @@ void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL, t_real i_hR,
         o_netUpdateR[1] = z1[1];
     }
 
-    if (std::signbit(delta2)) {
+    if (std::signbit(lambda_roe[1])) {
         o_netUpdateL[0] += z2[0];
         o_netUpdateL[1] += z2[1];
     } else {
