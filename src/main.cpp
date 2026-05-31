@@ -135,7 +135,7 @@ int main(int i_argc, char *i_argv[]) {
 
     // iterate over time
     while (l_simTime < l_maxTime) {
-        if (l_simTime >= stations.nextOutputTime()) {
+        if (l_simTime >= stations.nextOutput()) {
             std::cout << "  " << l_timeStep << " time steps, " << l_simTime
                       << " seconds" << std::endl;
 

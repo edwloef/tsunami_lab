@@ -33,7 +33,7 @@ typedef struct {
 class tsunami_lab::io::Stations {
   private:
     t_real m_outputFreq;
-    t_real m_lastOutput;
+    t_real m_nextOutput;
     std::vector<Station> m_stations;
 
   public:
@@ -60,8 +60,8 @@ class tsunami_lab::io::Stations {
      *
      * @return next output time in seconds.
      **/
-    t_real nextOutputTime() {
-        return m_lastOutput + m_outputFreq;
+    t_real nextOutput() {
+        return m_nextOutput;
     }
 };
 

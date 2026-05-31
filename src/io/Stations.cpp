@@ -17,6 +17,7 @@ tsunami_lab::io::Stations::Stations(std::ifstream i_file) {
     nlohmann::json data = nlohmann::json::parse(i_file);
 
     m_outputFreq = data["outputFreq"];
+    m_nextOutput = 0;
 
     for (auto &[_, value] : data["stations"].items()) {
         std::string name = value["name"];
@@ -42,5 +43,5 @@ void tsunami_lab::io::Stations::output(t_real i_dxy, t_real i_simTime,
                    << i_waveProp->getMomentumY()[idx] << std::endl;
     }
 
-    m_lastOutput = i_simTime;
+    m_nextOutput = i_simTime + m_outputFreq;
 }
