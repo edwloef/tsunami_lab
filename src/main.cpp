@@ -7,20 +7,21 @@
 #include "io/NetCDF.h"
 #include "io/Stations.h"
 #include "patches/WavePropagation2d.h"
-#include "setups/ArtificialTsunami2d.h"
 #include "setups/TsunamiEvent2d.h"
 #include "solvers/FWave.h"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <limits>
 #include <ostream>
 
 int main(int i_argc, char *i_argv[]) {
-    tsunami_lab::t_real l_maxTime, l_dxy, l_sx, l_sy, l_ex, l_ey;
+    tsunami_lab::t_real l_outputFreq, l_checkpointFreq, l_maxTime, l_dxy, l_sx,
+        l_sy, l_ex, l_ey;
     char const *l_displ, *l_bathy, *l_stations, *l_solution;
 
     std::cout << "####################################" << std::endl;
@@ -29,12 +30,13 @@ int main(int i_argc, char *i_argv[]) {
     std::cout << "### https://scalable.uni-jena.de ###" << std::endl;
     std::cout << "####################################" << std::endl;
 
-    if (i_argc < 7) {
-        std::cerr << "invalid number of arguments, usage:\n  " << *i_argv
-                  << " SIM_TIME CELL_SIZE DOMAIN_START_X "
-                     "DOMAIN_START_Y DOMAIN_END_X DOMAIN_END_Y [DISPL.nc "
-                     "[BATHY.nc [STATIONS.json [SOLUTION.nc]]]]"
-                  << std::endl;
+    if (i_argc < 9) {
+        std::cerr
+            << "invalid number of arguments, usage:\n  " << *i_argv
+            << " SIM_TIME CELL_SIZE DOMAIN_START_X DOMAIN_START_Y DOMAIN_END_X "
+               "DOMAIN_END_Y DISPL.nc, BATHY.nc [OUTPUT_FREQ [CHECKPOINT_FREQ "
+               "[STATIONS.json [SOLUTION.nc]]]]"
+            << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -46,9 +48,11 @@ int main(int i_argc, char *i_argv[]) {
     l_sy = std::stod(*i_argv++);
     l_ex = std::stod(*i_argv++);
     l_ey = std::stod(*i_argv++);
+    l_displ = *i_argv++;
+    l_bathy = *i_argv++;
 
-    l_displ = *i_argv ? *i_argv++ : "displ.nc";
-    l_bathy = *i_argv ? *i_argv++ : "bathy.nc";
+    l_outputFreq = *i_argv ? std::stod(*i_argv++) : 60;
+    l_checkpointFreq = *i_argv ? std::stod(*i_argv++) : 10 * l_outputFreq;
     l_stations = *i_argv ? *i_argv++ : "stations.json";
     l_solution = *i_argv ? *i_argv++ : "solution.nc";
 
@@ -122,6 +126,8 @@ int main(int i_argc, char *i_argv[]) {
     // set up time and print control
     tsunami_lab::t_idx l_timeStep = 0;
     tsunami_lab::t_real l_simTime = 0;
+    tsunami_lab::t_real l_nextOutput = 0;
+    tsunami_lab::t_real l_nextCheckpoint = l_checkpointFreq;
 
     std::cout << "  time step length: " << l_dt << " seconds" << std::endl;
 
@@ -135,15 +141,31 @@ int main(int i_argc, char *i_argv[]) {
 
     // iterate over time
     while (l_simTime < l_maxTime) {
-        if (l_simTime >= stations.nextOutput()) {
-            std::cout << "  " << l_timeStep << " time steps, " << l_simTime
-                      << " seconds" << std::endl;
+        if (l_simTime >= l_nextOutput) {
+            std::cout << "  output: " << l_timeStep << " time steps, "
+                      << l_simTime << " seconds" << std::endl;
 
             netcdf.writeTimeStep(l_simTime, l_waveProp->getHeight(),
                                  l_waveProp->getMomentumX(),
                                  l_waveProp->getMomentumY());
 
             stations.output(l_dxy, l_simTime, l_waveProp);
+
+            l_nextOutput += l_outputFreq;
+        }
+
+        if (l_simTime >= l_nextCheckpoint) {
+            std::cout << "  checkpoint: " << l_timeStep << " time steps, "
+                      << l_simTime << " seconds" << std::endl;
+
+            netcdf.writeCheckpoint(
+                "checkpoint.nc.new", l_waveProp->getBathymetry(),
+                l_waveProp->getHeight(), l_waveProp->getMomentumX(),
+                l_waveProp->getMomentumY());
+
+            std::filesystem::rename("checkpoint.nc.new", "checkpoint.nc");
+
+            l_nextCheckpoint += l_checkpointFreq;
         }
 
         auto now = std::chrono::high_resolution_clock::now();
@@ -154,6 +176,8 @@ int main(int i_argc, char *i_argv[]) {
         l_timeStep++;
         l_simTime += l_dt;
     }
+
+    std::filesystem::remove("checkpoint.nc");
 
     std::cout << "finished time loop\n  simulation time per time step: "
               << dur.count() << " ms" << std::endl;

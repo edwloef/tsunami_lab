@@ -21,7 +21,7 @@ class NetCDF;
 class tsunami_lab::io::NetCDF {
   private:
     t_idx nx, ny, stride, k, knx, kny, step;
-    int ncid, x_dimid, y_dimid, b_varid, t_dimid, x_varid, y_varid, z_varid,
+    int ncid, x_dimid, y_dimid, t_dimid, x_varid, y_varid, z_varid, b_varid,
         h_varid, hu_varid, hv_varid, t_varid;
     float *buf;
 
@@ -80,6 +80,22 @@ class tsunami_lab::io::NetCDF {
      **/
     void writeTimeStep(t_real i_simTime, t_real const *i_h, t_real const *i_hu,
                        t_real const *i_hv);
+
+    /**
+     * Writes the checkpoint as NetCDF.
+     *
+     * @param i_path path to be written to
+     * @param i_nx number of cells in x-direction
+     * @param i_ny number of cells in y-direction
+     * @param i_stride stride of the data arrays in y-direction
+     * @param i_b bathymetry
+     * @param i_h water height of the cells
+     * @param i_hu momentum in x-direction of the cells
+     * @param i_hv momentum in y-direction of the cells
+     **/
+    void writeCheckpoint(char const *i_path, t_real const *i_b,
+                         t_real const *i_h, t_real const *i_hu,
+                         t_real const *i_hv);
 
     /**
      * Reads the value of the z variable at the given position.
