@@ -13,6 +13,7 @@
    fourth
    fifth
    sixth
+   seventh
 
 
 Tsunami documentation
