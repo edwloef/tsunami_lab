@@ -180,7 +180,9 @@ int main(int i_argc, char *i_argv[]) {
     std::filesystem::remove("checkpoint.nc");
 
     std::cout << "finished time loop\n  simulation time per time step: "
-              << dur.count() << " ms" << std::endl;
+              << dur.count()
+              << " ms\n  simulation time per time step per cell: "
+              << 1'000'000 * dur.count() / (l_nx * l_ny) << " ns" << std::endl;
 
     delete l_waveProp;
 }
