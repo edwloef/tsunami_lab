@@ -5,9 +5,13 @@
  * One-dimensional wave propagation patch.
  **/
 #include "WavePropagation1d.h"
+#include "../solvers/FWave.h"
 #include <cstring>
 
-tsunami_lab::patches::WavePropagation1d::WavePropagation1d(t_idx i_nCells) {
+template <typename Solver>
+tsunami_lab::patches::WavePropagation1d<Solver>::WavePropagation1d(
+    t_idx i_nCells, Solver i_solver) {
+    m_solver = i_solver;
     m_nCells = i_nCells;
 
     for (unsigned short l_st = 0; l_st < 2; l_st++) {
@@ -18,7 +22,9 @@ tsunami_lab::patches::WavePropagation1d::WavePropagation1d(t_idx i_nCells) {
     m_b = new t_real[m_nCells + 2]{0};
 }
 
-tsunami_lab::patches::WavePropagation1d::~WavePropagation1d() {
+template <typename Solver>
+tsunami_lab::patches::WavePropagation1d<
+    Solver>::WavePropagation1d::~WavePropagation1d() {
     for (unsigned short l_st = 0; l_st < 2; l_st++) {
         delete[] m_h[l_st];
         delete[] m_hu[l_st];
@@ -27,8 +33,9 @@ tsunami_lab::patches::WavePropagation1d::~WavePropagation1d() {
     delete[] m_b;
 }
 
-void tsunami_lab::patches::WavePropagation1d::timeStep(
-    t_real i_scaling, solvers::Solver *solver) {
+template <typename Solver>
+void tsunami_lab::patches::WavePropagation1d<Solver>::timeStep(
+    t_real i_scaling) {
     // pointers to old and new data
     t_real *l_hOld = m_h[m_step];
     t_real *l_huOld = m_hu[m_step];
@@ -72,8 +79,8 @@ void tsunami_lab::patches::WavePropagation1d::timeStep(
         // compute net-updates
         t_real l_netUpdates[2][2];
 
-        solver->netUpdates(l_hL, l_hR, l_huL, l_huR, l_bL, l_bR,
-                           l_netUpdates[0], l_netUpdates[1]);
+        m_solver.netUpdates(l_hL, l_hR, l_huL, l_huR, l_bL, l_bR,
+                            l_netUpdates[0], l_netUpdates[1]);
 
         // update the cells' quantities
         l_hNew[l_ceL] -= i_scaling * l_netUpdates[0][0];
@@ -84,7 +91,8 @@ void tsunami_lab::patches::WavePropagation1d::timeStep(
     }
 }
 
-void tsunami_lab::patches::WavePropagation1d::setGhostOutflow() {
+template <typename Solver>
+void tsunami_lab::patches::WavePropagation1d<Solver>::setGhostOutflow() {
     t_real *l_h = m_h[m_step];
     t_real *l_hu = m_hu[m_step];
 
@@ -99,7 +107,8 @@ void tsunami_lab::patches::WavePropagation1d::setGhostOutflow() {
     m_b[m_nCells + 1] = m_b[m_nCells];
 }
 
-void tsunami_lab::patches::WavePropagation1d::setGhostReflecting() {
+template <typename Solver>
+void tsunami_lab::patches::WavePropagation1d<Solver>::setGhostReflecting() {
     t_real *l_h = m_h[m_step];
     t_real *l_hu = m_hu[m_step];
 
@@ -113,3 +122,6 @@ void tsunami_lab::patches::WavePropagation1d::setGhostReflecting() {
     l_hu[m_nCells + 1] = -l_hu[m_nCells];
     m_b[m_nCells + 1] = m_b[m_nCells];
 }
+
+template class tsunami_lab::patches::WavePropagation1d<
+    tsunami_lab::solvers::FWave>;

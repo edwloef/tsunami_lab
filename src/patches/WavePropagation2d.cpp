@@ -6,10 +6,14 @@
  * Two-dimensional wave propagation patch.
  **/
 #include "WavePropagation2d.h"
+#include "../solvers/FWave.h"
 #include <cstring>
 
-tsunami_lab::patches::WavePropagation2d::WavePropagation2d(t_idx i_x,
-                                                           t_idx i_y) {
+template <typename Solver>
+tsunami_lab::patches::WavePropagation2d<Solver>::WavePropagation2d(
+    t_idx i_x, t_idx i_y, Solver i_solver) {
+    m_solver = i_solver;
+
     m_nCellsX = i_x;
     m_nCellsY = i_y;
 
@@ -24,7 +28,9 @@ tsunami_lab::patches::WavePropagation2d::WavePropagation2d(t_idx i_x,
     m_b = new t_real[m_nCells]{0};
 }
 
-tsunami_lab::patches::WavePropagation2d::~WavePropagation2d() {
+template <typename Solver>
+tsunami_lab::patches::WavePropagation2d<
+    Solver>::WavePropagation2d::~WavePropagation2d() {
     for (unsigned short l_st = 0; l_st < 2; l_st++) {
         delete[] m_h[l_st];
         delete[] m_hu[l_st];
@@ -34,8 +40,9 @@ tsunami_lab::patches::WavePropagation2d::~WavePropagation2d() {
     delete[] m_b;
 }
 
-void tsunami_lab::patches::WavePropagation2d::timeStep(
-    t_real i_scaling, solvers::Solver *solver) {
+template <typename Solver>
+void tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(
+    t_real i_scaling) {
     // pointers to old and new data
     t_real *l_hOld = m_h[m_step];
     t_real *l_huOld = m_hu[m_step];
@@ -82,8 +89,8 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(
             t_real l_netUpdates[2][2];
 
             // compute net-updates
-            solver->netUpdates(l_hL, l_hR, l_huL, l_huR, l_bL, l_bR,
-                               l_netUpdates[0], l_netUpdates[1]);
+            m_solver.netUpdates(l_hL, l_hR, l_huL, l_huR, l_bL, l_bR,
+                                l_netUpdates[0], l_netUpdates[1]);
 
             // update the cells' quantities
             l_hNew[l_ceL] -= i_scaling * l_netUpdates[0][0];
@@ -125,8 +132,8 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(
             t_real l_netUpdates[2][2];
 
             // compute net-updates
-            solver->netUpdates(l_hL, l_hR, l_hvL, l_hvR, l_bL, l_bR,
-                               l_netUpdates[0], l_netUpdates[1]);
+            m_solver.netUpdates(l_hL, l_hR, l_hvL, l_hvR, l_bL, l_bR,
+                                l_netUpdates[0], l_netUpdates[1]);
 
             // update the cells' quantities
             l_hNew[l_ceL] -= i_scaling * l_netUpdates[0][0];
@@ -138,7 +145,8 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(
     }
 }
 
-void tsunami_lab::patches::WavePropagation2d::setGhostOutflow() {
+template <typename Solver>
+void tsunami_lab::patches::WavePropagation2d<Solver>::setGhostOutflow() {
     t_real *l_h = m_h[m_step];
     t_real *l_hu = m_hu[m_step];
     t_real *l_hv = m_hv[m_step];
@@ -188,7 +196,8 @@ void tsunami_lab::patches::WavePropagation2d::setGhostOutflow() {
     }
 }
 
-void tsunami_lab::patches::WavePropagation2d::setGhostReflecting() {
+template <typename Solver>
+void tsunami_lab::patches::WavePropagation2d<Solver>::setGhostReflecting() {
     for (t_idx l_x = 1; l_x < m_nCellsX + 1; l_x++) {
         m_b[l_x] = 20.;
         m_b[(m_nCellsY + 1) * getStride() + l_x] = 20.;
@@ -199,3 +208,6 @@ void tsunami_lab::patches::WavePropagation2d::setGhostReflecting() {
         m_b[l_y * getStride() + m_nCellsX + 1] = 20.;
     }
 }
+
+template class tsunami_lab::patches::WavePropagation2d<
+    tsunami_lab::solvers::FWave>;

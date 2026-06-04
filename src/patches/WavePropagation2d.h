@@ -8,17 +8,19 @@
 #ifndef TSUNAMI_LAB_PATCHES_WAVE_PROPAGATION_2D
 #define TSUNAMI_LAB_PATCHES_WAVE_PROPAGATION_2D
 
-#include "../solvers/Solver.h"
 #include "WavePropagation.h"
 
 namespace tsunami_lab {
 namespace patches {
-class WavePropagation2d;
+template <typename Solver> class WavePropagation2d;
 }
 } // namespace tsunami_lab
 
+template <typename Solver>
 class tsunami_lab::patches::WavePropagation2d : public WavePropagation {
   private:
+    Solver m_solver;
+
     //! current step which indicates the active values in the arrays below
     unsigned short m_step = 0;
 
@@ -46,7 +48,7 @@ class tsunami_lab::patches::WavePropagation2d : public WavePropagation {
      * @param i_x number of cells in x direction.
      * @param i_y number of cells in y direction.
      **/
-    WavePropagation2d(t_idx i_x, t_idx i_y);
+    WavePropagation2d(t_idx i_x, t_idx i_y, Solver i_solver);
 
     /**
      * Destructor which frees all allocated memory.
@@ -58,7 +60,7 @@ class tsunami_lab::patches::WavePropagation2d : public WavePropagation {
      *
      * @param i_scaling scaling of the time step (dt / dx).
      **/
-    void timeStep(t_real i_scaling, solvers::Solver *solver);
+    void timeStep(t_real i_scaling);
 
     /**
      * Sets the values of the ghost cells according to outflow boundary

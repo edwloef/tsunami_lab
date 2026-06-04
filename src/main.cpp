@@ -78,7 +78,8 @@ int main(int i_argc, char *i_argv[]) {
     l_setup = new tsunami_lab::setups::TsunamiEvent2d(l_displ, l_bathy);
     // construct solver
     tsunami_lab::patches::WavePropagation *l_waveProp;
-    l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny);
+    l_waveProp = new tsunami_lab::patches::WavePropagation2d(
+        l_nx, l_ny, tsunami_lab::solvers::FWave());
     // construct stations
     tsunami_lab::io::Stations stations(std::ifstream{l_stations});
     // construct netcdf writer
@@ -135,8 +136,6 @@ int main(int i_argc, char *i_argv[]) {
 
     std::cout << "entering time loop..." << std::endl;
 
-    tsunami_lab::solvers::FWave solver;
-
     auto dur = std::chrono::duration<double>(0);
 
     // iterate over time
@@ -170,7 +169,7 @@ int main(int i_argc, char *i_argv[]) {
 
         auto now = std::chrono::high_resolution_clock::now();
         l_waveProp->setGhostOutflow();
-        l_waveProp->timeStep(l_scaling, &solver);
+        l_waveProp->timeStep(l_scaling);
         dur += std::chrono::high_resolution_clock::now() - now;
 
         l_timeStep++;

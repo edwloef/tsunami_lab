@@ -31,7 +31,8 @@ TEST_CASE("Test the 1d wave propagation solver.", "[WaveProp1d]") {
      */
 
     // construct solver and setup a dambreak problem
-    tsunami_lab::patches::WavePropagation1d m_waveProp(100);
+    tsunami_lab::patches::WavePropagation1d m_waveProp(
+        100, tsunami_lab::solvers::FWave());
 
     for (std::size_t l_ce = 0; l_ce < 50; l_ce++) {
         m_waveProp.setHeight(l_ce, 0, 10);
@@ -46,8 +47,7 @@ TEST_CASE("Test the 1d wave propagation solver.", "[WaveProp1d]") {
     m_waveProp.setGhostOutflow();
 
     // perform a time step
-    auto solver = tsunami_lab::solvers::FWave();
-    m_waveProp.timeStep(0.1, &solver);
+    m_waveProp.timeStep(0.1);
 
     // steady state
     for (std::size_t l_ce = 0; l_ce < 49; l_ce++) {
@@ -72,7 +72,8 @@ TEST_CASE("Test the 1d wave propagation solver.", "[WaveProp1d]") {
 TEST_CASE("Test the 1d wave propagation solver with middle-state cases.",
           "[WaveProp1dMiddleStates]") {
     // construct solver
-    tsunami_lab::patches::WavePropagation1d m_waveProp(100);
+    tsunami_lab::patches::WavePropagation1d m_waveProp(
+        100, tsunami_lab::solvers::FWave());
 
     // set outflow boundary condition
     m_waveProp.setGhostOutflow();
@@ -102,8 +103,7 @@ TEST_CASE("Test the 1d wave propagation solver with middle-state cases.",
             }
 
             // perform a time step
-            auto solver = tsunami_lab::solvers::FWave();
-            m_waveProp.timeStep(0.01259, &solver);
+            m_waveProp.timeStep(0.01259);
 
             // check middle-state
             fails += m_waveProp.getHeight()[50] != Approx(hStar).epsilon(1e-1);
