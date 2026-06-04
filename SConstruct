@@ -36,7 +36,7 @@ if vars.UnknownVariables():
     exit(1)
 
 # create environment
-env = Environment(variables=vars, COMPILATIONDB_USE_ABSPATH=True)
+env = Environment(variables=vars)
 env.Tool("compilation_db")
 env.CompilationDatabase()
 
@@ -78,6 +78,11 @@ env.Append(LINKFLAGS=env["CXXFLAGS"])
 
 # add nix header paths
 env.Append(CPPPATH=os.environ.get("NIX_CFLAGS_COMPILE", "").split())
+
+# set cxx
+cxx = os.environ.get("CXX", "")
+if cxx:
+    env["CXX"] = cxx
 
 # get source files
 VariantDir(variant_dir="build/src", src_dir="src")
