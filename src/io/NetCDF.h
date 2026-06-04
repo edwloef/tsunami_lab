@@ -9,6 +9,7 @@
 #define TSUNAMI_LAB_IO_NETCDF
 
 #include "../constants.h"
+#include <algorithm>
 #include <cstring>
 #include <optional>
 
@@ -105,6 +106,22 @@ class tsunami_lab::io::NetCDF {
      * @return value of z.
      **/
     std::optional<t_real> readAt(t_real i_x, t_real i_y) const;
+
+    t_real minX() const {
+        return std::min(buf[0], buf[nx - 1]);
+    }
+
+    t_real minY() const {
+        return std::min(buf[nx], buf[nx + ny - 1]);
+    }
+
+    t_real maxX() const {
+        return std::max(buf[0], buf[nx - 1]);
+    }
+
+    t_real maxY() const {
+        return std::max(buf[nx], buf[nx + ny - 1]);
+    }
 };
 
 #endif

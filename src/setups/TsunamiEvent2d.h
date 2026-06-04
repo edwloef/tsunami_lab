@@ -62,6 +62,22 @@ class tsunami_lab::setups::TsunamiEvent2d : public Setup {
      * @return bathymetry.
      **/
     t_real getBathymetry(t_real, t_real) const;
+
+    t_real minX() const {
+        return b.minX();
+    }
+
+    t_real minY() const {
+        return b.minY();
+    }
+
+    t_real maxX() const {
+        return b.maxX();
+    }
+
+    t_real maxY() const {
+        return b.maxY();
+    }
 };
 
 #endif
