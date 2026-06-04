@@ -8,6 +8,7 @@
 #define TSUNAMI_LAB_IO_CSV
 
 #include "../constants.h"
+#include <array>
 #include <iostream>
 #include <vector>
 

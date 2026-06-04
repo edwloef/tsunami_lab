@@ -5,7 +5,6 @@
  * IO-routines for writing a snapshot as Comma Separated Values (CSV).
  **/
 #include "Csv.h"
-#include <array>
 #include <sstream>
 #include <string>
 #include <vector>
