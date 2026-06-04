@@ -44,7 +44,17 @@ env.CompilationDatabase()
 Help(vars.GenerateHelpText(env))
 
 # add default flags
-env.Append(CXXFLAGS=["-std=c++17", "-fwrapv", "-Wall", "-Wextra", "-Wpedantic"])
+env.Append(
+    CXXFLAGS=[
+        "-std=c++17",
+        "-fwrapv",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Wno-keyword-macro",
+        "-Wno-c2y-extensions",
+    ]
+)
 
 # set optimization mode
 if "debug" in env["mode"]:
