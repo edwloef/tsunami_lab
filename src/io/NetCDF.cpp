@@ -152,11 +152,6 @@ void tsunami_lab::io::NetCDF::writeCheckpoint(char const *i_path,
     nc_try(nc_def_var(ncid, "hv", NC_FLOAT, 2, dimids, &hv_varid));
     nc_try(nc_def_var(ncid, "t", NC_FLOAT, 0, NULL, &step_varid));
 
-    nc_try(nc_def_var_deflate(ncid, b_varid, true, true, 3));
-    nc_try(nc_def_var_deflate(ncid, h_varid, true, true, 3));
-    nc_try(nc_def_var_deflate(ncid, hu_varid, true, true, 3));
-    nc_try(nc_def_var_deflate(ncid, hv_varid, true, true, 3));
-
     nc_try(nc_put_att_text(ncid, b_varid, "units", strlen("meters"), "meters"));
     nc_try(nc_put_att_text(ncid, h_varid, "units", strlen("meters"), "meters"));
 
