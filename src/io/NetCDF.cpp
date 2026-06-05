@@ -144,7 +144,7 @@ void tsunami_lab::io::NetCDF::writeCheckpoint(char const *i_path,
     nc_try(nc_def_dim(ncid, "y", ny, &y_dimid));
     nc_try(nc_def_dim(ncid, "x", nx, &x_dimid));
 
-    int dimids[3] = {y_dimid, x_dimid};
+    int dimids[2] = {y_dimid, x_dimid};
 
     nc_try(nc_def_var(ncid, "b", NC_FLOAT, 2, dimids, &b_varid));
     nc_try(nc_def_var(ncid, "h", NC_FLOAT, 2, dimids, &h_varid));
