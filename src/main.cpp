@@ -73,7 +73,7 @@ Args parseArgs(int argc, char *argv[]) {
                  NULL, NULL,  "stations.json", "output.nc", "checkpoint.nc"};
 
     int c;
-    while ((c = getopt_long(argc, argv, "hl:s:d:b:o:c:", options, NULL)) !=
+    while ((c = getopt_long(argc, argv, "hl:s:k:d:b:o:c:", options, NULL)) !=
            -1) {
         switch (c) {
         case 'h':
