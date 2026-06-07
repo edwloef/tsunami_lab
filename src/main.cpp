@@ -202,7 +202,8 @@ int main(int i_argc, char *i_argv[]) {
 
     // construct netcdf writer
     tsunami_lab::io::NetCDF netcdf(l_args.output, l_args.cellSize, l_nx, l_ny,
-                                   l_waveProp.getStride());
+                                   l_waveProp.getStride(),
+                                   l_args.coarseOutputSize);
 
     // construct stations
     tsunami_lab::io::Stations stations(std::ifstream{l_args.stations});
