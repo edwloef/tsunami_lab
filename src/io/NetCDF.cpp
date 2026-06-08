@@ -75,14 +75,6 @@ tsunami_lab::io::NetCDF::NetCDF(char const *i_path, t_real i_dxy, t_idx i_nx,
     nc_try(nc_def_var(ncid, "hv", NC_FLOAT, 3, dimids, &hv_varid));
     nc_try(nc_def_var(ncid, "t", NC_FLOAT, 1, dimids, &t_varid));
 
-    nc_try(nc_def_var_deflate(ncid, x_varid, true, true, 3));
-    nc_try(nc_def_var_deflate(ncid, y_varid, true, true, 3));
-    nc_try(nc_def_var_deflate(ncid, b_varid, true, true, 3));
-    nc_try(nc_def_var_deflate(ncid, h_varid, true, true, 3));
-    nc_try(nc_def_var_deflate(ncid, hu_varid, true, true, 3));
-    nc_try(nc_def_var_deflate(ncid, hv_varid, true, true, 3));
-    nc_try(nc_def_var_deflate(ncid, t_varid, true, true, 3));
-
     nc_try(nc_put_att_text(ncid, x_varid, "units", strlen("meters"), "meters"));
     nc_try(nc_put_att_text(ncid, y_varid, "units", strlen("meters"), "meters"));
     nc_try(nc_put_att_text(ncid, b_varid, "units", strlen("meters"), "meters"));
