@@ -54,6 +54,10 @@ void tsunami_lab::patches::WavePropagation1d<Solver>::timeStep(
         t_idx l_ceL = l_ed;
         t_idx l_ceR = l_ceL + 1;
 
+        // init new cell quantities
+        l_hNew[l_ceR] = l_hOld[l_ceR];
+        l_huNew[l_ceR] = l_huOld[l_ceR];
+
         t_real l_hL = l_hOld[l_ceL];
         t_real l_hR = l_hOld[l_ceR];
         t_real l_huL = l_huOld[l_ceL];
@@ -86,8 +90,8 @@ void tsunami_lab::patches::WavePropagation1d<Solver>::timeStep(
         l_hNew[l_ceL] -= i_scaling * l_netUpdates[0][0];
         l_huNew[l_ceL] -= i_scaling * l_netUpdates[0][1];
 
-        l_hNew[l_ceR] = l_hR - i_scaling * l_netUpdates[1][0];
-        l_huNew[l_ceR] = l_huR - i_scaling * l_netUpdates[1][1];
+        l_hNew[l_ceR] -= i_scaling * l_netUpdates[1][0];
+        l_huNew[l_ceR] -= i_scaling * l_netUpdates[1][1];
     }
 }
 
