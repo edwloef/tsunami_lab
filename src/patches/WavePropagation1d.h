@@ -71,7 +71,7 @@ class tsunami_lab::patches::WavePropagation1d : public WavePropagation {
      *
      * @return stride in y-direction.
      **/
-    t_idx getStride() {
+    t_idx getStride() const {
         return m_nCells + 2;
     }
 
@@ -80,7 +80,7 @@ class tsunami_lab::patches::WavePropagation1d : public WavePropagation {
      *
      * @return water heights.
      */
-    t_real const *getHeight() {
+    t_real const *getHeight() const {
         return m_h[m_step] + 1;
     }
 
@@ -89,14 +89,14 @@ class tsunami_lab::patches::WavePropagation1d : public WavePropagation {
      *
      * @return momenta in x-direction.
      **/
-    t_real const *getMomentumX() {
+    t_real const *getMomentumX() const {
         return m_hu[m_step] + 1;
     }
 
     /**
      * Dummy function which returns a nullptr.
      **/
-    t_real const *getMomentumY() {
+    t_real const *getMomentumY() const {
         return nullptr;
     }
 
@@ -105,7 +105,7 @@ class tsunami_lab::patches::WavePropagation1d : public WavePropagation {
      *
      * @return bathymetry.
      **/
-    t_real const *getBathymetry() {
+    t_real const *getBathymetry() const {
         return m_b + 1;
     }
 

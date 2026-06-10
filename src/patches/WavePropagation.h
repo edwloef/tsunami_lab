@@ -46,35 +46,35 @@ class tsunami_lab::patches::WavePropagation {
      *
      * @return stride in y-direction.
      **/
-    virtual t_idx getStride() = 0;
+    virtual t_idx getStride() const = 0;
 
     /**
      * Gets cells' water heights.
      *
      * @return water heights.
      */
-    virtual t_real const *getHeight() = 0;
+    virtual t_real const *getHeight() const = 0;
 
     /**
      * Gets the cells' momenta in x-direction.
      *
      * @return momenta in x-direction.
      **/
-    virtual t_real const *getMomentumX() = 0;
+    virtual t_real const *getMomentumX() const = 0;
 
     /**
      * Gets the cells' momenta in y-direction.
      *
      * @return momenta in y-direction.
      **/
-    virtual t_real const *getMomentumY() = 0;
+    virtual t_real const *getMomentumY() const = 0;
 
     /**
      * Gets the cells' bathymetry.
      *
      * @return bathymetry.
      **/
-    virtual t_real const *getBathymetry() = 0;
+    virtual t_real const *getBathymetry() const = 0;
 
     /**
      * Sets the height of the cell to the given value.
