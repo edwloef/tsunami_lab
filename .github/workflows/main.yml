@@ -26,16 +26,16 @@ jobs:
         run: |
           scons mode=debug+san
           ./build/tests
-          ./build/tsunami_lab -d artificialtsunami_displ_1000.nc -b artificialtsunami_bathymetry_1000.nc -s 5 -l 25
+          ./build/tsunami_lab -d artificialtsunami_displ_1000.nc -b artificialtsunami_bathymetry_1000.nc -s 10 -l 25
           scons mode=release+san
           ./build/tests
-          ./build/tsunami_lab -d artificialtsunami_displ_1000.nc -b artificialtsunami_bathymetry_1000.nc -s 2.5 -l 25
+          ./build/tsunami_lab -d artificialtsunami_displ_1000.nc -b artificialtsunami_bathymetry_1000.nc -s 5 -l 25
 
       - name: valgrind
         run: |
           scons mode=debug
           valgrind ./build/tests
-          valgrind ./build/tsunami_lab -d artificialtsunami_displ_1000.nc -b artificialtsunami_bathymetry_1000.nc -s 5 -l 25
+          valgrind ./build/tsunami_lab -d artificialtsunami_displ_1000.nc -b artificialtsunami_bathymetry_1000.nc -s 10 -l 25
           scons mode=release
           valgrind ./build/tests
-          valgrind ./build/tsunami_lab -d artificialtsunami_displ_1000.nc -b artificialtsunami_bathymetry_1000.nc -s 2.5 -l 25
+          valgrind ./build/tsunami_lab -d artificialtsunami_displ_1000.nc -b artificialtsunami_bathymetry_1000.nc -s 5 -l 25

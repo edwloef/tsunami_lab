@@ -275,8 +275,11 @@ int main(int i_argc, char *i_argv[]) {
 
     std::filesystem::remove(l_args.checkpoint);
 
+    dur /= l_timeStep;
+
     std::cout << "finished time loop\n  simulation time per time step: "
-              << dur.count()
+              << 1'000 * dur.count()
               << " ms\n  simulation time per time step per cell: "
-              << 1'000'000 * dur.count() / (l_nx * l_ny) << " ns" << std::endl;
+              << 1'000'000'000 * dur.count() / (l_nx * l_ny) << " ns"
+              << std::endl;
 }
