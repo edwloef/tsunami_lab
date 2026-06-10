@@ -45,14 +45,14 @@ void tsunami_lab::patches::WavePropagation1d<Solver>::timeStep(
     t_real *l_huNew = m_hu[m_step];
 
     // init new cell quantities
-    std::memcpy(l_hNew + 1, l_hOld + 1, m_nCells * sizeof(t_real));
-    std::memcpy(l_huNew + 1, l_huOld + 1, m_nCells * sizeof(t_real));
+    l_hNew[0] = l_hOld[0];
+    l_huNew[0] = l_huOld[0];
 
     // iterate over edges and update with Riemann solutions
     for (t_idx l_ed = 0; l_ed < m_nCells + 1; l_ed++) {
         // determine left and right cell-id
         t_idx l_ceL = l_ed;
-        t_idx l_ceR = l_ed + 1;
+        t_idx l_ceR = l_ceL + 1;
 
         t_real l_hL = l_hOld[l_ceL];
         t_real l_hR = l_hOld[l_ceR];
@@ -86,8 +86,8 @@ void tsunami_lab::patches::WavePropagation1d<Solver>::timeStep(
         l_hNew[l_ceL] -= i_scaling * l_netUpdates[0][0];
         l_huNew[l_ceL] -= i_scaling * l_netUpdates[0][1];
 
-        l_hNew[l_ceR] -= i_scaling * l_netUpdates[1][0];
-        l_huNew[l_ceR] -= i_scaling * l_netUpdates[1][1];
+        l_hNew[l_ceR] = l_hR - i_scaling * l_netUpdates[1][0];
+        l_huNew[l_ceR] = l_huR - i_scaling * l_netUpdates[1][1];
     }
 }
 

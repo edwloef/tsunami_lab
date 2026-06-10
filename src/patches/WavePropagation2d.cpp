@@ -7,7 +7,6 @@
  **/
 #include "WavePropagation2d.h"
 #include "../solvers/FWave.h"
-#include <cstring>
 
 template <typename Solver>
 tsunami_lab::patches::WavePropagation2d<Solver>::WavePropagation2d(
@@ -53,18 +52,23 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(
     t_real *l_huNew = m_hu[m_step];
     t_real *l_hvNew = m_hv[m_step];
 
-    // init new cell quantities
-    std::memcpy(l_hNew, l_hOld, m_nCells * sizeof(t_real));
-    std::memcpy(l_huNew, l_huOld, m_nCells * sizeof(t_real));
-    std::memcpy(l_hvNew, l_hvOld, m_nCells * sizeof(t_real));
-
     t_idx stride = getStride();
 
     for (t_idx l_y = 0; l_y < m_nCellsY + 1; l_y++) {
+        t_idx l_ce = l_y * stride;
+
+        // init new cell quantities
+        l_hNew[l_ce] = l_hOld[l_ce];
+        l_huNew[l_ce] = l_huOld[l_ce];
+        l_hvNew[l_ce] = l_hvOld[l_ce];
+
         for (t_idx l_x = 0; l_x < m_nCellsX + 1; l_x++) {
             // determine left and right cell-id
-            t_idx l_ceL = l_y * stride + l_x;
-            t_idx l_ceR = l_y * stride + l_x + 1;
+            t_idx l_ceL = l_ce + l_x;
+            t_idx l_ceR = l_ceL + 1;
+
+            // init new cell quantities
+            l_hvNew[l_ceR] = l_hvOld[l_ceR];
 
             t_real l_hL = l_hOld[l_ceL];
             t_real l_hR = l_hOld[l_ceR];
@@ -98,16 +102,18 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(
             l_hNew[l_ceL] -= i_scaling * l_netUpdates[0][0];
             l_huNew[l_ceL] -= i_scaling * l_netUpdates[0][1];
 
-            l_hNew[l_ceR] -= i_scaling * l_netUpdates[1][0];
-            l_huNew[l_ceR] -= i_scaling * l_netUpdates[1][1];
+            l_hNew[l_ceR] = l_hR - i_scaling * l_netUpdates[1][0];
+            l_huNew[l_ceR] = l_huR - i_scaling * l_netUpdates[1][1];
         }
     }
 
     for (t_idx l_y = 0; l_y < m_nCellsY + 1; l_y++) {
+        t_idx l_ce = l_y * stride;
+
         for (t_idx l_x = 0; l_x < m_nCellsX + 1; l_x++) {
             // determine left and right cell-id
-            t_idx l_ceL = l_y * stride + l_x;
-            t_idx l_ceR = (l_y + 1) * stride + l_x;
+            t_idx l_ceL = l_ce + l_x;
+            t_idx l_ceR = l_ceL + stride;
 
             t_real l_hL = l_hOld[l_ceL];
             t_real l_hR = l_hOld[l_ceR];
