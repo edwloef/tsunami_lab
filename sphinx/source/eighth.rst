@@ -20,9 +20,17 @@ was faster:
 
 .. code-block:: c++
 
+    g++ -O3 -flto=auto -fno-math-errno 
+    finished time loop (local):
+        simulation time per time step: 12.7347 ms
+        simulation time per time step per cell: 12.6036 ns
+
+.. code-block:: c++
+
     finished time loop (draco)
         simulation time per time step: 28.2843 ms
         simulation time per time step per cell: 27.9931 ns
+
 
 
 **2. Compilers**
@@ -45,14 +53,14 @@ we saw that the clang compiler was just a bit faster:
 
 .. code-block:: c++
 
-    g++:
+    g++ -O3:
     finished time loop
-        simulation time per time step: 54.7107 ms
-        simulation time per time step per cell: 54.1475 ns
-    clang++:
+        simulation time per time step: 14.6622 ms
+        simulation time per time step per cell: 14.5113 ns
+    clang++ -O3:
     finished time loop
-        simulation time per time step: 50.7336 ms
-        simulation time per time step per cell: 50.2113 ns
+        simulation time per time step: 19.5751 ms
+        simulation time per time step per cell: 19.3736 ns
 
 
 Then we tried different optimization switches, we used O3, flto-auto, 
