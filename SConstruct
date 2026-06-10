@@ -23,7 +23,14 @@ vars.AddVariables(
         "mode",
         "compile modes, option 'san' enables address and undefined behavior sanitizers",
         "release",
-        allowed_values=("release", "debug", "release+san", "debug+san"),
+        allowed_values=(
+            "release",
+            "debug",
+            "release+san",
+            "debug+san",
+            "release+remarks",
+            "release+san+remarks",
+        ),
     )
 )
 

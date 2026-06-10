@@ -6,6 +6,10 @@
 ##
 Import("env")
 
+remarks_flags = []
+if "remarks" in env["mode"]:
+    remarks_flags = ["-Rpass=.*", "-Rpass-missed=.*", "-Rpass-analysis=.*"]
+
 # gather sources
 l_sources = [
     "io/Csv.cpp",
@@ -28,9 +32,9 @@ l_sources = [
 ]
 
 for l_so in l_sources:
-    env.sources.append(env.Object(l_so))
+    env.sources.append(env.Object(l_so, CXXFLAGS=env["CXXFLAGS"] + remarks_flags))
 
-env.standalone = env.Object("main.cpp")
+env.standalone = env.Object("main.cpp", CXXFLAGS=env["CXXFLAGS"] + remarks_flags)
 
 # gather unit tests
 l_tests = [
