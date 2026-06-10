@@ -14,6 +14,7 @@
    fifth
    sixth
    seventh
+   eighth
 
 
 Tsunami documentation
