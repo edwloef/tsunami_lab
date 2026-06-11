@@ -174,6 +174,8 @@ int main(int i_argc, char *i_argv[]) {
     tsunami_lab::t_real l_hMax =
         std::numeric_limits<tsunami_lab::t_real>::lowest();
 
+    auto now = std::chrono::high_resolution_clock::now();
+
     // set up solver
     for (tsunami_lab::t_idx l_cy = 0; l_cy < l_ny; l_cy++) {
         tsunami_lab::t_real l_y = l_setup->minY() + l_cy * l_args.cellSize;
@@ -196,6 +198,9 @@ int main(int i_argc, char *i_argv[]) {
             l_hMax = std::max(l_h, l_hMax);
         }
     }
+
+    std::chrono::duration<double> setup_dur =
+        std::chrono::high_resolution_clock::now() - now;
 
     // destroy setup
     delete l_setup;
@@ -229,7 +234,7 @@ int main(int i_argc, char *i_argv[]) {
 
     std::cout << "entering time loop..." << std::endl;
 
-    auto dur = std::chrono::duration<double>(0);
+    auto sim_dur = std::chrono::duration<double>(0);
 
     char *new_checkpoint = strfmt("%s.new", l_args.checkpoint);
 
@@ -265,7 +270,7 @@ int main(int i_argc, char *i_argv[]) {
         auto now = std::chrono::high_resolution_clock::now();
         l_waveProp.setGhostOutflow();
         l_waveProp.timeStep(l_scaling);
-        dur += std::chrono::high_resolution_clock::now() - now;
+        sim_dur += std::chrono::high_resolution_clock::now() - now;
 
         l_timeStep++;
         l_simTime += l_dt;
@@ -275,11 +280,11 @@ int main(int i_argc, char *i_argv[]) {
 
     std::filesystem::remove(l_args.checkpoint);
 
-    dur /= l_timeStep;
+    sim_dur /= l_timeStep;
 
-    std::cout << "finished time loop\n  simulation time per time step: "
-              << 1'000 * dur.count()
-              << " ms\n  simulation time per time step per cell: "
-              << 1'000'000'000 * dur.count() / (l_nx * l_ny) << " ns"
+    std::cout << "finished time loop\n  setup time per cell: "
+              << 1'000'000 * setup_dur.count() / (l_nx * l_ny)
+              << " us\n  simulation time per time step per cell: "
+              << 1'000'000'000 * sim_dur.count() / (l_nx * l_ny) << " ns"
               << std::endl;
 }
