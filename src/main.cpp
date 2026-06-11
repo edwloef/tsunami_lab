@@ -26,12 +26,14 @@ typedef struct {
     tsunami_lab::t_real outputFreq, checkpointFreq, simLen, cellSize;
     tsunami_lab::t_idx coarseOutputSize;
     char const *displ, *bathy, *stations, *output, *checkpoint;
+    bool readall;
 } Args;
 
 enum {
     outputFreq = 256,
     checkpointFreq,
     stations,
+    readall,
 };
 
 static struct option options[] = {
@@ -46,6 +48,7 @@ static struct option options[] = {
     {"stations", required_argument, 0, stations},
     {"output", required_argument, 0, 'o'},
     {"checkpoint", required_argument, 0, 'c'},
+    {"readall", no_argument, 0, readall},
     {0, 0, 0, 0}};
 
 void printUsage(char *program) {
@@ -64,13 +67,16 @@ void printUsage(char *program) {
            "--stations <path>              Path to stations JSON file (default "
            "stations.nc)\n  -o --output <path>                Path to output "
            "NetCDF file (default output.nc)\n  -c --checkpoint <path>          "
-           "  Path to checkpoint NetCDF file (default checkpoint.nc)"
+           "  Path to checkpoint NetCDF file (default "
+           "checkpoint.nc)\n--readall                  Whether to read the "
+           "entire NetCDF file into RAM for faster setup (default false)"
         << std::endl;
 }
 
 Args parseArgs(int argc, char *argv[]) {
     Args args = {60.0, 600.0, 3600.0,          1000.0,      1,
-                 NULL, NULL,  "stations.json", "output.nc", "checkpoint.nc"};
+                 NULL, NULL,  "stations.json", "output.nc", "checkpoint.nc",
+                 false};
 
     int c;
     while ((c = getopt_long(argc, argv, "hl:s:k:d:b:o:c:", options, NULL)) !=
@@ -109,6 +115,9 @@ Args parseArgs(int argc, char *argv[]) {
         case 'c':
             args.checkpoint = optarg;
             break;
+        case readall:
+            args.readall = true;
+            break;
         default:
             printUsage(*argv);
             exit(2);
@@ -145,12 +154,14 @@ int main(int i_argc, char *i_argv[]) {
 
     Args l_args = parseArgs(i_argc, i_argv);
 
+    auto now = std::chrono::high_resolution_clock::now();
+
     std::cout << "runtime configuration:\n  cell size: " << l_args.cellSize
               << " meters" << std::endl;
 
     // construct setup
-    auto l_setup =
-        new tsunami_lab::setups::TsunamiEvent2d(l_args.displ, l_args.bathy);
+    auto l_setup = new tsunami_lab::setups::TsunamiEvent2d(
+        l_args.displ, l_args.bathy, l_args.readall);
 
     tsunami_lab::t_idx l_nx =
         (l_setup->maxX() - l_setup->minX()) / l_args.cellSize;
@@ -173,8 +184,6 @@ int main(int i_argc, char *i_argv[]) {
     // maximum observed height in the setup
     tsunami_lab::t_real l_hMax =
         std::numeric_limits<tsunami_lab::t_real>::lowest();
-
-    auto now = std::chrono::high_resolution_clock::now();
 
     // set up solver
     for (tsunami_lab::t_idx l_cy = 0; l_cy < l_ny; l_cy++) {

@@ -21,6 +21,7 @@ class NetCDF;
 
 class tsunami_lab::io::NetCDF {
   private:
+    bool readall;
     t_idx nx, ny, stride, k, knx, kny, step;
     int ncid, x_dimid, y_dimid, t_dimid, x_varid, y_varid, z_varid, b_varid,
         h_varid, hu_varid, hv_varid, t_varid;
@@ -45,7 +46,7 @@ class tsunami_lab::io::NetCDF {
      *
      * @param i_path path to be read from.
      */
-    NetCDF(char const *i_path);
+    NetCDF(char const *i_path, bool i_readall = false);
 
     /**
      * Constructor.
