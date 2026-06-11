@@ -249,7 +249,7 @@ int main(int i_argc, char *i_argv[]) {
 
     // iterate over time
     while (l_simTime < l_args.simLen) {
-        if (l_simTime >= l_nextOutput) {
+        if (l_simTime >= l_nextOutput && l_args.outputFreq > 0.0) {
             std::cout << "  output: " << l_timeStep << " time steps, "
                       << l_simTime << " seconds" << std::endl;
 
@@ -262,7 +262,7 @@ int main(int i_argc, char *i_argv[]) {
             l_nextOutput += l_args.outputFreq;
         }
 
-        if (l_simTime >= l_nextCheckpoint) {
+        if (l_simTime >= l_nextCheckpoint && l_args.checkpointFreq > 0.0) {
             std::cout << "  checkpoint: " << l_timeStep << " time steps, "
                       << l_simTime << " seconds" << std::endl;
 
