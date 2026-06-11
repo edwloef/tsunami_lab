@@ -6,7 +6,7 @@
  **/
 #include "WavePropagation1d.h"
 #include "../solvers/FWave.h"
-#include <cstring>
+#include <cmath>
 
 template <typename Solver>
 tsunami_lab::patches::WavePropagation1d<Solver>::WavePropagation1d(
@@ -66,15 +66,15 @@ void tsunami_lab::patches::WavePropagation1d<Solver>::timeStep(
         t_real l_bR = m_b[l_ceR];
 
         // if wet <-> dry boundary, set up reflection
-        if (l_bL > 0) {
-            if (l_bR > 0) {
+        if (!std::signbit(l_bL)) {
+            if (!std::signbit(l_bR)) {
                 continue;
             } else {
                 l_hL = l_hR;
                 l_huL = -l_huR;
                 l_bL = l_bR;
             }
-        } else if (l_bR > 0) {
+        } else if (!std::signbit(l_bR)) {
             l_hR = l_hL;
             l_huR = -l_huL;
             l_bR = l_bL;
