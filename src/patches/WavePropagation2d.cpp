@@ -54,6 +54,7 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(
 
     t_idx stride = getStride();
 
+#pragma omp parallel for
     for (t_idx l_y = 0; l_y < m_nCellsY + 1; l_y++) {
         t_idx l_ce = l_y * stride;
 
@@ -109,48 +110,51 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(
         }
     }
 
-    for (t_idx l_y = 0; l_y < m_nCellsY + 1; l_y++) {
-        t_idx l_ce = l_y * stride;
+    for (t_idx l_s = 0; l_s < 2; l_s++) {
+#pragma omp parallel for
+        for (t_idx l_y = l_s; l_y < m_nCellsY + 1; l_y += 2) {
+            t_idx l_ce = l_y * stride;
 
-        for (t_idx l_x = 0; l_x < m_nCellsX + 1; l_x++) {
-            // determine left and right cell-id
-            t_idx l_ceL = l_ce + l_x;
-            t_idx l_ceR = l_ceL + stride;
+            for (t_idx l_x = 0; l_x < m_nCellsX + 1; l_x++) {
+                // determine left and right cell-id
+                t_idx l_ceL = l_ce + l_x;
+                t_idx l_ceR = l_ceL + stride;
 
-            t_real l_hL = l_hOld[l_ceL];
-            t_real l_hR = l_hOld[l_ceR];
-            t_real l_hvL = l_hvOld[l_ceL];
-            t_real l_hvR = l_hvOld[l_ceR];
-            t_real l_bL = m_b[l_ceL];
-            t_real l_bR = m_b[l_ceR];
+                t_real l_hL = l_hOld[l_ceL];
+                t_real l_hR = l_hOld[l_ceR];
+                t_real l_hvL = l_hvOld[l_ceL];
+                t_real l_hvR = l_hvOld[l_ceR];
+                t_real l_bL = m_b[l_ceL];
+                t_real l_bR = m_b[l_ceR];
 
-            // if wet <-> dry boundary, set up reflection
-            if (l_bL > 0) {
-                if (l_bR > 0) {
-                    continue;
-                } else {
-                    l_hL = l_hR;
-                    l_hvL = -l_hvR;
-                    l_bL = l_bR;
+                // if wet <-> dry boundary, set up reflection
+                if (l_bL > 0) {
+                    if (l_bR > 0) {
+                        continue;
+                    } else {
+                        l_hL = l_hR;
+                        l_hvL = -l_hvR;
+                        l_bL = l_bR;
+                    }
+                } else if (l_bR > 0) {
+                    l_hR = l_hL;
+                    l_hvR = -l_hvL;
+                    l_bR = l_bL;
                 }
-            } else if (l_bR > 0) {
-                l_hR = l_hL;
-                l_hvR = -l_hvL;
-                l_bR = l_bL;
+
+                t_real l_netUpdates[2][2];
+
+                // compute net-updates
+                m_solver.netUpdates(l_hL, l_hR, l_hvL, l_hvR, l_bL, l_bR,
+                                    l_netUpdates[0], l_netUpdates[1]);
+
+                // update the cells' quantities
+                l_hNew[l_ceL] -= i_scaling * l_netUpdates[0][0];
+                l_hvNew[l_ceL] -= i_scaling * l_netUpdates[0][1];
+
+                l_hNew[l_ceR] -= i_scaling * l_netUpdates[1][0];
+                l_hvNew[l_ceR] -= i_scaling * l_netUpdates[1][1];
             }
-
-            t_real l_netUpdates[2][2];
-
-            // compute net-updates
-            m_solver.netUpdates(l_hL, l_hR, l_hvL, l_hvR, l_bL, l_bR,
-                                l_netUpdates[0], l_netUpdates[1]);
-
-            // update the cells' quantities
-            l_hNew[l_ceL] -= i_scaling * l_netUpdates[0][0];
-            l_hvNew[l_ceL] -= i_scaling * l_netUpdates[0][1];
-
-            l_hNew[l_ceR] -= i_scaling * l_netUpdates[1][0];
-            l_hvNew[l_ceR] -= i_scaling * l_netUpdates[1][1];
         }
     }
 }

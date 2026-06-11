@@ -54,6 +54,7 @@ Help(vars.GenerateHelpText(env))
 env.Append(
     CXXFLAGS=[
         "-std=c++17",
+        "-fopenmp",
         "-fwrapv",
         "-Wall",
         "-Wextra",
