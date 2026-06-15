@@ -59,6 +59,7 @@ env.Append(
         "-Wall",
         "-Wextra",
         "-Wpedantic",
+        "-Wno-unknown-warning-option",
         "-Wno-keyword-macro",
         "-Wno-c2y-extensions",
     ]
