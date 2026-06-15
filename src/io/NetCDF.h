@@ -10,7 +10,6 @@
 
 #include "../constants.h"
 #include <algorithm>
-#include <cstring>
 #include <optional>
 
 namespace tsunami_lab {
@@ -28,12 +27,25 @@ class tsunami_lab::io::NetCDF {
     float *buf;
 
     float const *downsample(t_real const *i_v) {
-        std::memset(buf, 0, knx * kny * sizeof(t_real));
+        t_real scale = t_real(1) / (k * k);
 
-        for (t_idx l_iy = 0; l_iy < ny; l_iy++) {
-            for (t_idx l_ix = 0; l_ix < nx; l_ix++) {
-                buf[(l_iy / k) * knx + (l_ix / k)] +=
-                    i_v[l_iy * stride + l_ix] / (k * k);
+        for (t_idx oy = 0; oy < kny; oy++) {
+            t_idx iy = oy * k;
+            t_idx my = std::min(iy + k, ny);
+
+            for (t_idx ox = 0; ox < knx; ox++) {
+                t_idx ix = ox * k;
+                t_idx mx = std::min(ix + k, nx);
+
+                t_real sum = 0;
+
+                for (t_idx iy_ = iy; iy_ < my; iy_++) {
+                    for (t_idx ix_ = ix; ix_ < mx; ix_++) {
+                        sum += i_v[iy_ * stride + ix_];
+                    }
+                }
+
+                buf[oy * knx + ox] = sum * scale;
             }
         }
 
