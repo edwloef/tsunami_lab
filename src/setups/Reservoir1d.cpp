@@ -24,5 +24,5 @@ tsunami_lab::setups::Reservoir1d::getMomentumY(t_real, t_real) const {
 
 tsunami_lab::t_real
 tsunami_lab::setups::Reservoir1d::getBathymetry(t_real, t_real) const {
-    return 0;
+    return -20;
 }

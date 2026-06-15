@@ -37,10 +37,12 @@ TEST_CASE("Test the 1d wave propagation solver.", "[WaveProp1d]") {
     for (std::size_t l_ce = 0; l_ce < 50; l_ce++) {
         m_waveProp.setHeight(l_ce, 0, 10);
         m_waveProp.setMomentumX(l_ce, 0, 0);
+        m_waveProp.setBathymetry(l_ce, 0, -20);
     }
     for (std::size_t l_ce = 50; l_ce < 100; l_ce++) {
         m_waveProp.setHeight(l_ce, 0, 8);
         m_waveProp.setMomentumX(l_ce, 0, 0);
+        m_waveProp.setBathymetry(l_ce, 0, -20);
     }
 
     // set outflow boundary condition
@@ -96,10 +98,12 @@ TEST_CASE("Test the 1d wave propagation solver with middle-state cases.",
             for (std::size_t l_ce = 0; l_ce < 50; l_ce++) {
                 m_waveProp.setHeight(l_ce, 0, hLeft);
                 m_waveProp.setMomentumX(l_ce, 0, huLeft);
+                m_waveProp.setBathymetry(l_ce, 0, -20);
             }
             for (std::size_t l_ce = 50; l_ce < 100; l_ce++) {
                 m_waveProp.setHeight(l_ce, 0, hRight);
                 m_waveProp.setMomentumX(l_ce, 0, huRight);
+                m_waveProp.setBathymetry(l_ce, 0, -20);
             }
 
             // perform a time step
