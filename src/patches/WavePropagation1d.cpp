@@ -15,11 +15,11 @@ tsunami_lab::patches::WavePropagation1d<Solver>::WavePropagation1d(
     m_nCells = i_nCells;
 
     for (unsigned short l_st = 0; l_st < 2; l_st++) {
-        m_h[l_st] = new t_real[m_nCells + 2]{0};
-        m_hu[l_st] = new t_real[m_nCells + 2]{0};
+        m_h[l_st] = new t_real[m_nCells + 2];
+        m_hu[l_st] = new t_real[m_nCells + 2];
     }
 
-    m_b = new t_real[m_nCells + 2]{0};
+    m_b = new t_real[m_nCells + 2];
 }
 
 template <typename Solver>
@@ -40,7 +40,7 @@ void tsunami_lab::patches::WavePropagation1d<Solver>::timeStep(
     t_real *l_hOld = m_h[m_step];
     t_real *l_huOld = m_hu[m_step];
 
-    m_step = (m_step + 1) % 2;
+    m_step = 1 - m_step;
     t_real *l_hNew = m_h[m_step];
     t_real *l_huNew = m_hu[m_step];
 
