@@ -14,10 +14,10 @@ void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL, t_real i_hR,
                                              t_real i_bL, t_real i_bR,
                                              t_real o_netUpdateL[2],
                                              t_real o_netUpdateR[2]) const {
+    // compute wave speeds
     t_real uL = i_huL / i_hL;
     t_real uR = i_huR / i_hR;
 
-    // compute wave speeds (eigenvalues)
     t_real sqrt_hL = std::sqrt(i_hL);
     t_real sqrt_hR = std::sqrt(i_hR);
 
@@ -49,17 +49,16 @@ void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL, t_real i_hR,
     t_real z1[2] = {alpha[0], alpha[0] * lambda_roe[0]};
     t_real z2[2] = {alpha[1], alpha[1] * lambda_roe[1]};
 
+    o_netUpdateL[0] = 0;
+    o_netUpdateL[1] = 0;
+    o_netUpdateR[0] = 0;
+    o_netUpdateR[1] = 0;
+
     // distribute waves
     if (std::signbit(lambda_roe[0])) {
-        o_netUpdateR[0] = t_real(0.0);
-        o_netUpdateR[1] = t_real(0.0);
-
         o_netUpdateL[0] = z1[0];
         o_netUpdateL[1] = z1[1];
     } else {
-        o_netUpdateL[0] = t_real(0.0);
-        o_netUpdateL[1] = t_real(0.0);
-
         o_netUpdateR[0] = z1[0];
         o_netUpdateR[1] = z1[1];
     }
