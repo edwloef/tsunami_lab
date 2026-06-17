@@ -11,7 +11,7 @@ We parallelized WavePropagation2d in our solver as such:
 
 .. code-block:: c++
 
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(guided)
     for (t_idx l_y = 0; l_y < m_nCellsY + 1; l_y++) {
         t_idx l_ce = l_y * stride;
 
@@ -34,7 +34,7 @@ We parallelized WavePropagation2d in our solver as such:
     }
 
     for (t_idx l_s = 0; l_s < 2; l_s++) {
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(guided)
         for (t_idx l_y = l_s; l_y < m_nCellsY + 1; l_y += 2) {
             t_idx l_ce = l_y * stride;
 
@@ -178,3 +178,9 @@ That is 4628 million cell updates per second (mcups).
 
 Our team name shall be "Aqua Tax Evaders", because of the prevelance of 
 the name "Aqua Helden".
+
+
+**Our contributions**
+
+* Edwin implemented the parallelization of the code and testet the scheduling strategies 
+* Lara implemented the checkpoint setup and the documentation

@@ -60,7 +60,6 @@ To generate the result, enter the path to the tsunami file and simply add the re
          --stations <path>              Path to stations JSON file (default stations.nc)
       -o --output <path>                Path to output NetCDF file (default output.nc)
       -c --checkpoint <path>            Path to checkpoint NetCDF file (default checkpoint.nc)
-      --readall                  Whether to read the entire NetCDF file into RAM for faster setup (default false)
 
 The only files that are required are the bathymetry file and the displacement file, the
 rest have a default setting.
