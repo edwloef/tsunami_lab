@@ -103,36 +103,47 @@ Concerning the question of wether we should parallelize
 the outer or the inner loop of our two-dimensional solver, 
 the outer ones should be parallelized.
 
-This is because the first inner loop accesses neighboring cells,
+This is because the inner loop of the x-sweep accesses neighboring cells,
 which raises the risk of race conditions and leads to incorrect
 results if parallelized.
-The first outer loop only initializes new cell quantities and
+The outer loop of the x-sweep only initializes new cell quantities and
 operates on disjoint cell regions, which doesn't cause any problems
 if parallelized.
-The outer loop also requires fewer fork-join cycles,
+The outer loop of the x-sweep also requires fewer fork-join cycles,
 and chunking doesn't help because we parallelize
 row-by-row in both the x-sweeps and y-sweeps and are therefore 
 working with good cache locality.
 
 Roughly the same goes for the second number of loops.
-The first of the three loops doesn't need to be parallelized,
-as it only has two iterations. The second loop can again be parallelized,
-as it only writes new data, and the inner loop can't be parallelized
-as it leads to race conditions because we access the neightboring cells again.
+The second loop of the y-sweep can again be parallelized,
+as it only writes new data, and the inner loop of the y-sweep can't be parallelized
+as it leads to race conditions because we access the neighboring cells again.
 Because we also parallelize the y-sweep row-wise 
 by splitting it into even and odd row pairs, and 
 then simply process all even pairs in parallel 
 followed by all odd pairs in parallel, we eliminate 
 dependencies between different threads.
 
-Taking a look at different scheduling strategies, 
-dynamic scheduling is slower than static and guided
+Taking a look at different scheduling strategies, we have static, where work 
+is divided into equal-sized chunks ahead of time and assigned to threads in a 
+fixed, repeating pattern.
+
+Then with dynamic the iteration chunks are placed into a shared queue; threads 
+repeatedly fetch the next chunk when they finish their current one.
+This is good for irregular or unpredictable workloads, but we loose cache locality.
+
+With guided we have a hybrid of the two previous versions: it initially hands out 
+large chunks, then reduces chunk size exponentially (or to a minimum chunk size) 
+as work proceeds. It combines the low overhead early with a good load balance near the end.
+
+We found that dynamic scheduling was slower than static scheduling and guided
 scheduling was the fastest.
 
 When we tried to use OpenMP's first touch 
 policy to perform NUMA-aware initializations, we 
 implemented the code below in the constructor, but
-it slowed our program down:
+it slowed our program down since it requires static scheduling which is slower than
+guided scheduling:
 
 .. code-block:: c++
 
@@ -164,9 +175,9 @@ Our command for the following result:
 
 ``OMP_NUM_THREADS=72 OMP_PROC_BIND=close ./build/tsunami_lab -d ../tohoku_gebco20_ucsb3_250m_displ.nc -b ../tohoku_gebco20_ucsb3_250m_bath.nc -s 250 -l 4058.7 --output-freq 40.5856 --checkpoint-freq 0``
 
-Our best time is 3 minutes and 17 seconds and 22 milliseconds.
+Our best time is 3 minutes and 17 seconds and 220 milliseconds.
 
-That is 4628 Mega cell updates/second (mcups).
+That is 4628 million cell updates per second (mcups).
 
 Our team name shall be "Aqua Tax Evaders", because of the prevelance of 
 the name "Aqua Helden".

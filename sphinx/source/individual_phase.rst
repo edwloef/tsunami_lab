@@ -8,7 +8,7 @@ speed of our program aka. the goals we want to achieve:
 
 **Dynamic time-step size:** Our program currently derives a constant time-step 
 size before entering the time loop. But this guess can be too large 
-and especially toward the end of the simulation, it can be much smaller. We want to expirement
+and especially toward the end of the simulation, it can be much smaller than necessary. We want to experiment
 with deriving a maximal time for each time step in order to speed up later simulation stages
 and avoid simulations where the result is useless due to an unlucky time-step guess.
 
@@ -27,7 +27,7 @@ increase CPU utilization, but at the cost of some memory
 overhead. We would like to investigate how large of a speedup this could provide for
 different simulation sizes and disk speeds.
 
-Analyzing our program using VTune shows us this graph:
+Analyzing the main thread of our program shows this result:
 
 .. image:: graphics/graph.png
    :width: 600px
@@ -56,9 +56,10 @@ Milestone 2: Focus on the dynamic time-step
 Milestone 3: Focus on FTZ/DAZ implementations
 - Work packages:
 
+    - Generate NetCDF input files containing very small values that decay to subnormals during a simulation
     - Instrument the simulation i.e. add counters for subnormal values
     - Identify where they occur most frequently
-    - Hardware implementation
+    - Hardware implementation (inline assembly)
     - Software flushing i.e. replace very small values with zero + configurable threshold
     - Measure runtime and compare numerical differences
 
