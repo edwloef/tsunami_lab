@@ -284,8 +284,8 @@ int main(int i_argc, char *i_argv[]) {
     sim_dur /= l_timeStep;
 
     std::cout << "finished time loop\n  setup time per cell: "
-              << 1'000'000 * setup_dur.count() / (l_nx * l_ny)
-              << " us\n  simulation time per time step per cell: "
+              << 1'000'000'000 * setup_dur.count() / (l_nx * l_ny)
+              << " ns\n  simulation time per time step per cell: "
               << 1'000'000'000 * sim_dur.count() / (l_nx * l_ny) << " ns"
               << std::endl;
 }
