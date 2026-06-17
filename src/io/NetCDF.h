@@ -28,11 +28,12 @@ class tsunami_lab::io::NetCDF {
     float const *downsample(t_real const *i_v, t_real *buf) {
         t_real scale = t_real(1) / (k * k);
 
+#pragma omp parallel for collapse(2) schedule(static)
         for (t_idx oy = 0; oy < kny; oy++) {
-            t_idx iy = oy * k;
-            t_idx my = std::min(iy + k, ny);
-
             for (t_idx ox = 0; ox < knx; ox++) {
+                t_idx iy = oy * k;
+                t_idx my = std::min(iy + k, ny);
+
                 t_idx ix = ox * k;
                 t_idx mx = std::min(ix + k, nx);
 

@@ -112,11 +112,9 @@ void tsunami_lab::io::NetCDF::writeBathymetry(t_real const *i_b) {
 void tsunami_lab::io::NetCDF::writeTimeStep(t_real i_simTime, t_real const *i_h,
                                             t_real const *i_hu,
                                             t_real const *i_hv) {
-    t_real const *bufs[] = {i_h, i_hu, i_hv};
-#pragma omp parallel for schedule(static)
-    for (int i = 0; i < 3; i++) {
-        downsample(bufs[i], buf + i * knx * kny);
-    }
+    downsample(i_h, buf);
+    downsample(i_hu, buf + knx * kny);
+    downsample(i_hv, buf + 2 * knx * kny);
 
     t_idx start[3] = {step, 0, 0};
     t_idx count[3] = {1, kny, knx};

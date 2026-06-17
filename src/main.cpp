@@ -178,11 +178,10 @@ int main(int i_argc, char *i_argv[]) {
     tsunami_lab::t_real l_hMax =
         std::numeric_limits<tsunami_lab::t_real>::lowest();
 
-#pragma omp parallel for schedule(static) reduction(max : l_hMax)
+#pragma omp parallel for schedule(static) collapse(2) reduction(max : l_hMax)
     for (tsunami_lab::t_idx l_cy = 0; l_cy < l_ny; l_cy++) {
-        tsunami_lab::t_real l_y = l_setup->minY() + l_cy * l_args.cellSize;
-
         for (tsunami_lab::t_idx l_cx = 0; l_cx < l_nx; l_cx++) {
+            tsunami_lab::t_real l_y = l_setup->minY() + l_cy * l_args.cellSize;
             tsunami_lab::t_real l_x = l_setup->minX() + l_cx * l_args.cellSize;
 
             // get initial values of the setup
