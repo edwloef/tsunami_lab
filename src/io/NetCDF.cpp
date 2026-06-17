@@ -61,7 +61,7 @@ tsunami_lab::io::NetCDF::NetCDF(char const *i_path, t_real i_dxy, t_idx i_nx,
     knx = div_ceil(nx, k);
     kny = div_ceil(ny, k);
     step = 0;
-    buf = new float[knx * kny];
+    buf = new float[3 * knx * kny];
 
     nc_try(nc_def_dim(ncid, "t", NC_UNLIMITED, &t_dimid));
     nc_try(nc_def_dim(ncid, "y", kny, &y_dimid));
@@ -106,20 +106,27 @@ tsunami_lab::io::NetCDF::~NetCDF() {
 }
 
 void tsunami_lab::io::NetCDF::writeBathymetry(t_real const *i_b) {
-    nc_try(nc_put_var_float(ncid, b_varid, downsample(i_b)));
+    nc_try(nc_put_var_float(ncid, b_varid, downsample(i_b, buf)));
 }
 
 void tsunami_lab::io::NetCDF::writeTimeStep(t_real i_simTime, t_real const *i_h,
                                             t_real const *i_hu,
                                             t_real const *i_hv) {
+    t_real const *bufs[] = {i_h, i_hu, i_hv};
+#pragma omp parallel for schedule(static)
+    for (int i = 0; i < 3; i++) {
+        downsample(bufs[i], buf + i * knx * kny);
+    }
+
     t_idx start[3] = {step, 0, 0};
     t_idx count[3] = {1, kny, knx};
 
     float simTime = i_simTime;
 
-    nc_try(nc_put_vara_float(ncid, h_varid, start, count, downsample(i_h)));
-    nc_try(nc_put_vara_float(ncid, hu_varid, start, count, downsample(i_hu)));
-    nc_try(nc_put_vara_float(ncid, hv_varid, start, count, downsample(i_hv)));
+    nc_try(nc_put_vara_float(ncid, h_varid, start, count, buf));
+    nc_try(nc_put_vara_float(ncid, hu_varid, start, count, buf + knx * kny));
+    nc_try(
+        nc_put_vara_float(ncid, hv_varid, start, count, buf + 2 * knx * kny));
     nc_try(nc_put_var1_float(ncid, t_varid, &step, &simTime));
 
     step++;

@@ -25,7 +25,7 @@ class tsunami_lab::io::NetCDF {
         h_varid, hu_varid, hv_varid, t_varid;
     float *buf;
 
-    float const *downsample(t_real const *i_v) {
+    float const *downsample(t_real const *i_v, t_real *buf) {
         t_real scale = t_real(1) / (k * k);
 
         for (t_idx oy = 0; oy < kny; oy++) {
