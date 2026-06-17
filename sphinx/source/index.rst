@@ -15,6 +15,8 @@
    sixth
    seventh
    eighth
+   ninth
+   individual_phase
 
 
 Tsunami documentation
@@ -42,16 +44,25 @@ To create the csv-file with the bathymetry data, run the prompt below in the ter
 
 ``gmt project -C141.024949/37.316569 -E146.0/37.316569 -G250e -Q | gmt grdtrack -GGEBCO_2026_sub_ice.nc | awk 'BEGIN {print "lon,lat,distance_m,elevation_m"} {print $1","$2","$3","$4}' > GEBCO_2026_sub_ice_bathy.csv``
 
-To create the nc files with our data, you have to enter the simulation time, the cell size,
-the start time, and the dimensions where the domain starts and ends.
-Type something like this:
+To generate the result, enter the path to the tsunami file and simply add the required arguments:
 
 .. code-block:: c++
 
-   ./build/tsunami_lab "SIM_TIME CELL_SIZE DOMAIN_START_X"
-                     "DOMAIN_START_Y DOMAIN_END_X DOMAIN_END_Y [DISPL.nc "
-                     "[BATHY.nc [STATIONS.json [SOLUTION.nc]]]]"
+   Usage: build/tsunami_lab [OPTION...]
+      -h                                This help message.
+         --output-freq <seconds>        Output frequency in seconds (default 60s)
+         --checkpoint-freq <seconds>    Checkpoint frequency in seconds (default 600s)
+      -l --simulation-length <seconds>  Simulation length in seconds (default 3600s)
+      -s --cell-size <meters>           Cell size in meters (default 1000m)
+      -k --coarse-output-size <cells>   Coarse output size in cells (default 1)
+      -d --displacement <path>          Path to displacement NetCDF file (required)
+      -b --bathymetry <path>            Path to bathymetry NetCDF file (required)
+         --stations <path>              Path to stations JSON file (default stations.nc)
+      -o --output <path>                Path to output NetCDF file (default output.nc)
+      -c --checkpoint <path>            Path to checkpoint NetCDF file (default checkpoint.nc)
+      --readall                  Whether to read the entire NetCDF file into RAM for faster setup (default false)
 
-in the terminal and let it run. 
+The only files that are required are the bathymetry file and the displacement file, the
+rest have a default setting.
 
 You can then view the result with paraview.
