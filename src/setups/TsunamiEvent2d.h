@@ -28,7 +28,7 @@ class tsunami_lab::setups::TsunamiEvent2d : public Setup {
     /**
      * Constructor.
      **/
-    TsunamiEvent2d(char const *i_d, char const *i_b, bool i_readall = false);
+    TsunamiEvent2d(char const *i_d, char const *i_b);
 
     /**
      * Destructor.

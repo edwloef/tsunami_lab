@@ -26,14 +26,12 @@ typedef struct {
     tsunami_lab::t_real outputFreq, checkpointFreq, simLen, cellSize;
     tsunami_lab::t_idx coarseOutputSize;
     char const *displ, *bathy, *stations, *output, *checkpoint;
-    bool readall;
 } Args;
 
 enum {
     outputFreq = 256,
     checkpointFreq,
     stations,
-    readall,
 };
 
 static struct option options[] = {
@@ -48,7 +46,6 @@ static struct option options[] = {
     {"stations", required_argument, 0, stations},
     {"output", required_argument, 0, 'o'},
     {"checkpoint", required_argument, 0, 'c'},
-    {"readall", no_argument, 0, readall},
     {0, 0, 0, 0}};
 
 void printUsage(char *program) {
@@ -75,8 +72,7 @@ void printUsage(char *program) {
 
 Args parseArgs(int argc, char *argv[]) {
     Args args = {60.0, 600.0, 3600.0,          1000.0,      1,
-                 NULL, NULL,  "stations.json", "output.nc", "checkpoint.nc",
-                 false};
+                 NULL, NULL,  "stations.json", "output.nc", "checkpoint.nc"};
 
     int c;
     while ((c = getopt_long(argc, argv, "hl:s:k:d:b:o:c:", options, NULL)) !=
@@ -114,9 +110,6 @@ Args parseArgs(int argc, char *argv[]) {
             break;
         case 'c':
             args.checkpoint = optarg;
-            break;
-        case readall:
-            args.readall = true;
             break;
         default:
             printUsage(*argv);
@@ -160,8 +153,8 @@ int main(int i_argc, char *i_argv[]) {
               << " meters" << std::endl;
 
     // construct setup
-    auto l_setup = new tsunami_lab::setups::TsunamiEvent2d(
-        l_args.displ, l_args.bathy, l_args.readall);
+    auto l_setup =
+        new tsunami_lab::setups::TsunamiEvent2d(l_args.displ, l_args.bathy);
 
     tsunami_lab::t_idx l_nx =
         (l_setup->maxX() - l_setup->minX()) / l_args.cellSize;
@@ -185,7 +178,7 @@ int main(int i_argc, char *i_argv[]) {
     tsunami_lab::t_real l_hMax =
         std::numeric_limits<tsunami_lab::t_real>::lowest();
 
-    // set up solver
+#pragma omp parallel for schedule(static) reduction(max : l_hMax)
     for (tsunami_lab::t_idx l_cy = 0; l_cy < l_ny; l_cy++) {
         tsunami_lab::t_real l_y = l_setup->minY() + l_cy * l_args.cellSize;
 

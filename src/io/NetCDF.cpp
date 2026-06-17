@@ -25,9 +25,7 @@
         }                                                                      \
     }
 
-tsunami_lab::io::NetCDF::NetCDF(char const *i_path, bool i_readall) {
-    readall = i_readall;
-
+tsunami_lab::io::NetCDF::NetCDF(char const *i_path) {
     nc_try(nc_open(i_path, NC_NETCDF4, &ncid));
 
     nc_try(nc_inq_dimid(ncid, "x", &x_dimid));
@@ -40,14 +38,12 @@ tsunami_lab::io::NetCDF::NetCDF(char const *i_path, bool i_readall) {
     nc_try(nc_inq_varid(ncid, "y", &y_varid));
     nc_try(nc_inq_varid(ncid, "z", &z_varid));
 
-    buf = new float[nx + ny + readall * nx * ny];
+    buf = new float[nx + ny + nx * ny];
 
     nc_try(nc_get_var_float(ncid, x_varid, buf));
     nc_try(nc_get_var_float(ncid, y_varid, buf + nx));
 
-    if (readall) {
-        nc_try(nc_get_var_float(ncid, z_varid, buf + nx + ny));
-    }
+    nc_try(nc_get_var_float(ncid, z_varid, buf + nx + ny));
 }
 
 template <typename T> T div_ceil(T &lhs, T &rhs) {
@@ -226,13 +222,5 @@ tsunami_lab::io::NetCDF::readAt(t_real i_x, t_real i_y) const {
         return std::nullopt;
     }
 
-    size_t index[2] = {y.value(), x.value()};
-
-    float val;
-    if (readall) {
-        val = buf[nx + ny + index[0] * nx + index[1]];
-    } else {
-        nc_try(nc_get_var1_float(ncid, z_varid, index, &val));
-    }
-    return val;
+    return buf[nx + ny + y.value() * nx + x.value()];
 }
