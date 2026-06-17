@@ -15,10 +15,7 @@ We parallelized WavePropagation2d in our solver as such:
     for (t_idx l_y = 0; l_y < m_nCellsY + 1; l_y++) {
         t_idx l_ce = l_y * stride;
 
-        // init new cell quantities
-        l_hNew[l_ce] = l_hOld[l_ce];
-        l_huNew[l_ce] = l_huOld[l_ce];
-        l_hvNew[l_ce] = l_hvOld[l_ce];
+        ...
 
         for (t_idx l_x = 0; l_x < m_nCellsX + 1; l_x++) {
             // determine left and right cell-id
@@ -99,7 +96,7 @@ solver itself parallelizes very well, with a speedup of over
 doing single-threaded I/O, which leads to a lower speedup overall.
 
 
-Concerning the question of wether we should parallelize 
+Concerning the question of whether we should parallelize 
 the outer or the inner loop of our two-dimensional solver, 
 the outer ones should be parallelized.
 
@@ -114,7 +111,7 @@ and chunking doesn't help because we parallelize
 row-by-row in both the x-sweeps and y-sweeps and are therefore 
 working with good cache locality.
 
-Roughly the same goes for the second number of loops.
+Roughly the same goes for the y-sweep.
 The second loop of the y-sweep can again be parallelized,
 as it only writes new data, and the inner loop of the y-sweep can't be parallelized
 as it leads to race conditions because we access the neighboring cells again.
@@ -130,7 +127,7 @@ fixed, repeating pattern.
 
 Then with dynamic the iteration chunks are placed into a shared queue; threads 
 repeatedly fetch the next chunk when they finish their current one.
-This is good for irregular or unpredictable workloads, but we loose cache locality.
+This is good for irregular or unpredictable workloads, but we lose cache locality.
 
 With guided we have a hybrid of the two previous versions: it initially hands out 
 large chunks, then reduces chunk size exponentially (or to a minimum chunk size) 
