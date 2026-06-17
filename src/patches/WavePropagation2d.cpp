@@ -168,6 +168,7 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::setGhostOutflow() {
 
     t_idx stride = getStride();
 
+#pragma omp parallel for schedule(static)
     for (t_idx l_x = 1; l_x < m_nCellsX + 1; l_x++) {
         t_idx l_y = 0;
 
@@ -190,6 +191,7 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::setGhostOutflow() {
         m_b[l_i] = m_b[l_j];
     }
 
+#pragma omp parallel for schedule(static)
     for (t_idx l_y = 1; l_y < m_nCellsY + 1; l_y++) {
         t_idx l_x = 0;
 
@@ -217,11 +219,13 @@ template <typename Solver>
 void tsunami_lab::patches::WavePropagation2d<Solver>::setGhostReflecting() {
     t_idx stride = getStride();
 
+#pragma omp parallel for schedule(static)
     for (t_idx l_x = 1; l_x < m_nCellsX + 1; l_x++) {
         m_b[l_x] = 20.;
         m_b[(m_nCellsY + 1) * stride + l_x] = 20.;
     }
 
+#pragma omp parallel for schedule(static)
     for (t_idx l_y = 1; l_y < m_nCellsY + 1; l_y++) {
         m_b[l_y * stride] = 20.;
         m_b[l_y * stride + m_nCellsX + 1] = 20.;
