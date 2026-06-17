@@ -55,7 +55,7 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(
 
     t_idx stride = getStride();
 
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(guided)
     for (t_idx l_y = 0; l_y < m_nCellsY + 1; l_y++) {
         t_idx l_ce = l_y * stride;
 
@@ -112,7 +112,7 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(
     }
 
     for (t_idx l_s = 0; l_s < 2; l_s++) {
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(guided)
         for (t_idx l_y = l_s; l_y < m_nCellsY + 1; l_y += 2) {
             t_idx l_ce = l_y * stride;
 
