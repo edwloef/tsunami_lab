@@ -6,6 +6,7 @@
  **/
 #include "io/NetCDF.h"
 #include "io/Stations.h"
+#include "setups/CheckPoint.h"
 #include "patches/WavePropagation2d.h"
 #include "setups/TsunamiEvent2d.h"
 #include "solvers/FWave.h"
@@ -16,6 +17,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <getopt.h>
 #include <iostream>
 #include <limits>
@@ -138,6 +140,8 @@ char *strfmt(const char *fmt, ...) {
     return str;
 }
 
+namespace fs = std::filesystem;
+
 int main(int i_argc, char *i_argv[]) {
     std::cout << "####################################" << std::endl;
     std::cout << "### Tsunami Lab                  ###" << std::endl;
@@ -152,9 +156,22 @@ int main(int i_argc, char *i_argv[]) {
     std::cout << "runtime configuration:\n  cell size: " << l_args.cellSize
               << " meters" << std::endl;
 
+    fs::path p = "checkpoint.nc";
+
     // construct setup
     auto l_setup =
         new tsunami_lab::setups::TsunamiEvent2d(l_args.displ, l_args.bathy);
+
+    /*auto l_setup =
+        new tsunami_lab::setups::Setup();
+
+    if (fs::exists(p) && fs::is_regular_file(p)) {
+        std::cout << "Datei existiert\n";
+        l_setup = new tsunami_lab::setups::CheckPoint(l_args.displ, l_args.bathy);
+    } else {
+        l_setup = new tsunami_lab::setups::TsunamiEvent2d(l_args.displ, l_args.bathy);
+    }
+    */
 
     tsunami_lab::t_idx l_nx =
         (l_setup->maxX() - l_setup->minX()) / l_args.cellSize;
