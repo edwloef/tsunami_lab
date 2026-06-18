@@ -31,11 +31,6 @@ class tsunami_lab::setups::TsunamiEvent2d : public Setup {
     TsunamiEvent2d(char const *i_d, char const *i_b);
 
     /**
-     * Destructor.
-     **/
-    virtual ~TsunamiEvent2d() = default;
-
-    /**
      * Gets the water height at a given point.
      *
      * @return height at the given point.

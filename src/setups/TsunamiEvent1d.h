@@ -32,11 +32,6 @@ class tsunami_lab::setups::TsunamiEvent1d : public Setup {
     TsunamiEvent1d();
 
     /**
-     * Destructor.
-     **/
-    virtual ~TsunamiEvent1d() = default;
-
-    /**
      * Gets the water height at a given point.
      *
      * @return height at the given point.

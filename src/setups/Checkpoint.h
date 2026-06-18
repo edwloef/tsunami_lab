@@ -32,11 +32,6 @@ class tsunami_lab::setups::CheckPoint : public Setup {
     CheckPoint(char const *i_d, char const *i_b);
 
     /**
-     * Destructor.
-     **/
-    virtual ~CheckPoint() = default;
-
-    /**
      * Gets the water height at a given point.
      *
      * @return height at the given point.

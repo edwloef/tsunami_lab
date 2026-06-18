@@ -24,12 +24,7 @@ class tsunami_lab::setups::ArtificialTsunami2d : public Setup {
     /**
      * Constructor.
      **/
-    ArtificialTsunami2d();
-
-    /**
-     * Destructor.
-     **/
-    virtual ~ArtificialTsunami2d() = default;
+    ArtificialTsunami2d() = default;
 
     /**
      * Gets the water height at a given point.
