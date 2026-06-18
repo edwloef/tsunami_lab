@@ -20,7 +20,7 @@ class tsunami_lab::patches::WavePropagation {
     /**
      * Virtual destructor for base class.
      **/
-    virtual ~WavePropagation() {};
+    virtual ~WavePropagation() = default;
 
     /**
      * Performs a time step.

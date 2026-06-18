@@ -24,7 +24,7 @@ class tsunami_lab::setups::DamBreak2d : public Setup {
     /**
      * Constructor.
      **/
-    DamBreak2d();
+    DamBreak2d() = default;
 
     /**
      * Gets the water height at a given point.

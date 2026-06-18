@@ -9,8 +9,6 @@
 
 #include <cmath>
 
-tsunami_lab::setups::SubCritical1d::SubCritical1d() {}
-
 tsunami_lab::t_real
 tsunami_lab::setups::SubCritical1d::getHeight(t_real i_x, t_real i_y) const {
     return -getBathymetry(i_x, i_y);

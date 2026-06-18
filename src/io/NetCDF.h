@@ -9,8 +9,10 @@
 #define TSUNAMI_LAB_IO_NETCDF
 
 #include "../constants.h"
+#include "PingPong.h"
 #include <algorithm>
 #include <optional>
+#include <thread>
 
 namespace tsunami_lab {
 namespace io {
@@ -23,7 +25,10 @@ class tsunami_lab::io::NetCDF {
     t_idx nx, ny, stride, k, knx, kny, step;
     int ncid, x_dimid, y_dimid, t_dimid, x_varid, y_varid, z_varid, b_varid,
         h_varid, hu_varid, hv_varid, t_varid;
-    float *buf;
+    float *buf, simTime;
+
+    PingPong pp;
+    std::optional<std::thread> t = std::nullopt;
 
     float const *downsample(t_real const *i_v, t_real *buf) {
         t_real scale = t_real(1) / (k * k);
@@ -78,6 +83,9 @@ class tsunami_lab::io::NetCDF {
      */
     ~NetCDF();
 
+    NetCDF(const NetCDF &) = delete;
+    NetCDF &operator=(const NetCDF &) = delete;
+
     /**
      * Writes the bathymetry as NetCDF.
      *
@@ -107,9 +115,10 @@ class tsunami_lab::io::NetCDF {
      * @param i_hu momentum in x-direction of the cells
      * @param i_hv momentum in y-direction of the cells
      **/
-    void writeCheckpoint(char const *i_path, t_real const *i_b,
-                         t_real const *i_h, t_real const *i_hu,
-                         t_real const *i_hv);
+    static void writeCheckpoint(char const *i_path, t_idx nx, t_idx ny,
+                                t_idx stride, t_real const *i_b,
+                                t_real i_simTime, t_real const *i_h,
+                                t_real const *i_hu, t_real const *i_hv);
 
     /**
      * Reads the value of the z variable at the given position.

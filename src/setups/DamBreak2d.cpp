@@ -7,8 +7,6 @@
  **/
 #include "DamBreak2d.h"
 
-tsunami_lab::setups::DamBreak2d::DamBreak2d() {}
-
 tsunami_lab::t_real
 tsunami_lab::setups::DamBreak2d::getHeight(t_real i_x, t_real i_y) const {
     return (i_x - 50) * (i_x - 50) + (i_y - 50) * (i_y - 50) < 100 ? 10 : 5;

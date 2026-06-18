@@ -23,7 +23,7 @@ class tsunami_lab::setups::Setup {
     /**
      * Virtual destructor for base class.
      **/
-    virtual ~Setup() {};
+    virtual ~Setup() = default;
 
     /**
      * Gets the water height at a given point.

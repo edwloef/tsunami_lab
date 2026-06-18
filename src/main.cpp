@@ -6,7 +6,6 @@
  **/
 #include "io/NetCDF.h"
 #include "io/Stations.h"
-#include "setups/CheckPoint.h"
 #include "patches/WavePropagation2d.h"
 #include "setups/TsunamiEvent2d.h"
 #include "solvers/FWave.h"
@@ -257,7 +256,7 @@ int main(int i_argc, char *i_argv[]) {
     char *new_checkpoint = strfmt("%s.new", l_args.checkpoint);
 
     // iterate over time
-    while (l_simTime < l_args.simLen) {
+    while (l_simTime <= l_args.simLen) {
         if (l_simTime >= l_nextOutput && l_args.outputFreq > 0.0) {
             std::cout << "  output: " << l_timeStep << " time steps, "
                       << l_simTime << " seconds" << std::endl;
@@ -275,10 +274,10 @@ int main(int i_argc, char *i_argv[]) {
             std::cout << "  checkpoint: " << l_timeStep << " time steps, "
                       << l_simTime << " seconds" << std::endl;
 
-            netcdf.writeCheckpoint(new_checkpoint, l_waveProp.getBathymetry(),
-                                   l_waveProp.getHeight(),
-                                   l_waveProp.getMomentumX(),
-                                   l_waveProp.getMomentumY());
+            tsunami_lab::io::NetCDF::writeCheckpoint(
+                new_checkpoint, l_nx, l_ny, l_waveProp.getStride(),
+                l_waveProp.getBathymetry(), l_simTime, l_waveProp.getHeight(),
+                l_waveProp.getMomentumX(), l_waveProp.getMomentumY());
 
             std::filesystem::rename(new_checkpoint, l_args.checkpoint);
 

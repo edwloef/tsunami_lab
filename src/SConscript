@@ -14,6 +14,7 @@ if "remarks" in env["mode"]:
 l_sources = [
     "io/Csv.cpp",
     "io/NetCDF.cpp",
+    "io/PingPong.cpp",
     "io/Stations.cpp",
     "patches/WavePropagation1d.cpp",
     "patches/WavePropagation2d.cpp",

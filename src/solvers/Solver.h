@@ -22,7 +22,7 @@ class tsunami_lab::solvers::Solver {
     /**
      * Virtual destructor for base class.
      **/
-    virtual ~Solver() {};
+    virtual ~Solver() = default;
 
     /**
      * Computes the net-updates.
