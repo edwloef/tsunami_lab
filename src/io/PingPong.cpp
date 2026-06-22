@@ -1,18 +1,14 @@
 #include "PingPong.h"
 
 PingPong::Guard PingPong::access_a() {
-    if (!turn_) {
-        std::unique_lock<std::mutex> lock(m_);
-        cv_.wait(lock, [&] { return turn_; });
-    }
+    std::unique_lock<std::mutex> lock(m_);
+    cv_.wait(lock, [&] { return turn_; });
     return PingPong::Guard(*this);
 }
 
 PingPong::Guard PingPong::access_b() {
-    if (turn_) {
-        std::unique_lock<std::mutex> lock(m_);
-        cv_.wait(lock, [&] { return !turn_; });
-    }
+    std::unique_lock<std::mutex> lock(m_);
+    cv_.wait(lock, [&] { return !turn_; });
     return Guard(*this);
 }
 
