@@ -8,6 +8,26 @@ parallelizing the I/O.
 First we implemented the class PingPong, which is our
 synchronization primitive for turn-style data ownership.
 
+We also added these two lines:
+
+.. code-block:: c++
+
+    static std::mutex nc_m;
+
+Here we declare a single, shared mutex named nc_m at file level.
+We enforce mutual exclusion, e.g. to guard calls into the NetCDF 
+library if those calls arent thread-safe.
+
+.. code-block:: c++
+
+    std::unique_lock l{nc_m};    
+
+Here we have a lock named l that locks the mutex nc_m immediately 
+(by default unique_lock locks on construction).
+l now owns the lock, so no other code that uses the same nc_m 
+(and locks it with a mutex/unique_lock/lock_guard) can enter the 
+protected section.
+
 There are three functions: access_a, access_b, and Guard:
 
 .. code-block:: c++
@@ -36,64 +56,7 @@ access_b() works the same way. Guard() locks the thread and flips turn_,
 and then calls  ``this_.cv_.notify_one()`` to wake one waiting thread.
 
 
-We use this class in our NetCDF class for our parallelization but we also 
-utilize OpenMP i.e. in this loop:
-
-.. code-block:: c++
-
-    #pragma omp parallel for collapse(2) schedule(static)
-        for (t_idx oy = 0; oy < kny; oy++) {
-            for (t_idx ox = 0; ox < knx; ox++) {
-                t_idx iy = oy * k;
-                t_idx my = std::min(iy + k, ny);
-
-                t_idx ix = ox * k;
-                t_idx mx = std::min(ix + k, nx);
-
-                t_real sum = 0;
-
-                for (t_idx iy_ = iy; iy_ < my; iy_++) {
-                    for (t_idx ix_ = ix; ix_ < mx; ix_++) {
-                        sum += i_v[iy_ * stride + ix_];
-                    }
-                }
-
-                buf[oy * knx + ox] = sum * scale;
-            }
-        }
-
-        return buf;
-    }
-
-Here we can collapse the two loops because each (oy, ox) tile computes an 
-independent output element and there are no data dependencies between
-different iterations of ox and oy.
-
-We cant parallelize the two inner for loops since they both access the variable sum,
-leading to wrong results if parallelized.
-
-
-Now we take a look at our implementation of PingPong:
-
-.. code-block:: c++
-
-    tsunami_lab::io::NetCDF::~NetCDF() {
-    std::optional<std::thread> l_t = std::nullopt;
-    {
-        auto guard = pp.access_a();
-        t.swap(l_t);
-    }
-
-    if (l_t.has_value()) {
-        l_t.value().join();
-
-        nc_try(nc_close(ncid));
-    }
-
-    delete[] buf;
-    }
-
-Here we aquire the a-side guard and swap out t into l_t.
+Here is our implementation of PingPong:
 
 .. code-block:: c++
 
@@ -137,4 +100,33 @@ thread that the new timestep data is ready to consume.
         }
     });
 
-Here we call the function access_b(), the other access function of the PingPong class.
+Here we call the function access_b(), the other access function of 
+the PingPong class.
+
+Now to check if these changes improved the runtime of our code:
+
+* Benchmark info: Tohoku event, 500m cell size, 3600s simulation time (4430 time steps), output every 60s simulation time, checkpoints disabled
+* Hardware info: Intel i7-13700H (6+8 cores, 12+8 threads), Samsung 990 PRO SSD, Seagate Enterprise Capacity 3.5 HDD v5
+
+.. code-block:: c++
+
+    SSD, synchronous output: 2:23.21
+    HDD, synchronous output: 2:31.03
+    SSD, asynchronous output: 2:22.57
+    HDD, asynchronous output: 2:22.26
+
+We save almost 8 seconds with our changes, so we have succeeded in our task.
+
+Now to test it on the draco cluster:
+
+* Benchmark info: Tohoku event, 250m cell size, 3600s simulation time (8870 time steps), output every 60s simulation time, checkpoints disabled
+* Hardware info: Draco cluster node009 (48 cores, 96 threads)
+
+.. code-block:: c++
+
+    /vast, synchronous output: 6:38.31
+    /work, synchronous output: 6:05.68
+    /vast, asynchronous output: 6:37.07
+    /work, asynchronous output: 5:45.69
+
+Here we also save a good amount of time with the changes we made.
