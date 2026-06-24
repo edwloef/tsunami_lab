@@ -51,8 +51,8 @@ There are three functions: access_a, access_b, and Guard:
     }
 
 
-access_a() locks the thread until turn_ is true, and then does its work and destroyes Guard at the end.
-access_b() works the same way. Guard() locks the thread and flips turn_,
+access_a() locks the thread until ``turn_`` is true, and then does its work and destroyes Guard at the end.
+access_b() works the same way. Guard() locks the thread and flips ``turn_``,
 and then calls  ``this_.cv_.notify_one()`` to wake one waiting thread.
 
 
