@@ -43,8 +43,8 @@ tsunami_lab::patches::WavePropagation2d<
 }
 
 template <typename Solver>
-void tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(
-    t_real i_scaling) {
+tsunami_lab::t_real
+tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(t_real i_dxy) {
     t_idx stride = getStride();
 
     t_real l_maxLambda = 0;
@@ -173,12 +173,17 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(
         }
     }
 
+    t_real l_dt = t_real(0.5) * i_dxy / l_maxLambda;
+    t_real l_scaling = l_dt / i_dxy;
+
 #pragma omp parallel for schedule(static)
     for (t_idx l_ed = 0; l_ed < m_nCells; l_ed++) {
-        m_h[l_ed] -= i_scaling * m_hAcc[l_ed];
-        m_hu[l_ed] -= i_scaling * m_huAcc[l_ed];
-        m_hv[l_ed] -= i_scaling * m_hvAcc[l_ed];
+        m_h[l_ed] -= l_scaling * m_hAcc[l_ed];
+        m_hu[l_ed] -= l_scaling * m_huAcc[l_ed];
+        m_hv[l_ed] -= l_scaling * m_hvAcc[l_ed];
     }
+
+    return l_dt;
 }
 
 template <typename Solver>

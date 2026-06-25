@@ -191,11 +191,7 @@ int main(int i_argc, char *i_argv[]) {
     tsunami_lab::patches::WavePropagation2d l_waveProp(
         l_nx, l_ny, tsunami_lab::solvers::FWave());
 
-    // maximum observed height in the setup
-    tsunami_lab::t_real l_hMax =
-        std::numeric_limits<tsunami_lab::t_real>::lowest();
-
-#pragma omp parallel for schedule(static) collapse(2) reduction(max : l_hMax)
+#pragma omp parallel for schedule(static) collapse(2)
     for (tsunami_lab::t_idx l_cy = 0; l_cy < l_ny; l_cy++) {
         for (tsunami_lab::t_idx l_cx = 0; l_cx < l_nx; l_cx++) {
             tsunami_lab::t_real l_y = l_setup->minY() + l_cy * l_args.cellSize;
@@ -212,8 +208,6 @@ int main(int i_argc, char *i_argv[]) {
             l_waveProp.setMomentumX(l_cx, l_cy, l_hu);
             l_waveProp.setMomentumY(l_cx, l_cy, l_hv);
             l_waveProp.setBathymetry(l_cx, l_cy, l_b);
-
-            l_hMax = std::max(l_h, l_hMax);
         }
     }
 
@@ -231,22 +225,11 @@ int main(int i_argc, char *i_argv[]) {
     // construct stations
     tsunami_lab::io::Stations stations(std::ifstream{l_args.stations});
 
-    // derive maximum wave speed in setup; the momentum is ignored
-    tsunami_lab::t_real l_speedMax = std::sqrt(9.80665 * l_hMax);
-
-    // derive constant time step; changes at simulation time are ignored
-    tsunami_lab::t_real l_dt = 0.5 * l_args.cellSize / l_speedMax;
-
-    // derive scaling for a time step
-    tsunami_lab::t_real l_scaling = l_dt / l_args.cellSize;
-
     // set up time and output control
     tsunami_lab::t_idx l_timeStep = 0;
     tsunami_lab::t_real l_simTime = 0;
     tsunami_lab::t_real l_nextOutput = 0;
     tsunami_lab::t_real l_nextCheckpoint = 0;
-
-    std::cout << "  time step length: " << l_dt << " seconds" << std::endl;
 
     netcdf.writeBathymetry(l_waveProp.getBathymetry());
 
@@ -289,7 +272,7 @@ int main(int i_argc, char *i_argv[]) {
 
         auto now = std::chrono::high_resolution_clock::now();
         l_waveProp.setGhostOutflow();
-        l_waveProp.timeStep(l_scaling);
+        tsunami_lab::t_real l_dt = l_waveProp.timeStep(l_args.cellSize);
         sim_dur += std::chrono::high_resolution_clock::now() - now;
 
         l_timeStep++;

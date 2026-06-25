@@ -34,8 +34,8 @@ tsunami_lab::patches::WavePropagation1d<
 }
 
 template <typename Solver>
-void tsunami_lab::patches::WavePropagation1d<Solver>::timeStep(
-    t_real i_scaling) {
+tsunami_lab::t_real
+tsunami_lab::patches::WavePropagation1d<Solver>::timeStep(t_real i_dxy) {
     t_real l_maxLambda = 0;
 
     // init new cell quantities
@@ -98,10 +98,15 @@ void tsunami_lab::patches::WavePropagation1d<Solver>::timeStep(
         }
     }
 
+    t_real l_dt = t_real(0.5) * i_dxy / l_maxLambda;
+    t_real l_scaling = l_dt / i_dxy;
+
     for (t_idx l_ed = 0; l_ed < m_nCells + 2; l_ed++) {
-        m_h[l_ed] -= i_scaling * m_hAcc[l_ed];
-        m_hu[l_ed] -= i_scaling * m_huAcc[l_ed];
+        m_h[l_ed] -= l_scaling * m_hAcc[l_ed];
+        m_hu[l_ed] -= l_scaling * m_huAcc[l_ed];
     }
+
+    return l_dt;
 }
 
 template <typename Solver>
