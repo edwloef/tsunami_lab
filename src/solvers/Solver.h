@@ -37,11 +37,13 @@ class tsunami_lab::solvers::Solver {
      * height, 1: momentum.
      * @param o_netUpdateR will be set to the net-updates for the right side; 0:
      * height, 1: momentum.
+     * @param o_lambda will be set to the wave speeds; 0: left side, 1: right
+     * side.
      **/
     virtual void netUpdates(t_real i_hL, t_real i_hR, t_real i_huL,
                             t_real i_huR, t_real i_bL, t_real i_bR,
-                            t_real o_netUpdateL[2],
-                            t_real o_netUpdateR[2]) const = 0;
+                            t_real o_netUpdateL[2], t_real o_netUpdateR[2],
+                            t_real o_lambda[2]) const = 0;
 };
 
 #endif

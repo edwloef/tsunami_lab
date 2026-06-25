@@ -13,7 +13,8 @@ void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL, t_real i_hR,
                                              t_real i_huL, t_real i_huR,
                                              t_real i_bL, t_real i_bR,
                                              t_real o_netUpdateL[2],
-                                             t_real o_netUpdateR[2]) const {
+                                             t_real o_netUpdateR[2],
+                                             t_real o_lambda[2]) const {
     // compute wave speeds
     t_real uL = i_huL / i_hL;
     t_real uR = i_huR / i_hR;
@@ -25,7 +26,8 @@ void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL, t_real i_hR,
     t_real sqrt_g_h_roe = std::sqrt(g_half * (i_hL + i_hR));
 
     // compute eigenvalues
-    t_real lambda_roe[2] = {u_roe - sqrt_g_h_roe, u_roe + sqrt_g_h_roe};
+    o_lambda[0] = u_roe - sqrt_g_h_roe;
+    o_lambda[1] = u_roe + sqrt_g_h_roe;
 
     // compute fluxes
     t_real fL[2] = {i_huL, i_huL * uL + g_half * i_hL * i_hL};
@@ -42,12 +44,12 @@ void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL, t_real i_hR,
 
     // solve linear system for alphas
     t_real diff = t_real(0.5) / sqrt_g_h_roe; // 1 / (lambda2 - lambda1)
-    t_real alpha[2] = {(combined[0] * lambda_roe[1] - combined[1]) * diff,
-                       (combined[1] - lambda_roe[0] * combined[0]) * diff};
+    t_real alpha[2] = {(combined[0] * o_lambda[1] - combined[1]) * diff,
+                       (combined[1] - o_lambda[0] * combined[0]) * diff};
 
     // f-waves
-    t_real z1[2] = {alpha[0], alpha[0] * lambda_roe[0]};
-    t_real z2[2] = {alpha[1], alpha[1] * lambda_roe[1]};
+    t_real z1[2] = {alpha[0], alpha[0] * o_lambda[0]};
+    t_real z2[2] = {alpha[1], alpha[1] * o_lambda[1]};
 
     o_netUpdateL[0] = 0;
     o_netUpdateL[1] = 0;
@@ -55,7 +57,7 @@ void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL, t_real i_hR,
     o_netUpdateR[1] = 0;
 
     // distribute waves
-    if (std::signbit(lambda_roe[0])) {
+    if (std::signbit(o_lambda[0])) {
         o_netUpdateL[0] = z1[0];
         o_netUpdateL[1] = z1[1];
     } else {
@@ -63,7 +65,7 @@ void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL, t_real i_hR,
         o_netUpdateR[1] = z1[1];
     }
 
-    if (std::signbit(lambda_roe[1])) {
+    if (std::signbit(o_lambda[1])) {
         o_netUpdateL[0] += z2[0];
         o_netUpdateL[1] += z2[1];
     } else {

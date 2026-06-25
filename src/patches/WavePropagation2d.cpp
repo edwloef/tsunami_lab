@@ -55,7 +55,9 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(
 
     t_idx stride = getStride();
 
-#pragma omp parallel for schedule(guided)
+    t_real l_maxLambda = 0;
+
+#pragma omp parallel for schedule(guided) reduction(max : l_maxLambda)
     for (t_idx l_y = 0; l_y < m_nCellsY + 1; l_y++) {
         t_idx l_ce = l_y * stride;
 
@@ -81,38 +83,48 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(
             t_real l_bL = m_b[l_ceL];
             t_real l_bR = m_b[l_ceR];
 
+            bool l_dryL = !std::signbit(l_bL);
+            bool l_dryR = !std::signbit(l_bR);
+
             // if wet <-> dry boundary, set up reflection
-            if (!std::signbit(l_bL)) {
-                if (!std::signbit(l_bR)) {
+            if (l_dryL) {
+                if (l_dryR) {
                     continue;
                 } else {
                     l_hL = l_hR;
                     l_huL = -l_huR;
                     l_bL = l_bR;
                 }
-            } else if (!std::signbit(l_bR)) {
+            } else if (l_dryR) {
                 l_hR = l_hL;
                 l_huR = -l_huL;
                 l_bR = l_bL;
             }
 
             t_real l_netUpdates[2][2];
+            t_real l_lambda[2];
 
             // compute net-updates
             m_solver.netUpdates(l_hL, l_hR, l_huL, l_huR, l_bL, l_bR,
-                                l_netUpdates[0], l_netUpdates[1]);
+                                l_netUpdates[0], l_netUpdates[1], l_lambda);
 
             // update the cells' quantities
-            l_hNew[l_ceL] -= i_scaling * l_netUpdates[0][0];
-            l_huNew[l_ceL] -= i_scaling * l_netUpdates[0][1];
+            if (!l_dryL) {
+                l_hNew[l_ceL] -= i_scaling * l_netUpdates[0][0];
+                l_huNew[l_ceL] -= i_scaling * l_netUpdates[0][1];
+                l_maxLambda = std::max(l_maxLambda, std::abs(l_lambda[0]));
+            }
 
-            l_hNew[l_ceR] -= i_scaling * l_netUpdates[1][0];
-            l_huNew[l_ceR] -= i_scaling * l_netUpdates[1][1];
+            if (!l_dryR) {
+                l_hNew[l_ceR] -= i_scaling * l_netUpdates[1][0];
+                l_huNew[l_ceR] -= i_scaling * l_netUpdates[1][1];
+                l_maxLambda = std::max(l_maxLambda, std::abs(l_lambda[1]));
+            }
         }
     }
 
     for (t_idx l_s = 0; l_s < 2; l_s++) {
-#pragma omp parallel for schedule(guided)
+#pragma omp parallel for schedule(guided) reduction(max : l_maxLambda)
         for (t_idx l_y = l_s; l_y < m_nCellsY + 1; l_y += 2) {
             t_idx l_ce = l_y * stride;
 
@@ -128,33 +140,43 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(
                 t_real l_bL = m_b[l_ceL];
                 t_real l_bR = m_b[l_ceR];
 
+                bool l_dryL = !std::signbit(l_bL);
+                bool l_dryR = !std::signbit(l_bR);
+
                 // if wet <-> dry boundary, set up reflection
-                if (!std::signbit(l_bL)) {
-                    if (!std::signbit(l_bR)) {
+                if (l_dryL) {
+                    if (l_dryR) {
                         continue;
                     } else {
                         l_hL = l_hR;
                         l_hvL = -l_hvR;
                         l_bL = l_bR;
                     }
-                } else if (!std::signbit(l_bR)) {
+                } else if (l_dryR) {
                     l_hR = l_hL;
                     l_hvR = -l_hvL;
                     l_bR = l_bL;
                 }
 
                 t_real l_netUpdates[2][2];
+                t_real l_lambda[2];
 
                 // compute net-updates
                 m_solver.netUpdates(l_hL, l_hR, l_hvL, l_hvR, l_bL, l_bR,
-                                    l_netUpdates[0], l_netUpdates[1]);
+                                    l_netUpdates[0], l_netUpdates[1], l_lambda);
 
                 // update the cells' quantities
-                l_hNew[l_ceL] -= i_scaling * l_netUpdates[0][0];
-                l_hvNew[l_ceL] -= i_scaling * l_netUpdates[0][1];
+                if (!l_dryL) {
+                    l_hNew[l_ceL] -= i_scaling * l_netUpdates[0][0];
+                    l_hvNew[l_ceL] -= i_scaling * l_netUpdates[0][1];
+                    l_maxLambda = std::max(l_maxLambda, std::abs(l_lambda[0]));
+                }
 
-                l_hNew[l_ceR] -= i_scaling * l_netUpdates[1][0];
-                l_hvNew[l_ceR] -= i_scaling * l_netUpdates[1][1];
+                if (!l_dryR) {
+                    l_hNew[l_ceR] -= i_scaling * l_netUpdates[1][0];
+                    l_hvNew[l_ceR] -= i_scaling * l_netUpdates[1][1];
+                    l_maxLambda = std::max(l_maxLambda, std::abs(l_lambda[1]));
+                }
             }
         }
     }
