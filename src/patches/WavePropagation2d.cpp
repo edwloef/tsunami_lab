@@ -19,40 +19,32 @@ tsunami_lab::patches::WavePropagation2d<Solver>::WavePropagation2d(
 
     m_nCells = (i_x + 2) * (i_y + 2);
 
-    for (unsigned short l_st = 0; l_st < 2; l_st++) {
-        m_h[l_st] = new t_real[m_nCells];
-        m_hu[l_st] = new t_real[m_nCells];
-        m_hv[l_st] = new t_real[m_nCells];
-    }
-
+    m_h = new t_real[m_nCells];
+    m_hu = new t_real[m_nCells];
+    m_hv = new t_real[m_nCells];
     m_b = new t_real[m_nCells];
+
+    m_hAcc = new t_real[m_nCells];
+    m_huAcc = new t_real[m_nCells];
+    m_hvAcc = new t_real[m_nCells];
 }
 
 template <typename Solver>
 tsunami_lab::patches::WavePropagation2d<
     Solver>::WavePropagation2d::~WavePropagation2d() {
-    for (unsigned short l_st = 0; l_st < 2; l_st++) {
-        delete[] m_h[l_st];
-        delete[] m_hu[l_st];
-        delete[] m_hv[l_st];
-    }
-
+    delete[] m_h;
+    delete[] m_hu;
+    delete[] m_hv;
     delete[] m_b;
+
+    delete[] m_hAcc;
+    delete[] m_huAcc;
+    delete[] m_hvAcc;
 }
 
 template <typename Solver>
 void tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(
     t_real i_scaling) {
-    // pointers to old and new data
-    t_real *l_hOld = m_h[m_step];
-    t_real *l_huOld = m_hu[m_step];
-    t_real *l_hvOld = m_hv[m_step];
-
-    m_step = 1 - m_step;
-    t_real *l_hNew = m_h[m_step];
-    t_real *l_huNew = m_hu[m_step];
-    t_real *l_hvNew = m_hv[m_step];
-
     t_idx stride = getStride();
 
     t_real l_maxLambda = 0;
@@ -62,9 +54,9 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(
         t_idx l_ce = l_y * stride;
 
         // init new cell quantities
-        l_hNew[l_ce] = l_hOld[l_ce];
-        l_huNew[l_ce] = l_huOld[l_ce];
-        l_hvNew[l_ce] = l_hvOld[l_ce];
+        m_hAcc[l_ce] = 0;
+        m_huAcc[l_ce] = 0;
+        m_hvAcc[l_ce] = 0;
 
         for (t_idx l_x = 0; l_x < m_nCellsX + 1; l_x++) {
             // determine left and right cell-id
@@ -72,14 +64,14 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(
             t_idx l_ceR = l_ceL + 1;
 
             // init new cell quantities
-            l_hNew[l_ceR] = l_hOld[l_ceR];
-            l_huNew[l_ceR] = l_huOld[l_ceR];
-            l_hvNew[l_ceR] = l_hvOld[l_ceR];
+            m_hAcc[l_ceR] = 0;
+            m_huAcc[l_ceR] = 0;
+            m_hvAcc[l_ceR] = 0;
 
-            t_real l_hL = l_hOld[l_ceL];
-            t_real l_hR = l_hOld[l_ceR];
-            t_real l_huL = l_huOld[l_ceL];
-            t_real l_huR = l_huOld[l_ceR];
+            t_real l_hL = m_h[l_ceL];
+            t_real l_hR = m_h[l_ceR];
+            t_real l_huL = m_hu[l_ceL];
+            t_real l_huR = m_hu[l_ceR];
             t_real l_bL = m_b[l_ceL];
             t_real l_bR = m_b[l_ceR];
 
@@ -110,14 +102,14 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(
 
             // update the cells' quantities
             if (!l_dryL) {
-                l_hNew[l_ceL] -= i_scaling * l_netUpdates[0][0];
-                l_huNew[l_ceL] -= i_scaling * l_netUpdates[0][1];
+                m_hAcc[l_ceL] += l_netUpdates[0][0];
+                m_huAcc[l_ceL] += l_netUpdates[0][1];
                 l_maxLambda = std::max(l_maxLambda, std::abs(l_lambda[0]));
             }
 
             if (!l_dryR) {
-                l_hNew[l_ceR] -= i_scaling * l_netUpdates[1][0];
-                l_huNew[l_ceR] -= i_scaling * l_netUpdates[1][1];
+                m_hAcc[l_ceR] += l_netUpdates[1][0];
+                m_huAcc[l_ceR] += l_netUpdates[1][1];
                 l_maxLambda = std::max(l_maxLambda, std::abs(l_lambda[1]));
             }
         }
@@ -133,10 +125,10 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(
                 t_idx l_ceL = l_ce + l_x;
                 t_idx l_ceR = l_ceL + stride;
 
-                t_real l_hL = l_hOld[l_ceL];
-                t_real l_hR = l_hOld[l_ceR];
-                t_real l_hvL = l_hvOld[l_ceL];
-                t_real l_hvR = l_hvOld[l_ceR];
+                t_real l_hL = m_h[l_ceL];
+                t_real l_hR = m_h[l_ceR];
+                t_real l_hvL = m_hv[l_ceL];
+                t_real l_hvR = m_hv[l_ceR];
                 t_real l_bL = m_b[l_ceL];
                 t_real l_bR = m_b[l_ceR];
 
@@ -167,27 +159,30 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(
 
                 // update the cells' quantities
                 if (!l_dryL) {
-                    l_hNew[l_ceL] -= i_scaling * l_netUpdates[0][0];
-                    l_hvNew[l_ceL] -= i_scaling * l_netUpdates[0][1];
+                    m_hAcc[l_ceL] += l_netUpdates[0][0];
+                    m_hvAcc[l_ceL] += l_netUpdates[0][1];
                     l_maxLambda = std::max(l_maxLambda, std::abs(l_lambda[0]));
                 }
 
                 if (!l_dryR) {
-                    l_hNew[l_ceR] -= i_scaling * l_netUpdates[1][0];
-                    l_hvNew[l_ceR] -= i_scaling * l_netUpdates[1][1];
+                    m_hAcc[l_ceR] += l_netUpdates[1][0];
+                    m_hvAcc[l_ceR] += l_netUpdates[1][1];
                     l_maxLambda = std::max(l_maxLambda, std::abs(l_lambda[1]));
                 }
             }
         }
     }
+
+#pragma omp parallel for schedule(static)
+    for (t_idx l_ed = 0; l_ed < m_nCells; l_ed++) {
+        m_h[l_ed] -= i_scaling * m_hAcc[l_ed];
+        m_hu[l_ed] -= i_scaling * m_huAcc[l_ed];
+        m_hv[l_ed] -= i_scaling * m_hvAcc[l_ed];
+    }
 }
 
 template <typename Solver>
 void tsunami_lab::patches::WavePropagation2d<Solver>::setGhostOutflow() {
-    t_real *l_h = m_h[m_step];
-    t_real *l_hu = m_hu[m_step];
-    t_real *l_hv = m_hv[m_step];
-
     t_idx stride = getStride();
 
 #pragma omp parallel for schedule(static)
@@ -197,9 +192,9 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::setGhostOutflow() {
         t_idx l_i = l_y * stride + l_x;
         t_idx l_j = (l_y + 1) * stride + l_x;
 
-        l_h[l_i] = l_h[l_j];
-        l_hu[l_i] = l_hu[l_j];
-        l_hv[l_i] = l_hv[l_j];
+        m_h[l_i] = m_h[l_j];
+        m_hu[l_i] = m_hu[l_j];
+        m_hv[l_i] = m_hv[l_j];
         m_b[l_i] = m_b[l_j];
 
         l_y = m_nCellsY + 1;
@@ -207,9 +202,9 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::setGhostOutflow() {
         l_i = l_y * stride + l_x;
         l_j = (l_y - 1) * stride + l_x;
 
-        l_h[l_i] = l_h[l_j];
-        l_hu[l_i] = l_hu[l_j];
-        l_hv[l_i] = l_hv[l_j];
+        m_h[l_i] = m_h[l_j];
+        m_hu[l_i] = m_hu[l_j];
+        m_hv[l_i] = m_hv[l_j];
         m_b[l_i] = m_b[l_j];
     }
 
@@ -220,9 +215,9 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::setGhostOutflow() {
         t_idx l_i = l_y * stride + l_x;
         t_idx l_j = l_y * stride + l_x + 1;
 
-        l_h[l_i] = l_h[l_j];
-        l_hu[l_i] = l_hu[l_j];
-        l_hv[l_i] = l_hv[l_j];
+        m_h[l_i] = m_h[l_j];
+        m_hu[l_i] = m_hu[l_j];
+        m_hv[l_i] = m_hv[l_j];
         m_b[l_i] = m_b[l_j];
 
         l_x = m_nCellsX + 1;
@@ -230,9 +225,9 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::setGhostOutflow() {
         l_i = l_y * stride + l_x;
         l_j = l_y * stride + l_x - 1;
 
-        l_h[l_i] = l_h[l_j];
-        l_hu[l_i] = l_hu[l_j];
-        l_hv[l_i] = l_hv[l_j];
+        m_h[l_i] = m_h[l_j];
+        m_hu[l_i] = m_hu[l_j];
+        m_hv[l_i] = m_hv[l_j];
         m_b[l_i] = m_b[l_j];
     }
 }
