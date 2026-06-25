@@ -257,19 +257,6 @@ int main(int i_argc, char *i_argv[]) {
 
     // iterate over time
     while (l_simTime <= l_args.simLen) {
-        if (l_simTime >= l_nextOutput && l_args.outputFreq > 0.0) {
-            std::cout << "  output: " << l_timeStep << " time steps, "
-                      << l_simTime << " seconds" << std::endl;
-
-            netcdf.writeTimeStep(l_simTime, l_waveProp.getHeight(),
-                                 l_waveProp.getMomentumX(),
-                                 l_waveProp.getMomentumY());
-
-            stations.output(l_args.cellSize, l_simTime, &l_waveProp);
-
-            l_nextOutput += l_args.outputFreq;
-        }
-
         if (l_simTime >= l_nextCheckpoint && l_args.checkpointFreq > 0.0) {
             std::cout << "  checkpoint: " << l_timeStep << " time steps, "
                       << l_simTime << " seconds" << std::endl;
@@ -282,6 +269,19 @@ int main(int i_argc, char *i_argv[]) {
             std::filesystem::rename(new_checkpoint, l_args.checkpoint);
 
             l_nextCheckpoint += l_args.checkpointFreq;
+        }
+
+        if (l_simTime >= l_nextOutput && l_args.outputFreq > 0.0) {
+            std::cout << "  output: " << l_timeStep << " time steps, "
+                      << l_simTime << " seconds" << std::endl;
+
+            netcdf.writeTimeStep(l_simTime, l_waveProp.getHeight(),
+                                 l_waveProp.getMomentumX(),
+                                 l_waveProp.getMomentumY());
+
+            stations.output(l_args.cellSize, l_simTime, &l_waveProp);
+
+            l_nextOutput += l_args.outputFreq;
         }
 
         auto now = std::chrono::high_resolution_clock::now();
