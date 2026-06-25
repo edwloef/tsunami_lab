@@ -23,6 +23,8 @@
 #include <ostream>
 #include <stdarg.h>
 
+#define RESET_LINE "\x1b[2K\r"
+
 typedef struct {
     tsunami_lab::t_real outputFreq, checkpointFreq, simLen, cellSize;
     tsunami_lab::t_idx coarseOutputSize;
@@ -258,8 +260,9 @@ int main(int i_argc, char *i_argv[]) {
     // iterate over time
     while (l_simTime <= l_args.simLen) {
         if (l_simTime >= l_nextCheckpoint && l_args.checkpointFreq > 0.0) {
-            std::cout << "  checkpoint: " << l_timeStep << " time steps, "
-                      << l_simTime << " seconds" << std::endl;
+            std::cout << RESET_LINE "  checkpoint: " << l_timeStep
+                      << " time steps, " << l_simTime << " seconds"
+                      << std::endl;
 
             tsunami_lab::io::NetCDF::writeCheckpoint(
                 new_checkpoint, l_nx, l_ny, l_waveProp.getStride(),
@@ -272,8 +275,9 @@ int main(int i_argc, char *i_argv[]) {
         }
 
         if (l_simTime >= l_nextOutput && l_args.outputFreq > 0.0) {
-            std::cout << "  output: " << l_timeStep << " time steps, "
-                      << l_simTime << " seconds" << std::endl;
+            std::cout << RESET_LINE "  output: " << l_timeStep
+                      << " time steps, " << l_simTime << " seconds"
+                      << std::endl;
 
             netcdf.writeTimeStep(l_simTime, l_waveProp.getHeight(),
                                  l_waveProp.getMomentumX(),
@@ -291,6 +295,9 @@ int main(int i_argc, char *i_argv[]) {
 
         l_timeStep++;
         l_simTime += l_dt;
+
+        std::cout << RESET_LINE "  " << l_timeStep << " time steps, "
+                  << l_simTime << " seconds" << std::flush;
     }
 
     free(new_checkpoint);
@@ -299,7 +306,7 @@ int main(int i_argc, char *i_argv[]) {
 
     sim_dur /= l_timeStep;
 
-    std::cout << "finished time loop\n  setup time per cell: "
+    std::cout << RESET_LINE "finished time loop\n  setup time per cell: "
               << 1'000'000'000 * setup_dur.count() / (l_nx * l_ny)
               << " ns\n  simulation time per time step per cell: "
               << 1'000'000'000 * sim_dur.count() / (l_nx * l_ny) << " ns"
