@@ -5,45 +5,35 @@
  * @section DESCRIPTION
  * Two-dimensional wave propagation patch.
  **/
-#ifndef TSUNAMI_LAB_PATCHES_WAVE_PROPAGATION_2D
-#define TSUNAMI_LAB_PATCHES_WAVE_PROPAGATION_2D
+#ifndef TSUNAMI_LAB_PATCHES_DYNAMIC_WAVE_PROPAGATION_2D
+#define TSUNAMI_LAB_PATCHES_DYNAMIC_WAVE_PROPAGATION_2D
 
 #include "WavePropagation.h"
-#include <algorithm>
-#include <limits>
 
 namespace tsunami_lab {
 namespace patches {
-template <typename Solver> class WavePropagation2d;
+template <typename Solver> class DynamicWavePropagation2d;
 }
 } // namespace tsunami_lab
 
 template <typename Solver>
-class tsunami_lab::patches::WavePropagation2d : public WavePropagation {
+class tsunami_lab::patches::DynamicWavePropagation2d : public WavePropagation {
   private:
     Solver m_solver;
-
-    //! current step which indicates the active values in the arrays below
-    unsigned short m_step = 0;
 
     t_idx m_nCellsX = 0;
     t_idx m_nCellsY = 0;
 
-    //! number of cells discretizing the computational domain
     t_idx m_nCells = 0;
 
-    t_real m_hMax = std::numeric_limits<t_real>::lowest();
-
-    //! water heights for the current and next time step for all cells
-    t_real *m_h[2] = {nullptr, nullptr};
-
-    //! x-momenta for the current and next time step for all cells
-    t_real *m_hu[2] = {nullptr, nullptr};
-
-    //! y-momenta for the current and next time step for all cells
-    t_real *m_hv[2] = {nullptr, nullptr};
-
+    t_real *m_h = nullptr;
+    t_real *m_hu = nullptr;
+    t_real *m_hv = nullptr;
     t_real *m_b = nullptr;
+
+    t_real *m_hAcc = nullptr;
+    t_real *m_huAcc = nullptr;
+    t_real *m_hvAcc = nullptr;
 
   public:
     /**
@@ -52,19 +42,17 @@ class tsunami_lab::patches::WavePropagation2d : public WavePropagation {
      * @param i_x number of cells in x direction.
      * @param i_y number of cells in y direction.
      **/
-    WavePropagation2d(t_idx i_x, t_idx i_y, Solver i_solver);
+    DynamicWavePropagation2d(t_idx i_x, t_idx i_y, Solver i_solver);
 
     /**
      * Destructor which frees all allocated memory.
      **/
-    ~WavePropagation2d();
+    ~DynamicWavePropagation2d();
 
     /**
      * Performs a time step.
-     *
-     * @param i_scaling scaling of the time step (dt / dx).
      **/
-    t_real timeStep(t_real i_scaling);
+    t_real timeStep(t_real i_dxy);
 
     /**
      * Sets the values of the ghost cells according to outflow boundary
@@ -93,7 +81,7 @@ class tsunami_lab::patches::WavePropagation2d : public WavePropagation {
      * @return water heights.
      */
     t_real const *getHeight() const {
-        return m_h[m_step] + getStride() + 1;
+        return m_h + getStride() + 1;
     }
 
     /**
@@ -102,7 +90,7 @@ class tsunami_lab::patches::WavePropagation2d : public WavePropagation {
      * @return momenta in x-direction.
      **/
     t_real const *getMomentumX() const {
-        return m_hu[m_step] + getStride() + 1;
+        return m_hu + getStride() + 1;
     }
 
     /**
@@ -111,7 +99,7 @@ class tsunami_lab::patches::WavePropagation2d : public WavePropagation {
      * @return momenta in y-direction.
      **/
     t_real const *getMomentumY() const {
-        return m_hv[m_step] + getStride() + 1;
+        return m_hv + getStride() + 1;
     }
 
     /**
@@ -131,8 +119,7 @@ class tsunami_lab::patches::WavePropagation2d : public WavePropagation {
      * @param i_h water height.
      **/
     void setHeight(t_idx i_ix, t_idx i_iy, t_real i_h) {
-        m_hMax = std::max(m_hMax, i_h);
-        m_h[m_step][(i_iy + 1) * getStride() + i_ix + 1] = i_h;
+        m_h[(i_iy + 1) * getStride() + i_ix + 1] = i_h;
     }
 
     /**
@@ -143,7 +130,7 @@ class tsunami_lab::patches::WavePropagation2d : public WavePropagation {
      * @param i_hu momentum in x-direction.
      **/
     void setMomentumX(t_idx i_ix, t_idx i_iy, t_real i_hu) {
-        m_hu[m_step][(i_iy + 1) * getStride() + i_ix + 1] = i_hu;
+        m_hu[(i_iy + 1) * getStride() + i_ix + 1] = i_hu;
     }
 
     /**
@@ -154,7 +141,7 @@ class tsunami_lab::patches::WavePropagation2d : public WavePropagation {
      * @param i_hv momentum in y-direction.
      **/
     void setMomentumY(t_idx i_ix, t_idx i_iy, t_real i_hv) {
-        m_hv[m_step][(i_iy + 1) * getStride() + i_ix + 1] = i_hv;
+        m_hv[(i_iy + 1) * getStride() + i_ix + 1] = i_hv;
     };
 
     /**

@@ -6,19 +6,17 @@
  **/
 #include "io/NetCDF.h"
 #include "io/Stations.h"
+#include "patches/DynamicWavePropagation2d.h"
 #include "patches/WavePropagation2d.h"
 #include "setups/TsunamiEvent2d.h"
 #include "solvers/FWave.h"
-#include <algorithm>
 #include <assert.h>
 #include <chrono>
-#include <cmath>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <getopt.h>
 #include <iostream>
-#include <limits>
 #include <ostream>
 #include <stdarg.h>
 
@@ -28,13 +26,10 @@ typedef struct {
     tsunami_lab::t_real outputFreq, checkpointFreq, simLen, cellSize;
     tsunami_lab::t_idx coarseOutputSize;
     char const *displ, *bathy, *stations, *output, *checkpoint;
+    bool dynamicTimeStep;
 } Args;
 
-enum {
-    outputFreq = 256,
-    checkpointFreq,
-    stations,
-};
+enum { outputFreq = 256, checkpointFreq, stations, tynamicTimeStep };
 
 static struct option options[] = {
     {"help", no_argument, 0, 'h'},
@@ -48,6 +43,7 @@ static struct option options[] = {
     {"stations", required_argument, 0, stations},
     {"output", required_argument, 0, 'o'},
     {"checkpoint", required_argument, 0, 'c'},
+    {"dynamic-time-step", no_argument, 0, tynamicTimeStep},
     {0, 0, 0, 0}};
 
 void printUsage(char *program) {
@@ -67,14 +63,16 @@ void printUsage(char *program) {
            "stations.nc)\n  -o --output <path>                Path to output "
            "NetCDF file (default output.nc)\n  -c --checkpoint <path>          "
            "  Path to checkpoint NetCDF file (default "
-           "checkpoint.nc)\n--readall                  Whether to read the "
-           "entire NetCDF file into RAM for faster setup (default false)"
+           "checkpoint.nc)\n  --dynamic-time-step               Whether to use "
+           "a dynamically determined time step in the wave propagator (default "
+           "false)"
         << std::endl;
 }
 
 Args parseArgs(int argc, char *argv[]) {
     Args args = {60.0, 600.0, 3600.0,          1000.0,      1,
-                 NULL, NULL,  "stations.json", "output.nc", "checkpoint.nc"};
+                 NULL, NULL,  "stations.json", "output.nc", "checkpoint.nc",
+                 false};
 
     int c;
     while ((c = getopt_long(argc, argv, "hl:s:k:d:b:o:c:", options, NULL)) !=
@@ -112,6 +110,9 @@ Args parseArgs(int argc, char *argv[]) {
             break;
         case 'c':
             args.checkpoint = optarg;
+            break;
+        case tynamicTimeStep:
+            args.dynamicTimeStep = true;
             break;
         default:
             printUsage(*argv);
@@ -188,8 +189,14 @@ int main(int i_argc, char *i_argv[]) {
     std::cout.precision(defaultprecision);
 
     // construct solver
-    tsunami_lab::patches::WavePropagation2d l_waveProp(
-        l_nx, l_ny, tsunami_lab::solvers::FWave());
+    tsunami_lab::patches::WavePropagation *l_waveProp;
+    if (l_args.dynamicTimeStep) {
+        l_waveProp = new tsunami_lab::patches::DynamicWavePropagation2d(
+            l_nx, l_ny, tsunami_lab::solvers::FWave());
+    } else {
+        l_waveProp = new tsunami_lab::patches::WavePropagation2d(
+            l_nx, l_ny, tsunami_lab::solvers::FWave());
+    }
 
 #pragma omp parallel for schedule(static) collapse(2)
     for (tsunami_lab::t_idx l_cy = 0; l_cy < l_ny; l_cy++) {
@@ -204,10 +211,10 @@ int main(int i_argc, char *i_argv[]) {
             tsunami_lab::t_real l_b = l_setup->getBathymetry(l_x, l_y);
 
             // set initial values in wave propagation solver
-            l_waveProp.setHeight(l_cx, l_cy, l_h);
-            l_waveProp.setMomentumX(l_cx, l_cy, l_hu);
-            l_waveProp.setMomentumY(l_cx, l_cy, l_hv);
-            l_waveProp.setBathymetry(l_cx, l_cy, l_b);
+            l_waveProp->setHeight(l_cx, l_cy, l_h);
+            l_waveProp->setMomentumX(l_cx, l_cy, l_hu);
+            l_waveProp->setMomentumY(l_cx, l_cy, l_hv);
+            l_waveProp->setBathymetry(l_cx, l_cy, l_b);
         }
     }
 
@@ -219,7 +226,7 @@ int main(int i_argc, char *i_argv[]) {
 
     // construct netcdf writer
     tsunami_lab::io::NetCDF netcdf(l_args.output, l_args.cellSize, l_nx, l_ny,
-                                   l_waveProp.getStride(),
+                                   l_waveProp->getStride(),
                                    l_args.coarseOutputSize);
 
     // construct stations
@@ -231,7 +238,7 @@ int main(int i_argc, char *i_argv[]) {
     tsunami_lab::t_real l_nextOutput = 0;
     tsunami_lab::t_real l_nextCheckpoint = 0;
 
-    netcdf.writeBathymetry(l_waveProp.getBathymetry());
+    netcdf.writeBathymetry(l_waveProp->getBathymetry());
 
     std::cout << "entering time loop..." << std::endl;
 
@@ -247,9 +254,9 @@ int main(int i_argc, char *i_argv[]) {
                       << std::endl;
 
             tsunami_lab::io::NetCDF::writeCheckpoint(
-                new_checkpoint, l_nx, l_ny, l_waveProp.getStride(),
-                l_waveProp.getBathymetry(), l_simTime, l_waveProp.getHeight(),
-                l_waveProp.getMomentumX(), l_waveProp.getMomentumY());
+                new_checkpoint, l_nx, l_ny, l_waveProp->getStride(),
+                l_waveProp->getBathymetry(), l_simTime, l_waveProp->getHeight(),
+                l_waveProp->getMomentumX(), l_waveProp->getMomentumY());
 
             std::filesystem::rename(new_checkpoint, l_args.checkpoint);
 
@@ -261,18 +268,18 @@ int main(int i_argc, char *i_argv[]) {
                       << " time steps, " << l_simTime << " seconds"
                       << std::endl;
 
-            netcdf.writeTimeStep(l_simTime, l_waveProp.getHeight(),
-                                 l_waveProp.getMomentumX(),
-                                 l_waveProp.getMomentumY());
+            netcdf.writeTimeStep(l_simTime, l_waveProp->getHeight(),
+                                 l_waveProp->getMomentumX(),
+                                 l_waveProp->getMomentumY());
 
-            stations.output(l_args.cellSize, l_simTime, &l_waveProp);
+            stations.output(l_args.cellSize, l_simTime, &*l_waveProp);
 
             l_nextOutput += l_args.outputFreq;
         }
 
         auto now = std::chrono::high_resolution_clock::now();
-        l_waveProp.setGhostOutflow();
-        tsunami_lab::t_real l_dt = l_waveProp.timeStep(l_args.cellSize);
+        l_waveProp->setGhostOutflow();
+        tsunami_lab::t_real l_dt = l_waveProp->timeStep(l_args.cellSize);
         sim_dur += std::chrono::high_resolution_clock::now() - now;
 
         l_timeStep++;
@@ -293,4 +300,6 @@ int main(int i_argc, char *i_argv[]) {
               << " ns\n  simulation time per time step per cell: "
               << 1'000'000'000 * sim_dur.count() / (l_nx * l_ny) << " ns"
               << std::endl;
+
+    delete l_waveProp;
 }

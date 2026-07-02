@@ -16,6 +16,7 @@ l_sources = [
     "io/NetCDF.cpp",
     "io/PingPong.cpp",
     "io/Stations.cpp",
+    "patches/DynamicWavePropagation2d.cpp",
     "patches/WavePropagation1d.cpp",
     "patches/WavePropagation2d.cpp",
     "setups/ArtificialTsunami2d.cpp",
