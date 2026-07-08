@@ -22,13 +22,14 @@ class TsunamiEvent2d;
  **/
 class tsunami_lab::setups::TsunamiEvent2d : public Setup {
   private:
+    double m_delta;
     io::NetCDF d, b;
 
   public:
     /**
      * Constructor.
      **/
-    TsunamiEvent2d(char const *i_d, char const *i_b);
+    TsunamiEvent2d(char const *i_d, char const *i_b, t_real i_delta);
 
     /**
      * Gets the water height at a given point.

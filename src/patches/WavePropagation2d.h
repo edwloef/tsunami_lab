@@ -21,6 +21,7 @@ template <typename Solver> class WavePropagation2d;
 template <typename Solver>
 class tsunami_lab::patches::WavePropagation2d : public WavePropagation {
   private:
+    t_real m_gamma;
     Solver m_solver;
 
     //! current step which indicates the active values in the arrays below
@@ -52,7 +53,7 @@ class tsunami_lab::patches::WavePropagation2d : public WavePropagation {
      * @param i_x number of cells in x direction.
      * @param i_y number of cells in y direction.
      **/
-    WavePropagation2d(t_idx i_x, t_idx i_y, Solver i_solver);
+    WavePropagation2d(t_idx i_x, t_idx i_y, t_real i_gamma, Solver i_solver);
 
     /**
      * Destructor which frees all allocated memory.

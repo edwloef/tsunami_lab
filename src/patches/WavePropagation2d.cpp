@@ -11,7 +11,8 @@
 
 template <typename Solver>
 tsunami_lab::patches::WavePropagation2d<Solver>::WavePropagation2d(
-    t_idx i_x, t_idx i_y, Solver i_solver) {
+    t_idx i_x, t_idx i_y, t_real i_gamma, Solver i_solver) {
+    m_gamma = i_gamma;
     m_solver = i_solver;
 
     m_nCellsX = i_x;
@@ -53,7 +54,8 @@ tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(t_real i_dxy) {
     t_real *l_huNew = m_hu[m_step];
     t_real *l_hvNew = m_hv[m_step];
 
-    t_idx stride = getStride();
+    t_idx l_stride = getStride();
+    t_real l_reflect = (2.0 * m_gamma - t_real(1.0));
 
     tsunami_lab::t_real l_speedMax = std::sqrt(9.80665 * m_hMax);
     t_real l_dt = t_real(0.5) * i_dxy / l_speedMax;
@@ -61,7 +63,7 @@ tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(t_real i_dxy) {
 
 #pragma omp parallel for schedule(guided)
     for (t_idx l_y = 0; l_y < m_nCellsY + 1; l_y++) {
-        t_idx l_ce = l_y * stride;
+        t_idx l_ce = l_y * l_stride;
 
         // init new cell quantities
         l_hNew[l_ce] = l_hOld[l_ce];
@@ -94,12 +96,12 @@ tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(t_real i_dxy) {
                     continue;
                 } else {
                     l_hL = l_hR;
-                    l_huL = -l_huR;
+                    l_huL = l_reflect * l_huR;
                     l_bL = l_bR;
                 }
             } else if (l_dryR) {
                 l_hR = l_hL;
-                l_huR = -l_huL;
+                l_huR = l_reflect * l_huL;
                 l_bR = l_bL;
             }
 
@@ -126,12 +128,12 @@ tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(t_real i_dxy) {
     for (t_idx l_s = 0; l_s < 2; l_s++) {
 #pragma omp parallel for schedule(guided)
         for (t_idx l_y = l_s; l_y < m_nCellsY + 1; l_y += 2) {
-            t_idx l_ce = l_y * stride;
+            t_idx l_ce = l_y * l_stride;
 
             for (t_idx l_x = 0; l_x < m_nCellsX + 1; l_x++) {
                 // determine left and right cell-id
                 t_idx l_ceL = l_ce + l_x;
-                t_idx l_ceR = l_ceL + stride;
+                t_idx l_ceR = l_ceL + l_stride;
 
                 t_real l_hL = l_hOld[l_ceL];
                 t_real l_hR = l_hOld[l_ceR];
@@ -149,12 +151,12 @@ tsunami_lab::patches::WavePropagation2d<Solver>::timeStep(t_real i_dxy) {
                         continue;
                     } else {
                         l_hL = l_hR;
-                        l_hvL = -l_hvR;
+                        l_hvL = l_reflect * l_hvR;
                         l_bL = l_bR;
                     }
                 } else if (l_dryR) {
                     l_hR = l_hL;
-                    l_hvR = -l_hvL;
+                    l_hvR = l_reflect * l_hvL;
                     l_bR = l_bL;
                 }
 

@@ -19,6 +19,7 @@ template <typename Solver> class DynamicWavePropagation2d;
 template <typename Solver>
 class tsunami_lab::patches::DynamicWavePropagation2d : public WavePropagation {
   private:
+    t_real m_gamma;
     Solver m_solver;
 
     t_idx m_nCellsX = 0;
@@ -42,7 +43,8 @@ class tsunami_lab::patches::DynamicWavePropagation2d : public WavePropagation {
      * @param i_x number of cells in x direction.
      * @param i_y number of cells in y direction.
      **/
-    DynamicWavePropagation2d(t_idx i_x, t_idx i_y, Solver i_solver);
+    DynamicWavePropagation2d(t_idx i_x, t_idx i_y, t_real i_gamma,
+                             Solver i_solver);
 
     /**
      * Destructor which frees all allocated memory.

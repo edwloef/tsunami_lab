@@ -23,13 +23,21 @@
 #define RESET_LINE "\x1b[2K\r"
 
 typedef struct {
-    tsunami_lab::t_real outputFreq, checkpointFreq, simLen, cellSize;
+    tsunami_lab::t_real outputFreq, checkpointFreq, simLen, cellSize, gamma,
+        delta;
     tsunami_lab::t_idx coarseOutputSize;
     char const *displ, *bathy, *stations, *output, *checkpoint;
     bool dynamicTimeStep;
 } Args;
 
-enum { outputFreq = 256, checkpointFreq, stations, tynamicTimeStep };
+enum {
+    outputFreq = 256,
+    checkpointFreq,
+    gamma,
+    delta,
+    stations,
+    tynamicTimeStep,
+};
 
 static struct option options[] = {
     {"help", no_argument, 0, 'h'},
@@ -37,6 +45,8 @@ static struct option options[] = {
     {"checkpoint-freq", required_argument, 0, checkpointFreq},
     {"simulation-length", required_argument, 0, 'l'},
     {"cell-size", required_argument, 0, 's'},
+    {"gamma", required_argument, 0, gamma},
+    {"delta", required_argument, 0, delta},
     {"coarse-output-size", required_argument, 0, 'k'},
     {"displacement", required_argument, 0, 'd'},
     {"bathymetry", required_argument, 0, 'b'},
@@ -54,24 +64,31 @@ void printUsage(char *program) {
            "seconds (default 60s)\n     --checkpoint-freq <seconds>    "
            "Checkpoint frequency in seconds (default 600s)\n  -l "
            "--simulation-length <seconds>  Simulation length in seconds "
-           "(default 3600s)\n  -s --cell-size <meters>           Cell size in "
-           "meters (default 1000m)\n  -k --coarse-output-size <cells>   Coarse "
-           "output size in cells (default 1)\n  -d --displacement <path>       "
-           "   Path to displacement NetCDF file (required)\n  -b --bathymetry "
-           "<path>            Path to bathymetry NetCDF file (required)\n     "
-           "--stations <path>              Path to stations JSON file (default "
-           "stations.nc)\n  -o --output <path>                Path to output "
-           "NetCDF file (default output.nc)\n  -c --checkpoint <path>          "
-           "  Path to checkpoint NetCDF file (default "
-           "checkpoint.nc)\n  --dynamic-time-step               Whether to use "
-           "a dynamically determined time step in the wave propagator (default "
-           "false)"
+           "(default off)\n  -s --cell-size <meters>           Cell size in "
+           "meters (default 1000m)\n     --gamma                        Wave "
+           "reflection damping coefficient between 0 and 1 (default 0.05)\n    "
+           " --delta                        Minimum water depth at setup time "
+           "in meters (default 20m)\n  -k --coarse-output-size <cells>   "
+           "Coarse output size in cells (default 1)\n  -d --displacement "
+           "<path>          Path to displacement NetCDF file (required)\n  -b "
+           "--bathymetry <path>            Path to bathymetry NetCDF file "
+           "(required)\n     --stations <path>              Path to stations "
+           "JSON file (default stations.nc)\n  -o --output <path>              "
+           "  Path to output NetCDF file (default output.nc)\n  -c "
+           "--checkpoint <path>            Path to checkpoint NetCDF file "
+           "(default checkpoint.nc)\n  --dynamic-time-step               "
+           "Whether to use a dynamically determined time step in the wave "
+           "propagator (default false)"
         << std::endl;
 }
 
 Args parseArgs(int argc, char *argv[]) {
-    Args args = {60.0, 600.0, 3600.0,          1000.0,      1,
-                 NULL, NULL,  "stations.json", "output.nc", "checkpoint.nc",
+    Args args = {60,          0,
+                 3600,        1000,
+                 0.05,        20,
+                 1,           NULL,
+                 NULL,        "stations.json",
+                 "output.nc", "checkpoint.nc",
                  false};
 
     int c;
@@ -92,6 +109,12 @@ Args parseArgs(int argc, char *argv[]) {
             break;
         case 's':
             args.cellSize = std::stod(optarg);
+            break;
+        case gamma:
+            args.gamma = std::stod(optarg);
+            break;
+        case delta:
+            args.delta = std::stod(optarg);
             break;
         case 'k':
             args.coarseOutputSize = std::atoi(optarg);
@@ -160,8 +183,8 @@ int main(int i_argc, char *i_argv[]) {
     fs::path p = "checkpoint.nc";
 
     // construct setup
-    auto l_setup =
-        new tsunami_lab::setups::TsunamiEvent2d(l_args.displ, l_args.bathy);
+    auto l_setup = new tsunami_lab::setups::TsunamiEvent2d(
+        l_args.displ, l_args.bathy, l_args.delta);
 
     /*auto l_setup =
         new tsunami_lab::setups::Setup();
@@ -192,10 +215,10 @@ int main(int i_argc, char *i_argv[]) {
     tsunami_lab::patches::WavePropagation *l_waveProp;
     if (l_args.dynamicTimeStep) {
         l_waveProp = new tsunami_lab::patches::DynamicWavePropagation2d(
-            l_nx, l_ny, tsunami_lab::solvers::FWave());
+            l_nx, l_ny, l_args.gamma, tsunami_lab::solvers::FWave());
     } else {
         l_waveProp = new tsunami_lab::patches::WavePropagation2d(
-            l_nx, l_ny, tsunami_lab::solvers::FWave());
+            l_nx, l_ny, l_args.gamma, tsunami_lab::solvers::FWave());
     }
 
 #pragma omp parallel for schedule(static) collapse(2)
