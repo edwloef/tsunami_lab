@@ -191,50 +191,46 @@ tsunami_lab::patches::DynamicWavePropagation2d<Solver>::timeStep(t_real i_dxy) {
 
 template <typename Solver>
 void tsunami_lab::patches::DynamicWavePropagation2d<Solver>::setGhostOutflow() {
-    t_idx stride = getStride();
-
-#pragma omp parallel for schedule(static)
-    for (t_idx l_x = 1; l_x < m_nCellsX + 1; l_x++) {
-        t_idx l_y = 0;
-
-        t_idx l_i = l_y * stride + l_x;
-        t_idx l_j = (l_y + 1) * stride + l_x;
-
-        m_h[l_i] = m_h[l_j];
-        m_hu[l_i] = m_hu[l_j];
-        m_hv[l_i] = m_hv[l_j];
-        m_b[l_i] = m_b[l_j];
-
-        l_y = m_nCellsY + 1;
-
-        l_i = l_y * stride + l_x;
-        l_j = (l_y - 1) * stride + l_x;
-
-        m_h[l_i] = m_h[l_j];
-        m_hu[l_i] = m_hu[l_j];
-        m_hv[l_i] = m_hv[l_j];
-        m_b[l_i] = m_b[l_j];
-    }
+    t_idx l_stride = getStride();
 
 #pragma omp parallel for schedule(static)
     for (t_idx l_y = 1; l_y < m_nCellsY + 1; l_y++) {
         t_idx l_x = 0;
 
-        t_idx l_i = l_y * stride + l_x;
-        t_idx l_j = l_y * stride + l_x + 1;
+        t_idx l_i = l_y * l_stride + l_x;
+        t_idx l_j = l_i + 1;
 
         m_h[l_i] = m_h[l_j];
         m_hu[l_i] = m_hu[l_j];
-        m_hv[l_i] = m_hv[l_j];
         m_b[l_i] = m_b[l_j];
 
         l_x = m_nCellsX + 1;
 
-        l_i = l_y * stride + l_x;
-        l_j = l_y * stride + l_x - 1;
+        l_i = l_y * l_stride + l_x;
+        l_j = l_i - 1;
 
         m_h[l_i] = m_h[l_j];
         m_hu[l_i] = m_hu[l_j];
+        m_b[l_i] = m_b[l_j];
+    }
+
+#pragma omp parallel for schedule(static)
+    for (t_idx l_x = 1; l_x < m_nCellsX + 1; l_x++) {
+        t_idx l_y = 0;
+
+        t_idx l_i = l_y * l_stride + l_x;
+        t_idx l_j = l_i + l_stride;
+
+        m_h[l_i] = m_h[l_j];
+        m_hv[l_i] = m_hv[l_j];
+        m_b[l_i] = m_b[l_j];
+
+        l_y = m_nCellsY + 1;
+
+        l_i = l_y * l_stride + l_x;
+        l_j = l_i - l_stride;
+
+        m_h[l_i] = m_h[l_j];
         m_hv[l_i] = m_hv[l_j];
         m_b[l_i] = m_b[l_j];
     }
@@ -243,18 +239,48 @@ void tsunami_lab::patches::DynamicWavePropagation2d<Solver>::setGhostOutflow() {
 template <typename Solver>
 void tsunami_lab::patches::DynamicWavePropagation2d<
     Solver>::setGhostReflecting() {
-    t_idx stride = getStride();
-
-#pragma omp parallel for schedule(static)
-    for (t_idx l_x = 1; l_x < m_nCellsX + 1; l_x++) {
-        m_b[l_x] = 20.;
-        m_b[(m_nCellsY + 1) * stride + l_x] = 20.;
-    }
+    t_idx l_stride = getStride();
 
 #pragma omp parallel for schedule(static)
     for (t_idx l_y = 1; l_y < m_nCellsY + 1; l_y++) {
-        m_b[l_y * stride] = 20.;
-        m_b[l_y * stride + m_nCellsX + 1] = 20.;
+        t_idx l_x = 0;
+
+        t_idx l_i = l_y * l_stride + l_x;
+        t_idx l_j = l_i + 1;
+
+        m_h[l_i] = m_h[l_j];
+        m_hu[l_i] = -m_hu[l_j];
+        m_b[l_i] = m_b[l_j];
+
+        l_x = m_nCellsX + 1;
+
+        l_i = l_y * l_stride + l_x;
+        l_j = l_i - 1;
+
+        m_h[l_i] = m_h[l_j];
+        m_hu[l_i] = -m_hu[l_j];
+        m_b[l_i] = m_b[l_j];
+    }
+
+#pragma omp parallel for schedule(static)
+    for (t_idx l_x = 1; l_x < m_nCellsX + 1; l_x++) {
+        t_idx l_y = 0;
+
+        t_idx l_i = l_y * l_stride + l_x;
+        t_idx l_j = l_i + l_stride;
+
+        m_h[l_i] = m_h[l_j];
+        m_hv[l_i] = -m_hv[l_j];
+        m_b[l_i] = m_b[l_j];
+
+        l_y = m_nCellsY + 1;
+
+        l_i = l_y * l_stride + l_x;
+        l_j = l_i - l_stride;
+
+        m_h[l_i] = m_h[l_j];
+        m_hv[l_i] = -m_hv[l_j];
+        m_b[l_i] = m_b[l_j];
     }
 }
 
