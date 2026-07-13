@@ -110,16 +110,23 @@ tsunami_lab::patches::WavePropagation1d<Solver>::timeStep(t_real i_dxy) {
 }
 
 template <typename Solver>
+void tsunami_lab::patches::WavePropagation1d<Solver>::setGhostBathymetry() {
+    // set left boundary
+    m_b[0] = m_b[1];
+
+    // set right boundary
+    m_b[m_nCells + 1] = m_b[m_nCells];
+}
+
+template <typename Solver>
 void tsunami_lab::patches::WavePropagation1d<Solver>::setGhostOutflow() {
     // set left boundary
     m_h[0] = m_h[1];
     m_hu[0] = m_hu[1];
-    m_b[0] = m_b[1];
 
     // set right boundary
     m_h[m_nCells + 1] = m_h[m_nCells];
     m_hu[m_nCells + 1] = m_hu[m_nCells];
-    m_b[m_nCells + 1] = m_b[m_nCells];
 }
 
 template <typename Solver>
@@ -127,12 +134,10 @@ void tsunami_lab::patches::WavePropagation1d<Solver>::setGhostReflecting() {
     // set left boundary
     m_h[0] = m_h[1];
     m_hu[0] = -m_hu[1];
-    m_b[0] = m_b[1];
 
     // set right boundary
     m_h[m_nCells + 1] = m_h[m_nCells];
     m_hu[m_nCells + 1] = -m_hu[m_nCells];
-    m_b[m_nCells + 1] = m_b[m_nCells];
 }
 
 template class tsunami_lab::patches::WavePropagation1d<

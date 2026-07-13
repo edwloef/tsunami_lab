@@ -269,6 +269,8 @@ int main(int i_argc, char *i_argv[]) {
 
     char *new_checkpoint = strfmt("%s.new", l_args.checkpoint);
 
+    l_waveProp->setGhostBathymetry();
+
     // iterate over time
     while (l_simTime <= l_args.simLen) {
         if (l_simTime >= l_nextCheckpoint && l_args.checkpointFreq > 0.0) {

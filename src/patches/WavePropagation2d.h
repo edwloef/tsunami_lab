@@ -68,6 +68,11 @@ class tsunami_lab::patches::WavePropagation2d : public WavePropagation {
     t_real timeStep(t_real i_scaling);
 
     /**
+     * Sets the bathymetry of the ghost cells.
+     **/
+    void setGhostBathymetry();
+
+    /**
      * Sets the values of the ghost cells according to outflow boundary
      * conditions.
      **/
