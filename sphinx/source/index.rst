@@ -18,6 +18,8 @@
    ninth
    individual_phase
    first_week_ind
+   second_week_ind
+   third_week_ind
 
 
 Tsunami documentation
