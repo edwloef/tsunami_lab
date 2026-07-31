@@ -13,11 +13,10 @@ and delta, which is the configurable minimum water depth at our setup time.
 .. code-block:: c++
 
     std::cout
-        << "Usage: " << program
-        << " [OPTION...]
-           ..."
-           --gamma Wave reflection damping coefficient between 0 and 1 (default 0.05)\n    "
-           " --delta Minimum water depth at setup time in meters (default 20m)"
+        << "Usage: " << program << " [OPTION...]"
+           "..."
+           "--gamma Wave reflection damping coefficient between 0 and 1 (default 0.05)\n"
+           "--delta Minimum water depth at setup time in meters (default 20m)\n"
            "..."
         << std::endl;
 
