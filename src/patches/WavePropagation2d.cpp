@@ -233,6 +233,7 @@ void tsunami_lab::patches::WavePropagation2d<Solver>::setGhostOutflow() {
 
 #pragma omp parallel for schedule(static)
     for (t_idx l_y = 1; l_y < m_nCellsY + 1; l_y++) {
+
         t_idx l_x = 0;
 
         t_idx l_i = l_y * l_stride + l_x;

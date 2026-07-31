@@ -8,6 +8,8 @@
 #define TSUNAMI_LAB_PATCHES_WAVE_PROPAGATION_1D
 
 #include "WavePropagation.h"
+#include <algorithm>
+#include <limits>
 
 namespace tsunami_lab {
 namespace patches {
@@ -20,14 +22,21 @@ class tsunami_lab::patches::WavePropagation1d : public WavePropagation {
   private:
     Solver m_solver;
 
+    //! current step which indicates the active values in the arrays below
+    unsigned short m_step = 0;
+
+    //! number of cells discretizing the computational domain
     t_idx m_nCells = 0;
 
-    t_real *m_h = nullptr;
-    t_real *m_hu = nullptr;
-    t_real *m_b = nullptr;
+    t_real m_hMax = std::numeric_limits<t_real>::lowest();
 
-    t_real *m_hAcc = nullptr;
-    t_real *m_huAcc = nullptr;
+    //! water heights for the current and next time step for all cells
+    t_real *m_h[2] = {nullptr, nullptr};
+
+    //! momenta for the current and next time step for all cells
+    t_real *m_hu[2] = {nullptr, nullptr};
+
+    t_real *m_b = nullptr;
 
   public:
     /**
@@ -44,8 +53,12 @@ class tsunami_lab::patches::WavePropagation1d : public WavePropagation {
 
     /**
      * Performs a time step.
+     *
+     * @param i_dxy cell width in x- and y-direction
+     *
+     * @return time step length in seconds
      **/
-    t_real timeStep(t_real i_dxy);
+    t_real timeStep(t_real i_scaling);
 
     /**
      * Sets the bathymetry of the ghost cells.
@@ -79,7 +92,7 @@ class tsunami_lab::patches::WavePropagation1d : public WavePropagation {
      * @return water heights.
      */
     t_real const *getHeight() const {
-        return m_h + 1;
+        return m_h[m_step] + 1;
     }
 
     /**
@@ -88,7 +101,7 @@ class tsunami_lab::patches::WavePropagation1d : public WavePropagation {
      * @return momenta in x-direction.
      **/
     t_real const *getMomentumX() const {
-        return m_hu + 1;
+        return m_hu[m_step] + 1;
     }
 
     /**
@@ -114,7 +127,8 @@ class tsunami_lab::patches::WavePropagation1d : public WavePropagation {
      * @param i_h water height.
      **/
     void setHeight(t_idx i_ix, t_idx, t_real i_h) {
-        m_h[i_ix + 1] = i_h;
+        m_hMax = std::max(m_hMax, i_h);
+        m_h[m_step][i_ix + 1] = i_h;
     }
 
     /**
@@ -124,7 +138,7 @@ class tsunami_lab::patches::WavePropagation1d : public WavePropagation {
      * @param i_hu momentum in x-direction.
      **/
     void setMomentumX(t_idx i_ix, t_idx, t_real i_hu) {
-        m_hu[i_ix + 1] = i_hu;
+        m_hu[m_step][i_ix + 1] = i_hu;
     }
 
     /**

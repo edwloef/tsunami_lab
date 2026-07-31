@@ -24,6 +24,10 @@ class tsunami_lab::patches::WavePropagation {
 
     /**
      * Performs a time step.
+     *
+     * @param i_dxy cell width in x- and y-direction
+     *
+     * @return time step length in seconds
      **/
     virtual t_real timeStep(t_real i_dxy) = 0;
 
