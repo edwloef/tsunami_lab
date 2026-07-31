@@ -8,6 +8,7 @@
 #include "io/Stations.h"
 #include "patches/DynamicWavePropagation2d.h"
 #include "patches/WavePropagation2d.h"
+#include "setups/Checkpoint.h"
 #include "setups/TsunamiEvent2d.h"
 #include "solvers/FWave.h"
 #include <assert.h>
@@ -164,8 +165,6 @@ char *strfmt(const char *fmt, ...) {
     return str;
 }
 
-namespace fs = std::filesystem;
-
 int main(int i_argc, char *i_argv[]) {
     std::cout << "####################################" << std::endl;
     std::cout << "### Tsunami Lab                  ###" << std::endl;
@@ -180,33 +179,47 @@ int main(int i_argc, char *i_argv[]) {
     std::cout << "runtime configuration:\n  cell size: " << l_args.cellSize
               << " meters" << std::endl;
 
-    fs::path p = "checkpoint.nc";
-
     // construct setup
-    auto l_setup = new tsunami_lab::setups::TsunamiEvent2d(
-        l_args.displ, l_args.bathy, l_args.delta);
+    tsunami_lab::setups::Setup *l_setup;
+    tsunami_lab::t_real l_minX, l_minY, l_maxX, l_maxY, l_simTime = 0;
+    tsunami_lab::t_real l_step = 0;
 
-    /*auto l_setup =
-        new tsunami_lab::setups::Setup();
+    if (std::filesystem::exists(l_args.checkpoint) &&
+        std::filesystem::is_regular_file(l_args.checkpoint)) {
+        std::cout << "resuming from checkpoint" << std::endl;
 
-    if (fs::exists(p) && fs::is_regular_file(p)) {
-        std::cout << "Datei existiert\n";
-        l_setup = new tsunami_lab::setups::CheckPoint(l_args.displ, l_args.bathy);
+        auto setup = new tsunami_lab::setups::Checkpoint(l_args.checkpoint);
+
+        l_minX = setup->minX();
+        l_minY = setup->minY();
+        l_maxX = setup->maxX();
+        l_maxY = setup->maxY();
+
+        l_step = setup->step();
+        l_simTime = setup->t();
+
+        l_setup = setup;
     } else {
-        l_setup = new tsunami_lab::setups::TsunamiEvent2d(l_args.displ, l_args.bathy);
-    }
-    */
+        std::filesystem::remove(l_args.output);
 
-    tsunami_lab::t_idx l_nx =
-        (l_setup->maxX() - l_setup->minX()) / l_args.cellSize;
-    tsunami_lab::t_idx l_ny =
-        (l_setup->maxY() - l_setup->minY()) / l_args.cellSize;
+        auto setup = new tsunami_lab::setups::TsunamiEvent2d(
+            l_args.displ, l_args.bathy, l_args.delta);
+
+        l_minX = setup->minX();
+        l_minY = setup->minY();
+        l_maxX = setup->maxX();
+        l_maxY = setup->maxY();
+
+        l_setup = setup;
+    }
+
+    tsunami_lab::t_idx l_nx = (l_maxX - l_minX) / l_args.cellSize;
+    tsunami_lab::t_idx l_ny = (l_maxY - l_minY) / l_args.cellSize;
 
     auto defaultprecision = std::cout.precision();
     std::cout.precision(0);
-    std::cout << "  simulation bounds: " << std::fixed << l_setup->minX() << "/"
-              << l_setup->maxX() << "/" << l_setup->minY() << "/"
-              << l_setup->maxY() << std::defaultfloat
+    std::cout << "  simulation bounds: " << std::fixed << l_minX << "/"
+              << l_maxX << "/" << l_minY << "/" << l_maxY << std::defaultfloat
               << "\n  cell count: " << l_nx << " * " << l_ny << " = "
               << l_nx * l_ny << std::endl;
     std::cout.precision(defaultprecision);
@@ -224,8 +237,8 @@ int main(int i_argc, char *i_argv[]) {
 #pragma omp parallel for schedule(static) collapse(2)
     for (tsunami_lab::t_idx l_cy = 0; l_cy < l_ny; l_cy++) {
         for (tsunami_lab::t_idx l_cx = 0; l_cx < l_nx; l_cx++) {
-            tsunami_lab::t_real l_y = l_setup->minY() + l_cy * l_args.cellSize;
-            tsunami_lab::t_real l_x = l_setup->minX() + l_cx * l_args.cellSize;
+            tsunami_lab::t_real l_y = l_minY + l_cy * l_args.cellSize;
+            tsunami_lab::t_real l_x = l_minX + l_cx * l_args.cellSize;
 
             // get initial values of the setup
             tsunami_lab::t_real l_h = l_setup->getHeight(l_x, l_y);
@@ -252,14 +265,15 @@ int main(int i_argc, char *i_argv[]) {
                                    l_waveProp->getStride(),
                                    l_args.coarseOutputSize);
 
+    netcdf.setStep(l_step);
+
     // construct stations
     tsunami_lab::io::Stations stations(std::ifstream{l_args.stations});
 
     // set up time and output control
     tsunami_lab::t_idx l_timeStep = 0;
-    tsunami_lab::t_real l_simTime = 0;
-    tsunami_lab::t_real l_nextOutput = 0;
-    tsunami_lab::t_real l_nextCheckpoint = 0;
+    tsunami_lab::t_real l_nextOutput = l_simTime;
+    tsunami_lab::t_real l_nextCheckpoint = l_simTime + l_args.checkpointFreq;
 
     netcdf.writeBathymetry(l_waveProp->getBathymetry());
 
@@ -273,22 +287,22 @@ int main(int i_argc, char *i_argv[]) {
 
     // iterate over time
     while (l_simTime <= l_args.simLen) {
-        if (l_simTime >= l_nextCheckpoint && l_args.checkpointFreq > 0.0) {
-            std::cout << RESET_LINE "  checkpoint: " << l_timeStep
-                      << " time steps, " << l_simTime << " seconds"
-                      << std::endl;
-
-            tsunami_lab::io::NetCDF::writeCheckpoint(
-                new_checkpoint, l_nx, l_ny, l_waveProp->getStride(),
-                l_waveProp->getBathymetry(), l_simTime, l_waveProp->getHeight(),
-                l_waveProp->getMomentumX(), l_waveProp->getMomentumY());
-
-            std::filesystem::rename(new_checkpoint, l_args.checkpoint);
-
-            l_nextCheckpoint += l_args.checkpointFreq;
-        }
-
         if (l_simTime >= l_nextOutput && l_args.outputFreq > 0.0) {
+            if (l_simTime >= l_nextCheckpoint && l_args.checkpointFreq > 0.0) {
+                std::cout << RESET_LINE "  checkpoint: " << l_timeStep
+                          << " time steps, " << l_simTime << " seconds"
+                          << std::endl;
+
+                netcdf.writeCheckpoint(
+                    new_checkpoint, l_waveProp->getBathymetry(), l_simTime,
+                    l_waveProp->getHeight(), l_waveProp->getMomentumX(),
+                    l_waveProp->getMomentumY());
+
+                std::filesystem::rename(new_checkpoint, l_args.checkpoint);
+
+                l_nextCheckpoint += l_args.checkpointFreq;
+            }
+
             std::cout << RESET_LINE "  output: " << l_timeStep
                       << " time steps, " << l_simTime << " seconds"
                       << std::endl;

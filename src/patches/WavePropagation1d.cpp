@@ -7,6 +7,7 @@
 #include "WavePropagation1d.h"
 #include "../solvers/FWave.h"
 #include <cmath>
+#include <iostream>
 
 template <typename Solver>
 tsunami_lab::patches::WavePropagation1d<Solver>::WavePropagation1d(

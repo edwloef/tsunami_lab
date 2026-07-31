@@ -36,6 +36,9 @@ class PingPong {
     Guard access_a();
     Guard access_b();
 
+    void wait_a();
+    void wait_b();
+
   private:
     std::mutex m_;
     std::condition_variable cv_;

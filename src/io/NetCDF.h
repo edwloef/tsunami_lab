@@ -11,8 +11,23 @@
 #include "../constants.h"
 #include "PingPong.h"
 #include <algorithm>
+#include <iostream>
+#include <netcdf.h>
 #include <optional>
+
 #include <thread>
+
+static std::mutex nc_m;
+
+#define nc_try(expr)                                                           \
+    {                                                                          \
+        std::unique_lock l{nc_m};                                              \
+        if (int err; (err = expr)) {                                           \
+            std::cout << __FILE__ << ":" << __LINE__ << ": "                   \
+                      << nc_strerror(err) << std::endl;                        \
+            exit(2);                                                           \
+        }                                                                      \
+    }
 
 namespace tsunami_lab {
 namespace io {
@@ -25,7 +40,7 @@ class tsunami_lab::io::NetCDF {
     t_idx nx, ny, stride, k, knx, kny, step;
     int ncid, x_dimid, y_dimid, t_dimid, x_varid, y_varid, z_varid, b_varid,
         h_varid, hu_varid, hv_varid, t_varid;
-    float *buf, simTime;
+    float *buf, simTime, dxy;
 
     PingPong pp;
     std::optional<std::thread> t = std::nullopt;
@@ -63,7 +78,7 @@ class tsunami_lab::io::NetCDF {
      *
      * @param i_path path to be read from.
      */
-    NetCDF(char const *i_path);
+    NetCDF(char const *i_path, char const *i_z = "z");
 
     /**
      * Constructor.
@@ -86,6 +101,10 @@ class tsunami_lab::io::NetCDF {
     NetCDF(const NetCDF &) = delete;
     NetCDF &operator=(const NetCDF &) = delete;
 
+    void setStep(t_idx i_step) {
+        step = i_step;
+    }
+
     /**
      * Writes the bathymetry as NetCDF.
      *
@@ -107,18 +126,14 @@ class tsunami_lab::io::NetCDF {
      * Writes the checkpoint as NetCDF.
      *
      * @param i_path path to be written to
-     * @param i_nx number of cells in x-direction
-     * @param i_ny number of cells in y-direction
-     * @param i_stride stride of the data arrays in y-direction
      * @param i_b bathymetry
      * @param i_h water height of the cells
      * @param i_hu momentum in x-direction of the cells
      * @param i_hv momentum in y-direction of the cells
      **/
-    static void writeCheckpoint(char const *i_path, t_idx nx, t_idx ny,
-                                t_idx stride, t_real const *i_b,
-                                t_real i_simTime, t_real const *i_h,
-                                t_real const *i_hu, t_real const *i_hv);
+    void writeCheckpoint(char const *i_path, t_real const *i_b,
+                         t_real i_simTime, t_real const *i_h,
+                         t_real const *i_hu, t_real const *i_hv);
 
     /**
      * Reads the value of the z variable at the given position.

@@ -10,26 +10,26 @@
 
 #include "../io/NetCDF.h"
 #include "Setup.h"
-#include <netcdf.h>
 
 namespace tsunami_lab {
 namespace setups {
-class CheckPoint;
+class Checkpoint;
 }
 } // namespace tsunami_lab
 
 /**
  * Checkpoint setup.
  **/
-class tsunami_lab::setups::CheckPoint : public Setup {
+class tsunami_lab::setups::Checkpoint : public Setup {
   private:
-    io::NetCDF d, b;
+    char const *nc;
+    io::NetCDF h, hu, hv, b;
 
   public:
     /**
      * Constructor.
      **/
-    CheckPoint(char const *i_d, char const *i_b);
+    Checkpoint(char const *i_nc);
 
     /**
      * Gets the water height at a given point.
@@ -73,6 +73,29 @@ class tsunami_lab::setups::CheckPoint : public Setup {
 
     t_real maxY() const {
         return b.maxY();
+    }
+
+    t_real t() const {
+        int ncid, t_varid;
+        float t;
+
+        nc_try(nc_open(nc, NC_NETCDF4, &ncid));
+        nc_try(nc_inq_varid(ncid, "t", &t_varid));
+        nc_try(nc_get_var1_float(ncid, t_varid, NULL, &t));
+        nc_try(nc_close(ncid));
+
+        return t;
+    }
+
+    t_idx step() const {
+        int ncid, step_varid, step;
+
+        nc_try(nc_open(nc, NC_NETCDF4, &ncid));
+        nc_try(nc_inq_varid(ncid, "step", &step_varid));
+        nc_try(nc_get_var1_int(ncid, step_varid, NULL, &step));
+        nc_try(nc_close(ncid));
+
+        return step;
     }
 };
 

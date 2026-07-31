@@ -6,81 +6,28 @@
  * Checkpoint setup.
  **/
 
-#include "CheckPoint.h"
-#include <netcdf.h>
-#include "NetCDF.h"
-#include <algorithm>
+#include "Checkpoint.h"
 
-tsunami_lab::setups::CheckPoint::CheckPoint(char const *i_d,
-                                                    char const *i_b)
-    : d(io::NetCDF(i_d)), b(io::NetCDF(i_b)) {}
+tsunami_lab::setups::Checkpoint::Checkpoint(char const *i_nc)
+    : nc(i_nc), h(io::NetCDF(i_nc, "h")), hu(io::NetCDF(i_nc, "hu")),
+      hv(io::NetCDF(i_nc, "hv")), b(io::NetCDF(i_nc, "b")) {}
 
 tsunami_lab::t_real
-tsunami_lab::setups::CheckPoint::getHeight(t_real i_x, t_real i_y) const {
-    std::filesystem::path p = "checkpoint.nc";
-    int ncid = -1;
-    nc_try(nc_open(p, NC_WRITE, &ncid));
-    int h_varid;
-    float height;
-
-    size_t index[2] = {0,0};
-
-    nc_try(nc_get_var1_float(ncid, &h_varid, index, &height));
-
-    nc_try(nc_close(ncid));
-
-    return height;
+tsunami_lab::setups::Checkpoint::getHeight(t_real i_x, t_real i_y) const {
+    return h.readAt(i_x, i_y).value();
 }
 
 tsunami_lab::t_real
-tsunami_lab::setups::CheckPoint::getMomentumX(t_real, t_real) const {
-    std::filesystem::path p = "checkpoint.nc";
-    int ncid = -1;
-    nc_try(nc_open(p, NC_WRITE, &ncid));
-    int hu_varid;
-    float mom_x;
-
-    size_t index[2] = {0,0};
-
-    nc_try(nc_get_var1_float(ncid, &hu_varid, index, &mom_x));
-
-    nc_try(nc_close(ncid));
-
-    return mom_x;
+tsunami_lab::setups::Checkpoint::getMomentumX(t_real i_x, t_real i_y) const {
+    return hu.readAt(i_x, i_y).value();
 }
 
 tsunami_lab::t_real
-tsunami_lab::setups::CheckPoint::getMomentumY(t_real, t_real) const {
-    std::filesystem::path p = "checkpoint.nc";
-    int ncid = -1;
-    nc_try(nc_open(p, NC_WRITE, &ncid));
-    int hv_varid;
-    float mom_y;
-
-    size_t index[2] = {0,0};
-
-    nc_try(nc_get_var1_float(ncid, &hv_varid, index, &mom_y));
-
-    nc_try(nc_close(ncid));
-
-    return mom_y;
+tsunami_lab::setups::Checkpoint::getMomentumY(t_real i_x, t_real i_y) const {
+    return hv.readAt(i_x, i_y).value();
 }
 
 tsunami_lab::t_real
-tsunami_lab::setups::CheckPoint::getBathymetry(t_real i_x,
-                                                   t_real i_y) const {
-    std::filesystem::path p = "checkpoint.nc";
-    int ncid = -1;
-    nc_try(nc_open(p, NC_WRITE, &ncid));
-    int b
-    _varid;
-    float bathy;
-
-    size_t index[2] = {0,3};
-
-    nc_try(nc_get_var1_float(ncid, &b_varid, index, &bathy));
-
-    nc_try(nc_close(ncid));
-
-    return bathy;
+tsunami_lab::setups::Checkpoint::getBathymetry(t_real i_x, t_real i_y) const {
+    return b.readAt(i_x, i_y).value();
 }
